@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 22:10:58
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-11 22:55:16
+ * @LastEditTime: 2024-08-12 08:14:40
  * @FilePath: \demo\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -27,11 +27,11 @@
         <!-- <div v-if="!isChatBoxOpen" class="Picture">
           <button></button>
         </div> -->
-        <div id="msg" >
+        <div id="msg"  v-show="isChatBoxOpen">
           <p @mouseover="changeColor" @mouseout="resetColor" :style="{color: textColor}">{{ msg }}</p>
         </div>
-        <div id="chatbox">
-            <div id="chatlog">
+        <div id="chatbox" v-show="isChatBoxOpen">
+            <div id="chatlog" >
               
             </div>
         </div>
@@ -46,9 +46,6 @@
 </template>
 
 <script>
-// import axios from 'axios';
-// import {ref} from 'vue'
-
 
 export default {
   name: 'ChatDialog',
@@ -85,6 +82,7 @@ export default {
       this.isSidebarOpen = !this.isSidebarOpen;
       this.isActive = !this.isActive;
     },
+
     async toggleDarkMode() {
       this.isDarkMode = !this.isDarkMode;
       if (this.isDarkMode) {
@@ -93,15 +91,18 @@ export default {
         document.body.classList.remove('dark-mode');
       }
     },
+
     async changeColor(){
       this.textColor = 'blue';
     },
+
     async resetColor(){
       this.textColor = 'black';
       setTimeout(() => {
         this.textColor = 'white';
       }, 3000);
     },
+
     async displayMessage(message,sender){
       //sender == user
       let messContainer = document.createElement('div');
@@ -127,41 +128,20 @@ export default {
       if (this.loading) {
         return;
       }
-      // if(this.isChatBoxOpen == false) {
-      //     this.isChatBoxOpen = true;
-      // }
-      this.loading = true;
 
       if (this.inputData.trim() !== "") {
-        if(this.isChatBoxOpen == false) {
-          this.isChatBoxOpen = true;
-        }        
+        this.loading = true;
+        this.isChatBoxOpen = true;
         let usermessage = this.inputData;
-        this.displayMessage(usermessage, 'user');
+        this.displayMessage(usermessage, 'user'); //展示用户问题
         this.inputData = ''; // 清空输入框
 
-        // // 创建一个子元素，用于加载动画
-        // const spinner = document.createElement('div');
-        // spinner.className = 'spinner';
-
-        // spinner.style.backgroundImage = 'url("../assets/logo.png")';
-        // spinner.style.width = '100px';
-        // spinner.style.height = '40px';
-        // spinner.style.backgroundSize = 'cover';
-        // spinner.style.zIndex = '9999'; // 使加载动画位于最前面
-        // spinner.style.alignItems = 'center';
-
-        // // 将 spinner 添加到 loadingDiv 中
-        // document.getElementById('chatlog').appendChild(spinner);
-
-        // 创建一个新的img元素
+        // 创建一个新的img元素，用于加载动画
         var img = document.createElement('img');
         img.style.width = "100px";
         img.style.height = "auto";
- 
         // 设置img的src属性
         img.src = this.gif.url;
-  
         // 将img元素添加到div中
         document.getElementById('chatlog').appendChild(img);
 
@@ -183,25 +163,20 @@ export default {
 
         console.log(response.ok);
         let messageElement = document.createElement('div');
+        // messageElement.setAttribute('v-html','markdownContent');
         messageElement.id = usermessage;
-        // messageElement.textContent = '';
         messageElement.innerHTML+='';
         document.getElementById('chatlog').appendChild(messageElement);
         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
         
-
-
         if (response.ok) {
           document.getElementById('chatlog').removeChild(img);
           
           const reader = response.body.getReader();
           const decoder = new TextDecoder('utf-8');
-          // let text = '';
-          
           
           reader.read().then(async function processText({ done, value }) {
             if (done) return;
-
             // text += decoder.decode(value, { stream: true });
             // const parts = text.split("\n\n").filter(part => part.startsWith('data:')).map(part => part.replace('data: ', ''));
             const parts = decoder.decode(value, { stream: true }).split("\n\n").filter(part => part.startsWith('data:')).map(part => part.replace('data: ', ''));
@@ -209,7 +184,6 @@ export default {
             console.log('parts:'+ parts);
             for (const part of parts) {
               console.log(part);
-              // messageElement.textContent+=part;
               // console.log(`AI: ${part}`);
               this.returnMessage += part;
               
@@ -227,7 +201,6 @@ export default {
         else{
           this.loading = false;
         }
-
         // else{
         //   const reader = response.body.getReader();
         //   const decoder = new TextDecoder('utf-8');
@@ -560,7 +533,4 @@ body {
 #modeButton.active {
   background-image: url("../assets/dark_mode.svg"); /* 替换为点击后 SVG 图片路径 */
 }
-/*#modeButton:hover {
-  background-color: #0056b3;
-}*/
 </style>

@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 22:10:58
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-12 15:47:59
+ * @LastEditTime: 2024-08-12 16:08:58
  * @FilePath: \demo\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -205,7 +205,7 @@ export default {
           
           const reader = response.body.getReader();
           const decoder = new TextDecoder('utf-8');
-          let messageSystem = '';
+          // let messageSystem = '';
           
           reader.read().then(async function processText({ done, value }) {
             if (done) return;
@@ -221,7 +221,7 @@ export default {
             console.log(parts);
             // console.log(`AI: ${part}`);
             this.returnMessage += parts;
-            messageSystem += parts;
+            // this.messageSystem += parts;
               
             await this.waitSeveralSeconds();
               
@@ -537,7 +537,8 @@ export default {
 /*dark mode*/
 #mode{
   position:absolute;
-  left:30px;
+  left: 30%;
+  right: 30%;
   bottom:10px;
   text-align: center;
   padding: 0;

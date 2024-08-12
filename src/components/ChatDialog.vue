@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 22:10:58
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-12 14:29:56
+ * @LastEditTime: 2024-08-12 15:47:59
  * @FilePath: \demo\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -49,6 +49,8 @@
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
+import 'github-markdown-css'
+
 
 export default {
   name: 'ChatDialog',
@@ -134,6 +136,20 @@ export default {
         return;
       }
 
+      // 配置marked，使其与highlight.js集成
+      marked.setOptions({
+        renderer: new marked.Renderer(),
+        highlight: function(code, lang) {
+          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+          return hljs.highlight(code, { language: language }).value;
+        },
+        pedantic: false,
+        gfm: true, // 开启gfm
+        breaks: true,
+        smartLists: true,
+        xhtml: true
+      });
+
       if (this.inputData.trim() !== "") {
         this.loading = true;
         this.isChatBoxOpen = true;
@@ -179,7 +195,8 @@ export default {
         let messageElementSystem = document.createElement('div');
         // messageElement.setAttribute('v-html','markdownContent');
         messageElementSystem.id = usermessage;
-        messageElementSystem.innerHTML+='';
+        // messageElementSystem.innerHTML+='';
+        messageElementSystem.textContent = '';
         messContainerSystem.appendChild(messageElementSystem);
         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
         
@@ -188,6 +205,7 @@ export default {
           
           const reader = response.body.getReader();
           const decoder = new TextDecoder('utf-8');
+          let messageSystem = '';
           
           reader.read().then(async function processText({ done, value }) {
             if (done) return;
@@ -203,18 +221,15 @@ export default {
             console.log(parts);
             // console.log(`AI: ${part}`);
             this.returnMessage += parts;
+            messageSystem += parts;
               
             await this.waitSeveralSeconds();
               
-            messageElementSystem.innerHTML += parts;
+            messageElementSystem.textContent += parts;
+            // messageElementSystem.innerHTML += marked(parts);
             document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
             // }
-            // // 解析Markdown并高亮代码
-            // const parsedContent = marked(this.returnMessage, {
-            //   highlight: function(code, lang) {
-            //     return hljs.highlightAuto(code,[lang]).value;
-            //   },
-            // });
+
             // messageElement.innerHTML = parsedContent;
             // console.log('this:'+this.returnMessage);
             messageElementSystem.className = 'message system';
@@ -222,6 +237,8 @@ export default {
             return reader.read().then(processText.bind(this));
           }.bind(this));
 
+          // 将Markdown转换为HTML
+          // messageElementSystem.textConetent = marked(messageSystem);
           this.loading = false;
           this.returnMessage = '';
         }
@@ -275,7 +292,7 @@ export default {
 </script>
 
 <style>
-
+@import '~highlight.js/styles/github.css';
 #Total{
   display: flex;
   justify-content: center;

@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 22:10:58
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-12 08:14:40
+ * @LastEditTime: 2024-08-12 14:29:56
  * @FilePath: \demo\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -46,12 +46,16 @@
 </template>
 
 <script>
+import { marked } from 'marked';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
 
 export default {
   name: 'ChatDialog',
   props: {
     msg: String
   },
+
   data() {
     return {
       messageStream: '',
@@ -105,18 +109,19 @@ export default {
 
     async displayMessage(message,sender){
       //sender == user
-      let messContainer = document.createElement('div');
-      messContainer.style.textAlign = 'right';
-      messContainer.style.display = 'flex';
-      messContainer.style.right = '0';
-      document.getElementById('chatlog').appendChild(messContainer);
+      let messContainerUser = document.createElement('div');
+      messContainerUser.style.textAlign = 'right';
+      messContainerUser.style.display = 'flex';
+      messContainerUser.style.right = '0';
+      messContainerUser.style.paddingLeft = '10%';
+      document.getElementById('chatlog').appendChild(messContainerUser);
 
 
-      let messageElement = document.createElement('div');
-      messageElement.className = 'message ' + sender;
-      messageElement.textContent = message;
+      let messageElementUser = document.createElement('div');
+      messageElementUser.className = 'message ' + sender;
+      messageElementUser.textContent = message;
 
-      messContainer.appendChild(messageElement);
+      messContainerUser.appendChild(messageElementUser);
       document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
     },
     
@@ -162,11 +167,20 @@ export default {
         // }
 
         console.log(response.ok);
-        let messageElement = document.createElement('div');
+
+        let messContainerSystem = document.createElement('div');
+        messContainerSystem.style.textAlign = 'right';
+        messContainerSystem.style.display = 'flex';
+        messContainerSystem.style.left = '0';
+        messContainerSystem.style.paddingRight = '10%';
+        messContainerSystem.style.height = 'fit-content';
+        document.getElementById('chatlog').appendChild(messContainerSystem);
+
+        let messageElementSystem = document.createElement('div');
         // messageElement.setAttribute('v-html','markdownContent');
-        messageElement.id = usermessage;
-        messageElement.innerHTML+='';
-        document.getElementById('chatlog').appendChild(messageElement);
+        messageElementSystem.id = usermessage;
+        messageElementSystem.innerHTML+='';
+        messContainerSystem.appendChild(messageElementSystem);
         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
         
         if (response.ok) {
@@ -179,24 +193,37 @@ export default {
             if (done) return;
             // text += decoder.decode(value, { stream: true });
             // const parts = text.split("\n\n").filter(part => part.startsWith('data:')).map(part => part.replace('data: ', ''));
-            const parts = decoder.decode(value, { stream: true }).split("\n\n").filter(part => part.startsWith('data:')).map(part => part.replace('data: ', ''));
+            // const parts = decoder.decode(value, { stream: true }).split('\n').filter(part => part.startsWith('data:')).map(part => part.replace('data: ', ''));
 
-            console.log('parts:'+ parts);
-            for (const part of parts) {
-              console.log(part);
-              // console.log(`AI: ${part}`);
-              this.returnMessage += part;
+            const rawParts = decoder.decode(value, { stream: true });
+            const parts = rawParts.replace(/data: /g, '');
+            // console.log('parts:'+ parts);
+            
+            // for (const part of parts) {
+            console.log(parts);
+            // console.log(`AI: ${part}`);
+            this.returnMessage += parts;
               
-              await this.waitSeveralSeconds();
-              messageElement.innerHTML += part;
-              document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
-            }
-            console.log('this:'+this.returnMessage);
-            messageElement.className = 'message system';
-
+            await this.waitSeveralSeconds();
+              
+            messageElementSystem.innerHTML += parts;
+            document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
+            // }
+            // // 解析Markdown并高亮代码
+            // const parsedContent = marked(this.returnMessage, {
+            //   highlight: function(code, lang) {
+            //     return hljs.highlightAuto(code,[lang]).value;
+            //   },
+            // });
+            // messageElement.innerHTML = parsedContent;
+            // console.log('this:'+this.returnMessage);
+            messageElementSystem.className = 'message system';
+            
             return reader.read().then(processText.bind(this));
           }.bind(this));
+
           this.loading = false;
+          this.returnMessage = '';
         }
         else{
           this.loading = false;
@@ -438,18 +465,18 @@ export default {
 }
 
 .user {
-  text-indent:2em;
-  white-space: pre-wrap;
   margin-left:auto;
-  padding-left:10%;
+  padding: 5px;
   text-align: left;
+  background: rgba(255,255,255,0.9);
 }
 
 .system {
   text-indent:2em;
   white-space: pre-wrap;
   text-align: left;
-  padding-right: 10%;
+  padding: 5px;
+  background: rgba(255,255,255,0.9)
 }
 
 #userInput {

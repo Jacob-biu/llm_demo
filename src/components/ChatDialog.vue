@@ -2,19 +2,19 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 22:10:58
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-12 16:08:58
+ * @LastEditTime: 2024-08-13 10:58:28
  * @FilePath: \demo\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
 <template>
-  <div id="Total" :class="{'dark-mode': isDarkMode}">
-    <div class="SlideButtonDiv">
+  <div id="Total">
+    <div id="SlideButtonDiv">
       <button @click="toggleSidebar" id="slideBarButton" :class="{ active: isActive }"></button>
     </div>
-    <div class="BarContainer" v-if="isSidebarOpen">
+    <div id="BarContainer" v-if="isSidebarOpen" :class="{ active: isDarkMode }">
       <p>工具栏</P>
-      <div class="Bar" >
+      <div id="Bar" >
         <button id="palmLogo" @click="navigateToPage"></button>
         <div :class="{'dark-mode': isDarkMode, 'white-mode': !isDarkMode}" id="mode">
           <button @click="toggleDarkMode" id="modeButton" :class="{ active: isDarkMode }">
@@ -22,22 +22,22 @@
         </div>
       </div>
     </div>
-    <div class="ChatContainer">
-      <div class="container">
+    <div id="ChatContainer">
+      <div id="container">
         <!-- <div v-if="!isChatBoxOpen" class="Picture">
           <button></button>
         </div> -->
-        <div id="msg"  v-show="isChatBoxOpen">
+        <div id="msg"  v-show="isChatBoxOpen" :class="{ active: isDarkMode }">
           <p @mouseover="changeColor" @mouseout="resetColor" :style="{color: textColor}">{{ msg }}</p>
         </div>
-        <div id="chatbox" v-show="isChatBoxOpen">
+        <div id="chatbox" v-show="isChatBoxOpen" :class="{ active: isDarkMode }">
             <div id="chatlog" >
               
             </div>
         </div>
         <div id="messagebox" >
-          <input type="text" id="userInput" v-model="inputData" @keyup.enter="sendData" placeholder="尽管问！" autofocus>
-          <button id="sendBtn" @click="sendData" :loading="loading">
+          <input type="text" id="userInput" v-model="inputData" @keyup.enter="sendData" placeholder="尽管问！" autofocus :class="{ active: isDarkMode }">
+          <button id="sendBtn" @click="sendData" :loading="loading" :class="{ active: isDarkMode }">
           </button>
         </div>
       </div>
@@ -165,6 +165,7 @@ export default {
         img.src = this.gif.url;
         // 将img元素添加到div中
         document.getElementById('chatlog').appendChild(img);
+        document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
 
         const response = await fetch('http://127.0.0.1:5000/sendData', {
           method: 'POST',
@@ -302,7 +303,7 @@ export default {
   margin-bottom: 0;;
 }
 
-.SlideButtonDiv{
+#SlideButtonDiv{
   display: inline-block;
   width:20px;
   height: 20px;
@@ -335,7 +336,7 @@ export default {
   background-color: red;
 }
 
-.BarContainer {
+#BarContainer {
   display: inline-block;
   width: 100px;
   height: 512px;
@@ -347,22 +348,28 @@ export default {
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+#BarContainer.active{
+  background: rgba(0,0,0,0.5);
+}
+#BarContainer.active >p{
+  color:white;
+}
 
-.Bar {
+#Bar {
   position:relative;
   width:100%;
   height:90%;
   text-align: center;
 }
 
-.ChatContainer {
+#ChatContainer {
   display: inline-block;
   width:700px;
   text-align: center;
   justify-content: center;
 }
 
-.container {
+#container {
   /*background: rgba(255,255,255,0.75);*/
   top:10px;
   position: relative;
@@ -417,6 +424,9 @@ export default {
   margin-top:0.5px;
   margin-bottom:0.5px;
 }
+#msg.active {
+  background-color: rgba(0,0,0,0.5);
+}
 
 #chatbox {
   border: 1px solid transparent;
@@ -427,6 +437,16 @@ export default {
   margin-bottom: 2.5px;
   overflow-y: auto;
   background: rgba(255,255,255,0.8);
+}
+#chatbox.active{
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 2.5px;
+  height: 420px;
+  overflow-y: scroll;
+  margin-bottom: 2.5px;
+  overflow-y: auto;
+  background-color: rgba(0,0,0,0.5);
 }
 
 
@@ -489,7 +509,6 @@ export default {
 }
 
 .system {
-  text-indent:2em;
   white-space: pre-wrap;
   text-align: left;
   padding: 5px;
@@ -508,6 +527,13 @@ export default {
 }
 #userInput:focus {
   outline: none;
+  background-color: transparent;
+}
+#userInput.active{
+  background-color: rgba(0,0,0,0.5);
+}
+#userInput.active::placeholder{
+  color: white;
 }
 
 #sendBtn {
@@ -516,7 +542,7 @@ export default {
   height:40px;
   border: none;
   margin-left: 5px;
-  background-color: rgba(255,255,255,0.8);
+  background-color: transparent;
   background-image: url("../assets/button_gray_plane.svg");
   background-size: auto 70%;
   background-position: center;
@@ -530,8 +556,9 @@ export default {
   top: 3px;
 }
 
+
 #sendBtn:hover {
-  background-color: rgb(240,248,255);
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
 }
 
 /*dark mode*/

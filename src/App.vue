@@ -2,13 +2,13 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 21:52:26
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-10 22:14:13
+ * @LastEditTime: 2024-08-13 10:54:13
  * @FilePath: \demo\llm_demo\src\App.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
 <template>
-  <div class="background"></div>
+  <!-- <div class="background"></div> -->
   <router-view/>
   <p id="Sen">大模型AI 也可能会犯错哦。请核查重要信息。</p>
   <ChatDialog msg="LLM-demo"/>
@@ -49,7 +49,7 @@ body{
   padding: 0;
   position:relative;
 }
-.background{
+#background{
   width: 100%;
   height: 100%;
   background-image: url("./assets/image.jpg");

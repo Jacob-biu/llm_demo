@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 22:10:58
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-13 10:58:28
+ * @LastEditTime: 2024-08-13 11:07:49
  * @FilePath: \demo\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -196,11 +196,12 @@ export default {
         let messageElementSystem = document.createElement('div');
         // messageElement.setAttribute('v-html','markdownContent');
         messageElementSystem.id = usermessage;
-        // messageElementSystem.innerHTML+='';
-        messageElementSystem.textContent = '';
+        messageElementSystem.innerHTML+='';
+        // messageElementSystem.textContent = '';
         messContainerSystem.appendChild(messageElementSystem);
         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
         
+        let messageFromSysytem = '';
         if (response.ok) {
           document.getElementById('chatlog').removeChild(img);
           
@@ -216,17 +217,18 @@ export default {
 
             const rawParts = decoder.decode(value, { stream: true });
             const parts = rawParts.replace(/data: /g, '');
-            // console.log('parts:'+ parts);
             
             // for (const part of parts) {
             console.log(parts);
-            // console.log(`AI: ${part}`);
             this.returnMessage += parts;
+            messageFromSysytem += parts;
             // this.messageSystem += parts;
+            let handledMessage = '';
               
             await this.waitSeveralSeconds();
               
-            messageElementSystem.textContent += parts;
+            handledMessage = marked(messageFromSysytem);
+            messageElementSystem.innerHTML = handledMessage;
             // messageElementSystem.innerHTML += marked(parts);
             document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
             // }

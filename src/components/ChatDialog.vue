@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 22:10:58
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-13 11:07:49
+ * @LastEditTime: 2024-08-13 12:58:25
  * @FilePath: \demo\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -48,9 +48,9 @@
 <script>
 import { marked } from 'marked';
 import hljs from 'highlight.js';
-import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
-import 'github-markdown-css'
-
+// import 'highlight.js/styles/monokai-sublime.css';
+import 'highlight.js/styles/atom-one-dark.css'; // 选择你喜欢的样式
+// import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
 
 export default {
   name: 'ChatDialog',
@@ -139,15 +139,25 @@ export default {
       // 配置marked，使其与highlight.js集成
       marked.setOptions({
         renderer: new marked.Renderer(),
+        // highlight: function(code, lang) {
+        //   const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+        //   return hljs.highlight(code, { language: language }).value;
+        // },
         highlight: function(code, lang) {
-          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-          return hljs.highlight(code, { language: language }).value;
+          if (hljs.getLanguage(lang)) {
+            return hljs.highlight(lang, code).value;
+          } else {
+            return hljs.highlightAuto(code).value;
+          }
         },
         pedantic: false,
         gfm: true, // 开启gfm
-        breaks: true,
+        breaks: false,
+        sanitize: false,
         smartLists: true,
-        xhtml: true
+        tables: true,
+        smartypants: false,
+        // xhtml: true
       });
 
       if (this.inputData.trim() !== "") {
@@ -194,9 +204,8 @@ export default {
         document.getElementById('chatlog').appendChild(messContainerSystem);
 
         let messageElementSystem = document.createElement('div');
-        // messageElement.setAttribute('v-html','markdownContent');
         messageElementSystem.id = usermessage;
-        messageElementSystem.innerHTML+='';
+        messageElementSystem.innerHTML = '';
         // messageElementSystem.textContent = '';
         messContainerSystem.appendChild(messageElementSystem);
         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
@@ -229,19 +238,20 @@ export default {
               
             handledMessage = marked(messageFromSysytem);
             messageElementSystem.innerHTML = handledMessage;
+            // 高亮代码块
+            document.querySelectorAll('pre code').forEach(function(block) {
+              hljs.highlightBlock(block);
+            });
             // messageElementSystem.innerHTML += marked(parts);
             document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
             // }
-
-            // messageElement.innerHTML = parsedContent;
-            // console.log('this:'+this.returnMessage);
             messageElementSystem.className = 'message system';
             
             return reader.read().then(processText.bind(this));
           }.bind(this));
 
-          // 将Markdown转换为HTML
-          // messageElementSystem.textConetent = marked(messageSystem);
+
+
           this.loading = false;
           this.returnMessage = '';
         }
@@ -295,7 +305,28 @@ export default {
 </script>
 
 <style>
-@import '~highlight.js/styles/github.css';
+/* 你可以根据需要自定义样式 */
+.hljs {
+  padding: 10px; /* 为代码块添加内边距 */
+  border-radius: 5px; /* 圆角边框 */
+  border: 2px solid black; /* 黑框 */
+}
+
+/* 确保代码文本颜色高亮 */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link {
+  color: #333; /* 设置文本颜色 */
+}
+
+/* 如果你想自定义行号样式，可以在这里添加 */
+.hljs-ln-numbers {
+  padding-right: 10px;
+  color: #999; /* 行号颜色 */
+}
+
 #Total{
   display: flex;
   justify-content: center;

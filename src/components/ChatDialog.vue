@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 22:10:58
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-14 10:19:41
+ * @LastEditTime: 2024-08-14 13:27:49
  * @FilePath: \NewDemo\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -48,8 +48,8 @@
 <script>
 import { marked } from 'marked';
 import hljs from 'highlight.js';
-// import 'highlight.js/styles/monokai-sublime.css';
-import 'highlight.js/styles/atom-one-dark.css'; // 选择你喜欢的样式
+import 'highlight.js/styles/monokai-sublime.css';
+// import 'highlight.js/styles/atom-one-dark.css'; // 选择你喜欢的样式
 // import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
 
 export default {
@@ -252,8 +252,21 @@ export default {
                         let handledMessage = '';                   
                         handledMessage = marked(this.wholeMessage);
                         messageElementSystem.innerHTML = handledMessage;
+
+                            
                         // 高亮代码块
                         document.querySelectorAll('pre code').forEach(function(block) {
+                          // 通过类名获取语言
+                          const language = block.className.replace('language-', '');
+                
+                          // 创建一个新的 div 元素来显示语言名称
+                          const header = document.createElement('div');
+                          header.className = 'code-header';
+                          header.innerText = language.toUpperCase(); // 将语言名称转换为大写
+
+                          // 在 pre 元素的顶部插入这个 div 元素
+                          block.parentNode.insertBefore(header, block.parentNode.firstChild);
+
                           hljs.highlightBlock(block);
                         });
                         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
@@ -290,7 +303,6 @@ export default {
 <style>
 /* 你可以根据需要自定义样式 */
 .hljs {
-  padding: 10px; /* 为代码块添加内边距 */
   border-radius: 5px; /* 圆角边框 */
   border: 2px solid black; /* 黑框 */
 }
@@ -304,11 +316,6 @@ export default {
   color: #333; /* 设置文本颜色 */
 }
 
-/* 如果你想自定义行号样式，可以在这里添加 */
-.hljs-ln-numbers {
-  padding-right: 10px;
-  color: #999; /* 行号颜色 */
-}
 
 #Total{
   display: flex;

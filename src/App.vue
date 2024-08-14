@@ -2,8 +2,8 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 21:52:26
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-13 11:01:05
- * @FilePath: \demo\llm_demo\src\App.vue
+ * @LastEditTime: 2024-08-14 13:31:44
+ * @FilePath: \NewDemo\llm_demo\src\App.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
@@ -66,5 +66,29 @@ body{
   top: 515px;
   left:36%;
   right: 36%;
+}
+
+/* 样式设置：语言标签 */
+.code-header {
+  background-color: #333;
+  color: #fff;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-family: monospace;
+  border-bottom: 1px solid #555;
+  border-radius: 3px 3px 0 0;
+  display: inline-block;
+  margin-bottom: -1px; /* 防止与代码块产生间距 */
+}
+
+/* 让代码块的顶部和语言标签对齐 */
+pre {
+  position: relative;
+  margin-top: 0;
+}
+
+pre code {
+  padding-top: 20px; /* 为了确保语言标注不会遮挡代码 */
+  display: block;
 }
 </style>

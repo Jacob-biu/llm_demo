@@ -2,8 +2,8 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 22:10:58
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-13 12:58:25
- * @FilePath: \demo\llm_demo\src\components\ChatDialog.vue
+ * @LastEditTime: 2024-08-14 10:19:41
+ * @FilePath: \NewDemo\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
@@ -60,13 +60,12 @@ export default {
 
   data() {
     return {
-      messageStream: '',
       textColor: 'white',
       inputData: '',
       loading: false,
       isStopped:false,
-      messages:'',
-      returnMessage:'',
+      messages:[],
+      wholeMessage: '',
       isDarkMode: false,
       isSidebarOpen: false,
       isChatBoxOpen: false,
@@ -75,6 +74,9 @@ export default {
       svg1: 'url(../assets/white_mode.svg)',
       svg2: 'url(../assets/dark_mode.svg)',
       gif: {url: require('../assets/loading2.gif')},
+      //对话历史
+      history: [],
+      API_URL: "http://localhost:9999/v1/chat/completions",
     };
   },
 
@@ -139,10 +141,6 @@ export default {
       // 配置marked，使其与highlight.js集成
       marked.setOptions({
         renderer: new marked.Renderer(),
-        // highlight: function(code, lang) {
-        //   const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-        //   return hljs.highlight(code, { language: language }).value;
-        // },
         highlight: function(code, lang) {
           if (hljs.getLanguage(lang)) {
             return hljs.highlight(lang, code).value;
@@ -157,7 +155,6 @@ export default {
         smartLists: true,
         tables: true,
         smartypants: false,
-        // xhtml: true
       });
 
       if (this.inputData.trim() !== "") {
@@ -177,21 +174,28 @@ export default {
         document.getElementById('chatlog').appendChild(img);
         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
 
-        const response = await fetch('http://127.0.0.1:5000/sendData', {
+        if(!this.history){
+          this.history.push({role: "system", content: "you are a helpful assistant"});
+        }
+        // 更新对话历史
+        this.history.push({"role": "user", "content": usermessage});
+        // 构建请求数据
+        var data = {
+          "model": "qwen2-7b",
+          "messages": this.history,
+          "temperature": 0.8,
+          "top_p": 0.95,
+          "repetition_penalty":1.1,
+          "stream":true,
+        };
+
+        const response = await fetch(this.API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ data: usermessage })
+          body: JSON.stringify(data)
         });
-        //非流式输出
-        // console.log(response.data.data);
-        // const data = await response.json();
-
-        // // const num = response.data;
-        // if(data && data.flag == false){
-        //   this.displayMessage(data.data.trim(), 'system');
-        // }
 
         console.log(response.ok);
 
@@ -206,91 +210,70 @@ export default {
         let messageElementSystem = document.createElement('div');
         messageElementSystem.id = usermessage;
         messageElementSystem.innerHTML = '';
-        // messageElementSystem.textContent = '';
+        messageElementSystem.className = 'message system';
         messContainerSystem.appendChild(messageElementSystem);
         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
         
-        let messageFromSysytem = '';
         if (response.ok) {
           document.getElementById('chatlog').removeChild(img);
-          
+
           const reader = response.body.getReader();
           const decoder = new TextDecoder('utf-8');
-          // let messageSystem = '';
-          
-          reader.read().then(async function processText({ done, value }) {
-            if (done) return;
-            // text += decoder.decode(value, { stream: true });
-            // const parts = text.split("\n\n").filter(part => part.startsWith('data:')).map(part => part.replace('data: ', ''));
-            // const parts = decoder.decode(value, { stream: true }).split('\n').filter(part => part.startsWith('data:')).map(part => part.replace('data: ', ''));
+          let buffer = '';
 
-            const rawParts = decoder.decode(value, { stream: true });
-            const parts = rawParts.replace(/data: /g, '');
-            
-            // for (const part of parts) {
-            console.log(parts);
-            this.returnMessage += parts;
-            messageFromSysytem += parts;
-            // this.messageSystem += parts;
-            let handledMessage = '';
-              
-            await this.waitSeveralSeconds();
-              
-            handledMessage = marked(messageFromSysytem);
-            messageElementSystem.innerHTML = handledMessage;
-            // 高亮代码块
-            document.querySelectorAll('pre code').forEach(function(block) {
-              hljs.highlightBlock(block);
-            });
-            // messageElementSystem.innerHTML += marked(parts);
-            document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
-            // }
-            messageElementSystem.className = 'message system';
-            
-            return reader.read().then(processText.bind(this));
-          }.bind(this));
+          while (true) {  //eslint-disable-line no-constant-condition
+            const { done, value } = await reader.read();
+            if (done) {
+              this.wholeMessage = '';
+              break;
+            }
 
+            buffer += decoder.decode(value, { stream: true });
 
+            // Split buffer by lines
+            const lines = buffer.split('\n');
 
+            // Keep the last incomplete line in buffer
+            buffer = lines.pop() || '';
+
+            // Process each line
+            for (const line of lines) {
+              const trimmedLine = line.trim();
+              if (trimmedLine.startsWith('data: ')) {
+                const dataStr = trimmedLine.slice('data: '.length);
+                if (dataStr !== '[DONE]') {
+                  try {
+                    const jsonData = JSON.parse(dataStr);
+                    if (jsonData.choices && jsonData.choices.length > 0) {
+                      const delta = jsonData.choices[0].delta || {};
+                      const content = delta.content || '';
+                      if (content) {
+                        this.wholeMessage += content;
+                        let handledMessage = '';                   
+                        handledMessage = marked(this.wholeMessage);
+                        messageElementSystem.innerHTML = handledMessage;
+                        // 高亮代码块
+                        document.querySelectorAll('pre code').forEach(function(block) {
+                          hljs.highlightBlock(block);
+                        });
+                        document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
+                        console.log(content);
+                      }
+                    }
+                  } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                  }
+                }
+              }
+            }
+          }
+          this.history.push({'role': 'assistant', 'content': this.wholeMessage})
           this.loading = false;
-          this.returnMessage = '';
+          // this.returnMessage = '';
         }
         else{
           this.loading = false;
         }
-        // else{
-        //   const reader = response.body.getReader();
-        //   const decoder = new TextDecoder('utf-8');
-        //   let text = '';
-
-        //   reader.read().then(function processText({ done, value }) {
-        //     if (done) return;
-
-        //     text += decoder.decode(value, { stream: true });
-        //     const parts = text.split("\n\n").filter(part => part.startsWith('data:')).map(part => part.replace('data: ', ''));
-
-        //     // 动态创建一个div
-        //     const messageDiv = document.createElement('div');
-        //     // 将div添加到#chat-container
-        //     document.getElementById('chatlog').appendChild(messageDiv);
-        //     document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
-
-        //     for (const part of parts) {
-        //       // this.addMessageToDiv(`AI: ${part}`);
-        //       this.messages.push(part);
-        //       messageDiv.className = this.messages + 'system';
-        //       messageDiv.textContent += part;
-        //     }
-
-        //     return reader.read().then(processText.bind(this));
-        //   }.bind(this));
-        //   // let messageElement = document.createElement('div');
-        //   // messageElement.className = this.stream + 'system';
-        //   // messageElement.textContent = this.stream;
-        //   // document.getElementById('chatlog').appendChild(messageElement);
-        //   // document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
-        // }
-        // console.log(data);
       }
     },
     

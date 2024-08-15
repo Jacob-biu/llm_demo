@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 21:52:26
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-14 13:31:44
+ * @LastEditTime: 2024-08-14 17:16:36
  * @FilePath: \NewDemo\llm_demo\src\App.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -66,6 +66,8 @@ body{
   top: 515px;
   left:36%;
   right: 36%;
+  padding-top: 10px;
+  padding-bottom:5px;
 }
 
 /* 样式设置：语言标签 */
@@ -90,5 +92,30 @@ pre {
 pre code {
   padding-top: 20px; /* 为了确保语言标注不会遮挡代码 */
   display: block;
+  overflow-x: auto;
+}
+pre code::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+::-webkit-scrollbar-button {
+	display: none;
+}
+::-webkit-scrollbar-track {
+	background-color: rgba(70, 166, 255, 0.1);
+	display: none;
+}
+::-webkit-scrollbar-thumb {
+	background-color: rgba(70, 166, 255, 0.4);
+	border: 2px solid transparent;
+	border-radius: 6px;
+	background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+h1, h2, h3, h4, h5, h6, strong, p, pre, ol, ul {
+  margin: 0;
 }
 </style>

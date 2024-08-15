@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 22:10:58
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-14 13:27:49
+ * @LastEditTime: 2024-08-14 17:00:28
  * @FilePath: \NewDemo\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -48,9 +48,10 @@
 <script>
 import { marked } from 'marked';
 import hljs from 'highlight.js';
-import 'highlight.js/styles/monokai-sublime.css';
+import 'highlightjs-line-numbers.js';      // 引入行号插件
+// import 'highlight.js/styles/monokai-sublime.css';
 // import 'highlight.js/styles/atom-one-dark.css'; // 选择你喜欢的样式
-// import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
+import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
 
 export default {
   name: 'ChatDialog',
@@ -211,6 +212,7 @@ export default {
         messageElementSystem.id = usermessage;
         messageElementSystem.innerHTML = '';
         messageElementSystem.className = 'message system';
+        messageElementSystem.style.maxWidth = '530px';
         messContainerSystem.appendChild(messageElementSystem);
         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
         
@@ -256,17 +258,39 @@ export default {
                             
                         // 高亮代码块
                         document.querySelectorAll('pre code').forEach(function(block) {
-                          // 通过类名获取语言
-                          const language = block.className.replace('language-', '');
+                          // 添加语言标签，确保只添加一次
+                          if (!block.hasAttribute('data-language-tagged')) {
+                            // 通过类名获取语言
+                            const language = block.className.replace('language-', '');
                 
-                          // 创建一个新的 div 元素来显示语言名称
-                          const header = document.createElement('div');
-                          header.className = 'code-header';
-                          header.innerText = language.toUpperCase(); // 将语言名称转换为大写
+                            // 创建一个新的 div 元素来显示语言名称
+                            const header = document.createElement('div');
+                            header.className = 'code-header';
+                            header.innerText = language.toUpperCase(); // 将语言名称转换为大写
 
-                          // 在 pre 元素的顶部插入这个 div 元素
-                          block.parentNode.insertBefore(header, block.parentNode.firstChild);
+                            // 在 pre 元素的顶部插入这个 div 元素
+                            block.parentNode.insertBefore(header, block.parentNode.firstChild);
+                            // 标记代码块为已添加语言标签
+                            block.setAttribute('data-language-tagged', 'true');
+                          }
 
+                          if(!block.hasAttribute('line-number-tagged')) {
+                            //为行插入行号
+                            const lines = block.innerHTML.split('\n');
+                            // 移除最后一个空行
+                            if (lines[lines.length - 1].trim() === '') {
+                              lines.pop();
+                            }
+                            let numberedLines = '';
+
+                            lines.forEach((line, index) => {
+                              numberedLines += `<span class="line-number">${index + 1}  </span>${line}\n`;
+                            });
+
+                            block.innerHTML = numberedLines;
+                            block.setAttribute('line-number-tagged', 'true');
+                          }
+                          //高亮代码
                           hljs.highlightBlock(block);
                         });
                         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
@@ -289,14 +313,23 @@ export default {
         }
       }
     },
-    
-    async addMessageToDiv(message,div) {
-      this.messages.push(message);
-      div.textContent += message;
+
+    async addLineNumbersToBlock(block){
+      //为行插入行号
+      const lines = block.innerHTML.split('\n');
+      // 移除最后一个空行
+      if (lines[lines.length - 1].trim() === '') {
+        lines.pop();
+      }
+      let numberedLines = '';
+
+      lines.forEach((line, index) => {
+        numberedLines += `<span class="line-number">${index + 1}  </span>${line}\n`;
+      });
+
+      block.innerHTML = numberedLines;
     }
-
-
-  }
+  },
 }
 </script>
 
@@ -315,7 +348,6 @@ export default {
 .hljs-link {
   color: #333; /* 设置文本颜色 */
 }
-
 
 #Total{
   display: flex;
@@ -459,6 +491,7 @@ export default {
   overflow-y: scroll;
   margin-bottom: 2.5px;
   overflow-y: auto;
+  overflow-x: auto;
   background: rgba(255,255,255,0.8);
 }
 #chatbox.active{
@@ -468,7 +501,7 @@ export default {
   height: 420px;
   overflow-y: scroll;
   margin-bottom: 2.5px;
-  overflow-y: auto;
+  overflow:auto;
   background-color: rgba(0,0,0,0.5);
 }
 

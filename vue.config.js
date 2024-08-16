@@ -12,6 +12,13 @@ const {
 } = require('@vue/cli-service')
 module.exports = defineConfig({
   transpileDependencies: true,
+  configureWebpack: {
+    resolve: {
+      fallback: {
+        util: require.resolve('util/'),
+      },
+    },
+  },
   lintOnSave: false, //关闭语法检查
   assetsDir: "static",
   devServer: {

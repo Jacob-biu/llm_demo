@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-16 11:35:53
+ * @LastEditTime: 2024-08-16 23:37:33
  * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -49,10 +49,14 @@
     <div v-show="isPreview" class="fileContainer">
       <div v-show="isPreview" class="file-preview" ref="pdfContainer">
         <img class="preview-image" v-if="isImageFile" :src="previewUrl" alt="File Preview" />
-        <div v-else-if="isPdfFile" class="pdf-page" v-for="i in pdfParams.pdfPageTotal" :key="i">
-          <!-- <div :id="'text-layer' + i" class="textLayer"></div> -->
+        <div v-else-if="isPdfFile" class="pdf-page" v-for="i in pdfParams.pdfPageTotal" :key="i" :id="'pageDiv' + i">
+          <div :id="'text-layer' + i" class="textLayer"></div>
           <canvas class="pdf-viewer" :id="'pdf-render' + i" ></canvas>
         </div>
+        <div v-else-if="isTxtFile" class = "txtPage">
+          <pre>{{ txtFileContent }}</pre>
+        </div>
+        <div v-else-if="isDocxFile" class="docx-preview" v-html="docxContent"></div>
         <span v-else>文件预览不可用</span>
       </div>
       <div class="pdf_down" v-if="isPdfFile">
@@ -76,10 +80,14 @@ import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
 import { reactive, nextTick } from 'vue';
 import * as pdfjs from 'pdfjs-dist/build/pdf';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
+import { TextLayerBuilder } from 'pdfjs-dist/web/pdf_viewer.js';
+import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer.js'
 import 'pdfjs-dist/web/pdf_viewer.css'
+import mammoth from "mammoth";
+
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-
+const eventBus = new pdfjsViewer.EventBus();
 
 export default {
   name: 'ChatDialog',
@@ -112,12 +120,17 @@ export default {
       previewUrl: '', // 文件预览的 URL
       isPdfFile: false,
       isImageFile: false,
+      isTxtFile: false,
+      isDocxFile: false,
       pdfParams: reactive({
         currentPageNumber: 1,
         pdfScale: 1.0,
         pdfPageTotal: 0,
       }),
-      // pdfDocu: null,
+      extractedText: "", // 存储提取的文本内容
+      txtFileContent: "", // 保存 txt 文件的内容
+      docxContent: '', //// 保存docx解析后的 HTML 内容
+      docxPlainTextContent: "", // 保存docx纯文本内容
     };
   },
 
@@ -225,8 +238,23 @@ export default {
         if(!this.history){
           this.history.push({role: "system", content: "you are a helpful assistant"});
         }
+
+        //合成用户发送的信息
+        var userMessageContent = '';
+        if(this.isImageFile){
+          userMessageContent = usermessage;
+        }else if(this.isPdfFile){
+          userMessageContent = this.extractedText + '\n\n' + usermessage;
+        }else if(this.isTxtFile){
+          userMessageContent = this.txtFileContent + '\n\n' + usermessage;
+        }else if(this.docxPlainTextContent){
+          userMessageContent = this.docxPlainTextContent + '\n\n' + usermessage;
+        }else{
+          userMessageContent = usermessage;
+        }
+
         // 更新对话历史
-        this.history.push({"role": "user", "content": usermessage});
+        this.history.push({"role": "user", "content": userMessageContent});
         // 构建请求数据
         var data = {
           "model": "qwen2-7b",
@@ -385,6 +413,8 @@ export default {
         if (file.type === 'application/pdf') {
           this.isPdfFile = true;
           this.isImageFile = false;
+          this.isTxtFile = false;
+          this.isDocxFile = false;
           this.selectedFile = file;
           const url = URL.createObjectURL(this.selectedFile);  
           console.log(url);
@@ -393,9 +423,39 @@ export default {
           }catch(error){
             console.error('从PDF提取文本时出错', error);  
           }
+        }else if(file.type === "text/plain"){
+          this.isPdfFile = false;
+          this.isImageFile = false;
+          this.isTxtFile = true;
+          this.isDocxFile = false;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.txtFileContent = e.target.result; // 读取到的内容赋值给 fileContent
+          };
+          reader.readAsText(file); // 以文本形式读取文件
+          console.log(this.txtFileContent);
+        }else if(file.name.endsWith(".docx")){
+          this.isPdfFile = false;
+          this.isImageFile = false;
+          this.isTxtFile = false;
+          this.isDocxFile = true;
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.convertToHtml({ arrayBuffer });
+            this.docxContent = result.value; // 将解析后的 HTML 内容赋值给 docxContent
+
+            // 解析纯文本内容
+            this.docxPlainTextContent = this.extractPlainText(this.docxContent);
+            console.log(this.docxPlainTextContent);
+          } catch (error) {
+            console.error("文档解析失败:", error);
+            alert("文档解析失败，请检查文件格式或内容！");
+          }
         }else if(this.isImage()){
           this.isPdfFile = false;
           this.isImageFile = true;
+          this.isTxtFile = false;
+          this.isDocxFile = false;
           const reader = new FileReader();
           reader.onload = (e) => {
             this.previewUrl = e.target.result;
@@ -404,10 +464,21 @@ export default {
         }else {
           this.isImageFile = false;
           this.isPdfFile = false;
+          this.isTxtFile = false;
+          this.isDocxFile = false;
           alert('请选择一个有效的文件');
         }
       }
     },
+    extractPlainText(htmlContent) {
+      // 创建一个虚拟的 DOM 元素
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlContent;
+      
+      // 提取纯文本内容
+      return tempDiv.textContent || tempDiv.innerText || "";
+    },
+
     async loadPdf(url) {      
       pdfjs.getDocument(url).promise.then(async doc => {
         try{
@@ -419,6 +490,7 @@ export default {
             return;
           }
           console.log(this.pdfDocu);
+          this.extractTextFromPdf();
           // this.pdfParams.pdfPageTotal = this.pdfDocu.numPages;
           this.pdfParams.pdfPageTotal = doc.numPages;
           // 使用 nextTick 确保 DOM 渲染完成后再操作 canvas 元素
@@ -435,6 +507,28 @@ export default {
         }
       });
     },
+    // 提取PDF中的文本内容
+    async extractTextFromPdf() {
+      const totalText = []; // 用于存储每页的文本内容
+      const totalPages = this.pdfDocu.pdfPageTotal;
+
+      for (let i = 1; i <= totalPages; i++) {
+        const page = await this.pdfDocu.getPage(i);
+        const textContent = await page.getTextContent();
+
+        // 获取每页的文本内容并拼接成字符串
+        const pageText = textContent.items.map(item => item.str).join(" ");
+        totalText.push(pageText);
+      }
+
+      // 将所有页的文本内容保存到 extractedText 中
+      this.extractedText = totalText.join("\n\n"); // 将所有页的文本用换行分隔
+      if(!this.extractedText){
+        console.log("OK!");
+        console.log(this.extractedText);
+      }
+    },
+
     // 渲染指定页码的 PDF 页面
     async renderPdfPage(pageNumber) {
       // 确保 pdfDoc 已经加载成功
@@ -501,52 +595,10 @@ export default {
               console.error('无法获取 2D 绘图上下文');
               return reject('Context not found');
             }
-            
-            
-            // const dpr = window.devicePixelRatio || 1;
-            // const viewport = page.getViewport({ scale: this.pdfParams.pdfScale });
             // 获取默认的 viewport（缩放）
             const viewport = page.getViewport({
               scale: this.pdfParams.pdfScale * window.devicePixelRatio, // 根据设备像素比调整 scale
             });
-
-            // const ratio = dpr;
-            // canvas.width = viewport.width * ratio;
-            // canvas.height = viewport.height * ratio;
-            // canvas.style.width = `${viewport.width}px`;
-            // canvas.style.height = `${viewport.height}px`;
-
-            // let renderContext = {
-            //   canvasContext: context,
-            //   viewport: viewport,
-            //   transform: [ratio, 0, 0, ratio, 0, 0]
-            // };
-            
-            // // 获取父容器的宽度和高度
-            // const container = document.querySelector('.file-preview');
-            // const containerWidth = container.clientWidth;
-            // const containerHeight = container.clientHeight;
-            // // 计算宽高比
-            // const originalWidth = viewport.width;
-            // const originalHeight = viewport.height;
-            // const aspectRatio = originalWidth / originalHeight;
-            // // 根据父容器的尺寸限制计算新的宽度和高度
-            // let newWidth = containerWidth;
-            // let newHeight = containerWidth / aspectRatio;
-            // // 如果高度超过父容器高度，按高度限制调整宽度
-            // if (newHeight > containerHeight) {
-            //   newHeight = containerHeight;
-            //   newWidth = containerHeight * aspectRatio;
-            // }
-            // canvas.width = newWidth * window.devicePixelRatio; // 处理高分辨率屏幕
-            // canvas.height = newHeight * window.devicePixelRatio;
-            // canvas.style.width = `${newWidth}px`;
-            // canvas.style.height = `${newHeight}px`;
-            // const renderContext = {
-            //   canvasContext: context,
-            //   viewport: page.getViewport({ scale: newWidth / originalWidth }),
-            //   transform: [window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0],
-            // };
 
             // 设置 Canvas 尺寸（根据 viewport 尺寸缩放）
             canvas.width = viewport.width;
@@ -562,10 +614,11 @@ export default {
             };
 
 
+            // var pageDiv = document.getElementById(`pageDiv${pageNumber}`);
             page.render(renderContext).promise.then(() => {
+              // console.log(page.getTextContent());
               resolve();
-              // // 渲染文本层
-              // this.renderTextLayer(page, viewport, pageNumber);
+              this.renderTextLayer(page, viewport, pageNumber, canvas);
               // 渲染成功后设置滚动条位置
               this.centerScroll();
             }).catch(error => {
@@ -588,7 +641,7 @@ export default {
       });
     },
 
-    async renderTextLayer(page, viewport, pageNumber) {
+    async renderTextLayer(page, viewport, pageNumber, canvas) {
       try {
         const textContent = await page.getTextContent();
         const textLayerDiv = document.getElementById(`text-layer${pageNumber}`);
@@ -598,14 +651,36 @@ export default {
           return;
         }
 
-        // 创建 PDF.js 的 TextLayerBuilder
-        pdfjs.renderTextLayer({
-          textContent: textContent,
-          container: textLayerDiv,
+        textLayerDiv.style.position = 'absolute';
+        textLayerDiv.style.left = canvas.offsetLeft + 'px';
+        textLayerDiv.style.top = canvas.offsetTop + 'px';
+        textLayerDiv.style.width = canvas.offsetWidth + 'px';
+        textLayerDiv.style.height = canvas.offsetHeight + 'px';
+         
+        var pageDiv = document.getElementById(`pageDiv${pageNumber}`);
+
+        // // 创建 PDF.js 的 TextLayerBuilder
+        // pdfjs.renderTextLayer({
+        //   textContent: textContent,
+        //   container: textLayerDiv,
+        //   viewport: viewport,
+        //   textDivs: [],
+        //   enhanceTextSelection: true, // 开启文本选择增强功能
+        // });
+        pageDiv.append(textLayerDiv);
+
+        const textLayer = new TextLayerBuilder({
+          // container: ,
+          textLayerDiv: textLayerDiv,
+          pageIndex: page.pageIndex,
           viewport: viewport,
-          textDivs: [],
           enhanceTextSelection: true, // 开启文本选择增强功能
+          eventBus,
+          // textDivs: []
         });
+
+        textLayer.setTextContent(textContent);
+        textLayer.render();
       } catch (error) {
         console.error("渲染文本层时出错：", error);
       }
@@ -668,8 +743,12 @@ export default {
       return /\.(jpeg|jpg|gif|png|bmp|webp)$/i.test(this.fileName);
     },
     isPdf(){
-      // 判断预览的文件是否为图片
+      // 判断预览的文件是否为PDF
       return /\.(pdf)$/i.test(this.fileName);
+    },
+    isTxt(){
+      // 判断预览的文件是否为Txt
+      return /\.(txt)$/i.test(this.fileName);
     },
 
     triggerFileUpload() {
@@ -1131,5 +1210,64 @@ body {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain; /* 保持长宽比 */
+}
+
+.txtPage{
+  width: 100%;
+  height: 100%;
+  background: white;
+  overflow: auto;
+  white-space: pre; /* 保留格式 */
+  text-align: initial;
+}
+.txtPage::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+::-webkit-scrollbar-button {
+	display: none;
+}
+::-webkit-scrollbar-track {
+	background-color: rgba(70, 166, 255, 0.1);
+	display: none;
+}
+::-webkit-scrollbar-thumb {
+	background-color: rgba(70, 166, 255, 0.4);
+	border: 2px solid transparent;
+	border-radius: 6px;
+	background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+.docx-preview {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  max-height: 400px;
+  overflow-y: auto;
+  text-align: initial;
+}
+.docx-preview::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+::-webkit-scrollbar-button {
+	display: none;
+}
+::-webkit-scrollbar-track {
+	background-color: rgba(70, 166, 255, 0.1);
+	display: none;
+}
+::-webkit-scrollbar-thumb {
+	background-color: rgba(70, 166, 255, 0.4);
+	border: 2px solid transparent;
+	border-radius: 6px;
+	background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(0, 0, 0, 0.5);
 }
 </style>

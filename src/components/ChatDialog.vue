@@ -1,12 +1,13 @@
 <!--
  * @Author: Jacob-biu 2777245228@qq.com
- * @Date: 2024-08-07 22:10:58
+ * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-14 17:00:28
- * @FilePath: \NewDemo\llm_demo\src\components\ChatDialog.vue
+ * @LastEditTime: 2024-08-16 11:35:53
+ * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
+
 <template>
   <div id="Total">
     <div id="SlideButtonDiv">
@@ -24,9 +25,6 @@
     </div>
     <div id="ChatContainer">
       <div id="container">
-        <!-- <div v-if="!isChatBoxOpen" class="Picture">
-          <button></button>
-        </div> -->
         <div id="msg"  v-show="isChatBoxOpen" :class="{ active: isDarkMode }">
           <p @mouseover="changeColor" @mouseout="resetColor" :style="{color: textColor}">{{ msg }}</p>
         </div>
@@ -36,10 +34,32 @@
             </div>
         </div>
         <div id="messagebox" >
+          <input type="file" id="fileInput" ref="fileInput" @change="handleFileChange" class="file-upload" style="display: none;" />
+          <!-- 自定义文件上传按钮 -->
+          <button @click="triggerFileUpload" class="custom-file-upload">
+          </button>
           <input type="text" id="userInput" v-model="inputData" @keyup.enter="sendData" placeholder="尽管问！" autofocus :class="{ active: isDarkMode }">
           <button id="sendBtn" @click="sendData" :loading="loading" :class="{ active: isDarkMode }">
           </button>
         </div>
+      </div>
+    </div>
+    
+    <!-- 文件预览区 -->
+    <div v-show="isPreview" class="fileContainer">
+      <div v-show="isPreview" class="file-preview" ref="pdfContainer">
+        <img class="preview-image" v-if="isImageFile" :src="previewUrl" alt="File Preview" />
+        <div v-else-if="isPdfFile" class="pdf-page" v-for="i in pdfParams.pdfPageTotal" :key="i">
+          <!-- <div :id="'text-layer' + i" class="textLayer"></div> -->
+          <canvas class="pdf-viewer" :id="'pdf-render' + i" ></canvas>
+        </div>
+        <span v-else>文件预览不可用</span>
+      </div>
+      <div class="pdf_down" v-if="isPdfFile">
+        <button class="pdf_set_left" @click="scaleUp">➕</button>
+        <button class="pdf_set_middle" @click="scaleDown">➖</button>
+        <!-- <div class="pdf-pre" @click="prePage">上一页</div>
+        <div class="pdf-next" @click="nextPage">下一页</div> -->
       </div>
     </div>
   </div>
@@ -52,6 +72,14 @@ import 'highlightjs-line-numbers.js';      // 引入行号插件
 // import 'highlight.js/styles/monokai-sublime.css';
 // import 'highlight.js/styles/atom-one-dark.css'; // 选择你喜欢的样式
 import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
+// import { isPdfFile } from 'pdfjs-dist/build/pdf';
+import { reactive, nextTick } from 'vue';
+import * as pdfjs from 'pdfjs-dist/build/pdf';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
+import 'pdfjs-dist/web/pdf_viewer.css'
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
 
 export default {
   name: 'ChatDialog',
@@ -78,7 +106,26 @@ export default {
       //对话历史
       history: [],
       API_URL: "http://localhost:9999/v1/chat/completions",
+      fileName: '',
+      selectedFile: null,
+      isPreview: false,
+      previewUrl: '', // 文件预览的 URL
+      isPdfFile: false,
+      isImageFile: false,
+      pdfParams: reactive({
+        currentPageNumber: 1,
+        pdfScale: 1.0,
+        pdfPageTotal: 0,
+      }),
+      // pdfDocu: null,
     };
+  },
+
+  mounted() {
+    // 在 mounted 时设置初始滚动位置
+    this.$nextTick(() => {
+      this.centerScroll();
+    });
   },
 
   methods:{
@@ -328,6 +375,306 @@ export default {
       });
 
       block.innerHTML = numberedLines;
+    },
+
+    async handleFileChange(event) {
+      this.isPreview = true;
+      const file = event.target.files[0];
+      this.fileName = file.name;  // 获取文件名称
+      if (file) {
+        if (file.type === 'application/pdf') {
+          this.isPdfFile = true;
+          this.isImageFile = false;
+          this.selectedFile = file;
+          const url = URL.createObjectURL(this.selectedFile);  
+          console.log(url);
+          try{
+            await this.loadPdf(url);
+          }catch(error){
+            console.error('从PDF提取文本时出错', error);  
+          }
+        }else if(this.isImage()){
+          this.isPdfFile = false;
+          this.isImageFile = true;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.previewUrl = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }else {
+          this.isImageFile = false;
+          this.isPdfFile = false;
+          alert('请选择一个有效的文件');
+        }
+      }
+    },
+    async loadPdf(url) {      
+      pdfjs.getDocument(url).promise.then(async doc => {
+        try{
+          console.log(doc.numPages);
+          this.pdfDocu = await pdfjs.getDocument(url).promise;
+          // 确保 pdfDoc 已经加载成功
+          if (!this.pdfDocu) {
+            console.error('PDF 文档未加载成功!!');
+            return;
+          }
+          console.log(this.pdfDocu);
+          // this.pdfParams.pdfPageTotal = this.pdfDocu.numPages;
+          this.pdfParams.pdfPageTotal = doc.numPages;
+          // 使用 nextTick 确保 DOM 渲染完成后再操作 canvas 元素
+          await nextTick();
+          this.pdfParams.currentPageNumber = 1; // 重置到第一页
+          // await this.getPdfPage(this.pdfParams.currentPageNumber);
+          for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
+            await this.getPdfPage(pageNum);
+          }
+          // 渲染成功后设置滚动条位置
+          this.centerScroll();
+        }catch (error) {
+          console.error('从 PDF 提取文本时出错', error);
+        }
+      });
+    },
+    // 渲染指定页码的 PDF 页面
+    async renderPdfPage(pageNumber) {
+      // 确保 pdfDoc 已经加载成功
+      if (!this.pdfDocu) {
+        console.error('PDF 文档未加载成功！');
+        return;
+      }
+      const page = await this.pdfDocu.getPage(pageNumber);
+      const viewport = page.getViewport({ scale: this.pdfParams.pdfScale });
+
+      const canvas = document.getElementById(`pdf-render${pageNumber}`);
+      if (!canvas) return;
+
+      const context = canvas.getContext('2d');
+
+      // 计算适应父容器的宽高
+      const container = document.querySelector('.file-preview');
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+      const originalWidth = viewport.width;
+      const originalHeight = viewport.height;
+      const aspectRatio = originalWidth / originalHeight;
+
+      let newWidth = containerWidth;
+      let newHeight = containerWidth / aspectRatio;
+
+      if (newHeight > containerHeight) {
+        newHeight = containerHeight;
+        newWidth = containerHeight * aspectRatio;
+      }
+
+      canvas.width = newWidth * window.devicePixelRatio;
+      canvas.height = newHeight * window.devicePixelRatio;
+      canvas.style.width = `${newWidth}px`;
+      canvas.style.height = `${newHeight}px`;
+
+      const renderContext = {
+        canvasContext: context,
+        viewport: page.getViewport({ scale: newWidth / originalWidth }),
+        transform: [window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0],
+      };
+
+      await page.render(renderContext).promise;
+    },
+    
+    getPdfPage(pageNumber) {
+      // 清空所有 Canvas 内容
+      // this.clearCanvas();
+      return new Promise((resolve, reject) => {
+        this.pdfDocu.getPage(pageNumber).then(async page => {
+          // 使用 nextTick 确保元素已被渲染
+          nextTick(() => {
+            // 在请求页面之前验证页码
+            if (pageNumber < 1 || pageNumber > this.pdfParams.pdfPageTotal) {
+              throw new Error(`Invalid page number: ${pageNumber}`);
+            }
+            const canvas = document.getElementById(`pdf-render${pageNumber}`);
+            if(!canvas) {
+              console.error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
+              return reject('Canvas not found');
+            }
+            const context = canvas.getContext('2d');
+            if (!context) {
+              console.error('无法获取 2D 绘图上下文');
+              return reject('Context not found');
+            }
+            
+            
+            // const dpr = window.devicePixelRatio || 1;
+            // const viewport = page.getViewport({ scale: this.pdfParams.pdfScale });
+            // 获取默认的 viewport（缩放）
+            const viewport = page.getViewport({
+              scale: this.pdfParams.pdfScale * window.devicePixelRatio, // 根据设备像素比调整 scale
+            });
+
+            // const ratio = dpr;
+            // canvas.width = viewport.width * ratio;
+            // canvas.height = viewport.height * ratio;
+            // canvas.style.width = `${viewport.width}px`;
+            // canvas.style.height = `${viewport.height}px`;
+
+            // let renderContext = {
+            //   canvasContext: context,
+            //   viewport: viewport,
+            //   transform: [ratio, 0, 0, ratio, 0, 0]
+            // };
+            
+            // // 获取父容器的宽度和高度
+            // const container = document.querySelector('.file-preview');
+            // const containerWidth = container.clientWidth;
+            // const containerHeight = container.clientHeight;
+            // // 计算宽高比
+            // const originalWidth = viewport.width;
+            // const originalHeight = viewport.height;
+            // const aspectRatio = originalWidth / originalHeight;
+            // // 根据父容器的尺寸限制计算新的宽度和高度
+            // let newWidth = containerWidth;
+            // let newHeight = containerWidth / aspectRatio;
+            // // 如果高度超过父容器高度，按高度限制调整宽度
+            // if (newHeight > containerHeight) {
+            //   newHeight = containerHeight;
+            //   newWidth = containerHeight * aspectRatio;
+            // }
+            // canvas.width = newWidth * window.devicePixelRatio; // 处理高分辨率屏幕
+            // canvas.height = newHeight * window.devicePixelRatio;
+            // canvas.style.width = `${newWidth}px`;
+            // canvas.style.height = `${newHeight}px`;
+            // const renderContext = {
+            //   canvasContext: context,
+            //   viewport: page.getViewport({ scale: newWidth / originalWidth }),
+            //   transform: [window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0],
+            // };
+
+            // 设置 Canvas 尺寸（根据 viewport 尺寸缩放）
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            // 缩放 canvas 显示比例
+            canvas.style.width = `${viewport.width / window.devicePixelRatio}px`;
+            canvas.style.height = `${viewport.height / window.devicePixelRatio}px`;
+
+            const renderContext = {
+              canvasContext: context,
+              viewport: viewport,
+            };
+
+
+            page.render(renderContext).promise.then(() => {
+              resolve();
+              // // 渲染文本层
+              // this.renderTextLayer(page, viewport, pageNumber);
+              // 渲染成功后设置滚动条位置
+              this.centerScroll();
+            }).catch(error => {
+              reject(error);
+            });
+          });
+        }).catch(error => {
+          reject(error);
+        });
+      });
+    },
+    // 清空所有 Canvas 内容
+    clearCanvas() {
+      const canvases = document.querySelectorAll(".pdf-viewer");
+      canvases.forEach((canvas) => {
+        const context = canvas.getContext("2d");
+        if (context) {
+          context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      });
+    },
+
+    async renderTextLayer(page, viewport, pageNumber) {
+      try {
+        const textContent = await page.getTextContent();
+        const textLayerDiv = document.getElementById(`text-layer${pageNumber}`);
+
+        if (!textLayerDiv) {
+          console.log(`text-layer${pageNumber}`)
+          return;
+        }
+
+        // 创建 PDF.js 的 TextLayerBuilder
+        pdfjs.renderTextLayer({
+          textContent: textContent,
+          container: textLayerDiv,
+          viewport: viewport,
+          textDivs: [],
+          enhanceTextSelection: true, // 开启文本选择增强功能
+        });
+      } catch (error) {
+        console.error("渲染文本层时出错：", error);
+      }
+    },
+
+    // 上一页功能
+    prevPage() {
+      if (this.pdfParams.currentPageNumber > 1) {
+        this.pdfParams.currentPageNumber = this.pdfParams.currentPageNumber - 1;
+        this.getPdfPage(this.pdfParams.currentPageNumber);
+      }
+    },
+
+    // 下一页功能
+    nextPage() {
+      if (this.pdfParams.currentPageNumber < this.pdfParams.pdfPageTotal) {
+        this.pdfParams.currentPageNumber = this.pdfParams.currentPageNumber + 1;
+        console.log(this.pdfParams.currentPageNumber);
+        this.getPdfPage(this.pdfParams.currentPageNumber);
+      }
+    },
+
+    // 放大 PDF 页面
+    async scaleUp() {
+      const maxScale = window.screen.width > 1440 ? 1.4 : 1.2;
+      if (this.pdfParams.pdfScale < maxScale) {
+        this.pdfParams.pdfScale += 0.1;
+        for (let pageNum = 1; pageNum <= this.pdfParams.pdfPageTotal; pageNum++) {
+            await this.getPdfPage(pageNum);
+        }
+        // await this.getPdfPage(this.pdfParams.currentPageNumber);
+      }
+    },
+
+    // 缩小 PDF 页面
+    async scaleDown() {
+      const minScale = 0.5;
+      if (this.pdfParams.pdfScale > minScale) {
+        this.pdfParams.pdfScale -= 0.1;
+        for (let pageNum = 1; pageNum <= this.pdfParams.pdfPageTotal; pageNum++) {
+            await this.getPdfPage(pageNum);
+        }
+        // await this.getPdfPage(this.pdfParams.currentPageNumber);
+      }
+    },
+
+    // 设置横向滚动条居中
+    centerScroll() {
+      this.$nextTick(() => {
+        const container = this.$refs.pdfContainer;
+        if (container) {
+            container.scrollLeft =
+              container.scrollWidth / 2 - container.clientWidth / 2;
+        }
+      });
+    },
+
+    isImage() {
+      // 判断预览的文件是否为图片
+      return /\.(jpeg|jpg|gif|png|bmp|webp)$/i.test(this.fileName);
+    },
+    isPdf(){
+      // 判断预览的文件是否为图片
+      return /\.(pdf)$/i.test(this.fileName);
+    },
+
+    triggerFileUpload() {
+      // 触发隐藏的文件上传 input
+      this.$refs.fileInput.click();
     }
   },
 }
@@ -355,7 +702,7 @@ export default {
   text-align: center;
   width: 100%;
   height: 100%;
-  margin-bottom: 0;;
+  margin-bottom: 0;
 }
 
 #SlideButtonDiv{
@@ -419,7 +766,7 @@ export default {
 
 #ChatContainer {
   display: inline-block;
-  width:700px;
+  width:600px;
   text-align: center;
   justify-content: center;
 }
@@ -541,15 +888,34 @@ export default {
 
 #messagebox {
   position: absolute;
-  right:-2.2px;
+  left:-0.5px;
   bottom: 3.5px;
   border-radius: 10px;
   height: 45px;
   width: 100%;
   display: flex;
-  align-items: right;
-  background: rgba(255,255,255,0);
-  display: inline-block; /* 如果需要行内显示 */
+  align-items: center;
+  background: rgba(255,255,255,1);
+  box-sizing: border-box;
+}
+
+.custom-file-upload {
+  padding: 10px;
+  width: 40px;
+  height:40px;
+  border: none;
+  background-color: transparent;
+  background-image: url("../assets/attachment.svg");
+  background-size: auto 70%;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: black;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.custom-file-upload:hover {
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
 }
 
 .message {
@@ -572,18 +938,20 @@ export default {
 }
 
 #userInput {
-  height: 25px;
+  height: 25px; /* 设置最小高度 */
+  overflow: hidden; /* 防止溢出显示 */  
   width: 580px;
   padding: 10px;
-  margin-right: 5px;
+  resize: none; /* 禁止用户手动调整大小 */
   border: none;
   border-radius: 5px;
-  position: relative;
   opacity: 0.7;
+  background-color: transparent;
 }
 #userInput:focus {
   outline: none;
   background-color: transparent;
+  box-shadow: none; /* 防止出现阴影 */
 }
 #userInput.active{
   background-color: rgba(0,0,0,0.5);
@@ -597,7 +965,6 @@ export default {
   width: 40px;
   height:40px;
   border: none;
-  margin-left: 5px;
   background-color: transparent;
   background-image: url("../assets/button_gray_plane.svg");
   background-size: auto 70%;
@@ -607,9 +974,9 @@ export default {
   border-radius: 50%;
   cursor: pointer;
 
-  position: absolute;
+  /*position: absolute;
   right: 15px; /* 定位到容器的右侧 */
-  top: 3px;
+  /*top: 3px;*/
 }
 
 
@@ -660,5 +1027,109 @@ body {
 /* 切换后的背景图片 */
 #modeButton.active {
   background-image: url("../assets/dark_mode.svg"); /* 替换为点击后 SVG 图片路径 */
+}
+
+.fileContainer{
+  position: relative;
+  height: 540px;
+}
+
+.file-preview{
+  width:500px;
+  height: 500px;
+  margin-left: 20px;
+  margin-top: 20px;
+  text-align: center;
+  position: relative;
+  /*display: flex;*/
+  align-items: center;
+  justify-content: center;
+  /*overflow: hidden;*/
+  overflow-y:auto;
+  overflow-x:auto;
+  position: relative;
+}
+.file-preview::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+::-webkit-scrollbar-button {
+	display: none;
+}
+::-webkit-scrollbar-track {
+	background-color: rgba(70, 166, 255, 0.1);
+	display: none;
+}
+::-webkit-scrollbar-thumb {
+	background-color: rgba(70, 166, 255, 0.4);
+	border: 2px solid transparent;
+	border-radius: 6px;
+	background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+.pdf-page {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.textLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  font-family: sans-serif;
+  line-height: 1;
+  white-space: pre;
+  overflow: hidden;
+}
+.pdf_down {
+  position: absolute;
+  display: flex;
+  z-index: 20;
+  right: 0;
+  bottom: 0;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+
+.pdf_set_left,
+.pdf_set_middle {
+  width: 30px;
+  height: 30px;
+  color: #408fff;
+  font-size: 15px;
+  text-align: center;
+  margin-right: 5px;
+  padding-top: 2px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+
+.pdf-pre {
+  position: fixed;
+  z-index: 20;
+  right: 160px;
+  bottom: 9%;
+  cursor: pointer;
+}
+
+.pdf-next {
+  position: fixed;
+  z-index: 20;
+  right: 100px;
+  bottom: 9%;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* 保持长宽比 */
 }
 </style>

@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-16 23:37:33
+ * @LastEditTime: 2024-08-17 12:53:19
  * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -57,6 +57,7 @@
           <pre>{{ txtFileContent }}</pre>
         </div>
         <div v-else-if="isDocxFile" class="docx-preview" v-html="docxContent"></div>
+        <div v-else-if="isDocFile" class="doc-preview" v-html="docContent"></div>
         <span v-else>文件预览不可用</span>
       </div>
       <div class="pdf_down" v-if="isPdfFile">
@@ -84,6 +85,7 @@ import { TextLayerBuilder } from 'pdfjs-dist/web/pdf_viewer.js';
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer.js'
 import 'pdfjs-dist/web/pdf_viewer.css'
 import mammoth from "mammoth";
+// import docx4js from "docx4js";
 
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
@@ -122,15 +124,22 @@ export default {
       isImageFile: false,
       isTxtFile: false,
       isDocxFile: false,
+      isDocFile: false,
+      
       pdfParams: reactive({
         currentPageNumber: 1,
         pdfScale: 1.0,
         pdfPageTotal: 0,
       }),
-      extractedText: "", // 存储提取的文本内容
+      extractedPDFText: "", // 存储pdf提取的文本内容
+      // pdfDocument: null, // 保存加载的PDF实例
+
       txtFileContent: "", // 保存 txt 文件的内容
+
       docxContent: '', //// 保存docx解析后的 HTML 内容
+      docContent: '', //// 保存doc解析后的 HTML 内容
       docxPlainTextContent: "", // 保存docx纯文本内容
+      docPlainTextContent: '',// 保存doc纯文本内容
     };
   },
 
@@ -242,15 +251,15 @@ export default {
         //合成用户发送的信息
         var userMessageContent = '';
         if(this.isImageFile){
-          userMessageContent = usermessage;
+          userMessageContent = "问题：" + usermessage;
         }else if(this.isPdfFile){
-          userMessageContent = this.extractedText + '\n\n' + usermessage;
+          userMessageContent = this.extractedPDFText + '\n\n' + "问题：" + usermessage;
         }else if(this.isTxtFile){
-          userMessageContent = this.txtFileContent + '\n\n' + usermessage;
+          userMessageContent = this.txtFileContent + '\n\n' + "问题：" + usermessage;
         }else if(this.docxPlainTextContent){
-          userMessageContent = this.docxPlainTextContent + '\n\n' + usermessage;
+          userMessageContent = this.docxPlainTextContent + '\n\n' + "问题：" + usermessage;
         }else{
-          userMessageContent = usermessage;
+          userMessageContent =  "问题：" +  usermessage;
         }
 
         // 更新对话历史
@@ -415,30 +424,43 @@ export default {
           this.isImageFile = false;
           this.isTxtFile = false;
           this.isDocxFile = false;
+          this.isDocFile = false;
+
           this.selectedFile = file;
-          const url = URL.createObjectURL(this.selectedFile);  
-          console.log(url);
-          try{
-            await this.loadPdf(url);
-          }catch(error){
-            console.error('从PDF提取文本时出错', error);  
-          }
+
+          const reader = new FileReader();
+          reader.onload = async (e) => {
+            const typedArray = new Uint8Array(e.target.result);
+            const pdfUrl = URL.createObjectURL(new Blob([typedArray], { type: 'application/pdf' }));
+            console.log(pdfUrl);
+            try{
+              await this.loadPdf(pdfUrl);
+              console.log(this.extractedPDFText);
+            }catch(error){
+              console.error('从PDF提取文本时出错', error);  
+            }          
+          };
+          reader.readAsArrayBuffer(file);
         }else if(file.type === "text/plain"){
           this.isPdfFile = false;
           this.isImageFile = false;
           this.isTxtFile = true;
           this.isDocxFile = false;
+          this.isDocFile = false;
+          
           const reader = new FileReader();
           reader.onload = (e) => {
             this.txtFileContent = e.target.result; // 读取到的内容赋值给 fileContent
+            console.log(this.txtFileContent);
           };
           reader.readAsText(file); // 以文本形式读取文件
-          console.log(this.txtFileContent);
         }else if(file.name.endsWith(".docx")){
           this.isPdfFile = false;
           this.isImageFile = false;
           this.isTxtFile = false;
           this.isDocxFile = true;
+          this.isDocFile = false;
+
           try {
             const arrayBuffer = await file.arrayBuffer();
             const result = await mammoth.convertToHtml({ arrayBuffer });
@@ -456,6 +478,7 @@ export default {
           this.isImageFile = true;
           this.isTxtFile = false;
           this.isDocxFile = false;
+          this.isDocFile = false;
           const reader = new FileReader();
           reader.onload = (e) => {
             this.previewUrl = e.target.result;
@@ -466,6 +489,8 @@ export default {
           this.isPdfFile = false;
           this.isTxtFile = false;
           this.isDocxFile = false;
+          this.isDocFile = false;
+
           alert('请选择一个有效的文件');
         }
       }
@@ -479,157 +504,242 @@ export default {
       return tempDiv.textContent || tempDiv.innerText || "";
     },
 
-    async loadPdf(url) {      
-      pdfjs.getDocument(url).promise.then(async doc => {
-        try{
-          console.log(doc.numPages);
-          this.pdfDocu = await pdfjs.getDocument(url).promise;
-          // 确保 pdfDoc 已经加载成功
-          if (!this.pdfDocu) {
-            console.error('PDF 文档未加载成功!!');
-            return;
-          }
-          console.log(this.pdfDocu);
-          this.extractTextFromPdf();
-          // this.pdfParams.pdfPageTotal = this.pdfDocu.numPages;
-          this.pdfParams.pdfPageTotal = doc.numPages;
-          // 使用 nextTick 确保 DOM 渲染完成后再操作 canvas 元素
-          await nextTick();
-          this.pdfParams.currentPageNumber = 1; // 重置到第一页
-          // await this.getPdfPage(this.pdfParams.currentPageNumber);
-          for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
-            await this.getPdfPage(pageNum);
-          }
-          // 渲染成功后设置滚动条位置
-          this.centerScroll();
-        }catch (error) {
-          console.error('从 PDF 提取文本时出错', error);
+    // async loadPdf(url) {      
+    //   pdfjs.getDocument(url).promise.then(async doc => {
+    //     try{
+    //       console.log(doc.numPages);
+    //       this.pdfDocu = await pdfjs.getDocument(url).promise;
+    //       // 确保 pdfDoc 已经加载成功
+    //       if (!this.pdfDocu) {
+    //         console.error('PDF 文档未加载成功!!');
+    //         return;
+    //       }
+    //       console.log(this.pdfDocu);
+    //       this.extractTextFromPdf();
+    //       // this.pdfParams.pdfPageTotal = this.pdfDocu.numPages;
+    //       this.pdfParams.pdfPageTotal = doc.numPages;
+    //       // 使用 nextTick 确保 DOM 渲染完成后再操作 canvas 元素
+    //       await nextTick();
+    //       this.pdfParams.currentPageNumber = 1; // 重置到第一页
+    //       // await this.getPdfPage(this.pdfParams.currentPageNumber);
+    //       for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
+    //         await this.getPdfPage(pageNum);
+    //       }
+    //       // 渲染成功后设置滚动条位置
+    //       this.centerScroll();
+    //     }catch (error) {
+    //       console.error('从 PDF 提取文本时出错', error);
+    //     }
+    //   });
+    // },
+
+    async loadPdf(url) {
+      try {
+        const loadingTask = pdfjs.getDocument(url);
+        this.pdfDocument = await loadingTask.promise;
+        // 确保 pdfDoc 已经加载成功
+        if (!this.pdfDocument) {
+          console.error('PDF 文档未加载成功!!');
+          return;
         }
-      });
-    },
-    // 提取PDF中的文本内容
-    async extractTextFromPdf() {
-      const totalText = []; // 用于存储每页的文本内容
-      const totalPages = this.pdfDocu.pdfPageTotal;
+        console.log(this.pdfDocument);
 
-      for (let i = 1; i <= totalPages; i++) {
-        const page = await this.pdfDocu.getPage(i);
-        const textContent = await page.getTextContent();
+        this.pdfParams.pdfPageTotal = this.pdfDocument.numPages;
 
-        // 获取每页的文本内容并拼接成字符串
-        const pageText = textContent.items.map(item => item.str).join(" ");
-        totalText.push(pageText);
-      }
+        for (let pageNum = 1; pageNum <= this.pdfParams.pdfPageTotal; pageNum++) {
+          await this.renderPdfPage(pageNum);
+        }
 
-      // 将所有页的文本内容保存到 extractedText 中
-      this.extractedText = totalText.join("\n\n"); // 将所有页的文本用换行分隔
-      if(!this.extractedText){
-        console.log("OK!");
-        console.log(this.extractedText);
+        // 渲染成功后设置滚动条位置
+        this.centerScroll();
+      } catch (error) {
+        console.error('加载PDF时出错', error);
       }
     },
 
-    // 渲染指定页码的 PDF 页面
-    async renderPdfPage(pageNumber) {
-      // 确保 pdfDoc 已经加载成功
-      if (!this.pdfDocu) {
-        console.error('PDF 文档未加载成功！');
-        return;
-      }
-      const page = await this.pdfDocu.getPage(pageNumber);
-      const viewport = page.getViewport({ scale: this.pdfParams.pdfScale });
+    // // 提取PDF中的文本内容
+    // async extractTextFromPdf() {
+    //   const totalText = []; // 用于存储每页的文本内容
+    //   const totalPages = this.pdfDocu.pdfPageTotal;
 
-      const canvas = document.getElementById(`pdf-render${pageNumber}`);
-      if (!canvas) return;
+    //   for (let i = 1; i <= totalPages; i++) {
+    //     const page = await this.pdfDocu.getPage(i);
+    //     const textContent = await page.getTextContent();
 
-      const context = canvas.getContext('2d');
+    //     // 获取每页的文本内容并拼接成字符串
+    //     const pageText = textContent.items.map(item => item.str).join(" ");
+    //     totalText.push(pageText);
+    //   }
 
-      // 计算适应父容器的宽高
-      const container = document.querySelector('.file-preview');
-      const containerWidth = container.clientWidth;
-      const containerHeight = container.clientHeight;
-      const originalWidth = viewport.width;
-      const originalHeight = viewport.height;
-      const aspectRatio = originalWidth / originalHeight;
-
-      let newWidth = containerWidth;
-      let newHeight = containerWidth / aspectRatio;
-
-      if (newHeight > containerHeight) {
-        newHeight = containerHeight;
-        newWidth = containerHeight * aspectRatio;
-      }
-
-      canvas.width = newWidth * window.devicePixelRatio;
-      canvas.height = newHeight * window.devicePixelRatio;
-      canvas.style.width = `${newWidth}px`;
-      canvas.style.height = `${newHeight}px`;
-
-      const renderContext = {
-        canvasContext: context,
-        viewport: page.getViewport({ scale: newWidth / originalWidth }),
-        transform: [window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0],
-      };
-
-      await page.render(renderContext).promise;
-    },
+    //   // 将所有页的文本内容保存到 extractedPDFText 中
+    //   this.extractedPDFText = totalText.join("\n\n"); // 将所有页的文本用换行分隔
+    //   if(!this.extractedPDFText){
+    //     console.log("OK!");
+    //     console.log(this.extractedPDFText);
+    //   }
+    // },
     
-    getPdfPage(pageNumber) {
-      // 清空所有 Canvas 内容
-      // this.clearCanvas();
-      return new Promise((resolve, reject) => {
-        this.pdfDocu.getPage(pageNumber).then(async page => {
-          // 使用 nextTick 确保元素已被渲染
-          nextTick(() => {
-            // 在请求页面之前验证页码
-            if (pageNumber < 1 || pageNumber > this.pdfParams.pdfPageTotal) {
-              throw new Error(`Invalid page number: ${pageNumber}`);
-            }
-            const canvas = document.getElementById(`pdf-render${pageNumber}`);
-            if(!canvas) {
-              console.error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
-              return reject('Canvas not found');
-            }
-            const context = canvas.getContext('2d');
-            if (!context) {
-              console.error('无法获取 2D 绘图上下文');
-              return reject('Context not found');
-            }
-            // 获取默认的 viewport（缩放）
-            const viewport = page.getViewport({
-              scale: this.pdfParams.pdfScale * window.devicePixelRatio, // 根据设备像素比调整 scale
-            });
+    // extractTextFromPage(textContent, pageNumber) {
+    //   const textLayer = document.getElementById(`text-layer${pageNumber}`);
+    //   textLayer.innerHTML = ''; // 清空现有的文本图层
 
-            // 设置 Canvas 尺寸（根据 viewport 尺寸缩放）
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
+    //   textContent.items.forEach(item => {
+    //     const span = document.createElement('span');
+    //     span.textContent = item.str;
+    //     span.style.left = `${item.transform[4]}px`;
+    //     span.style.top = `${item.transform[5]}px`;
+    //     span.style.fontSize = `${item.height}px`;
+    //     textLayer.appendChild(span);
+    //   });
 
-            // 缩放 canvas 显示比例
-            canvas.style.width = `${viewport.width / window.devicePixelRatio}px`;
-            canvas.style.height = `${viewport.height / window.devicePixelRatio}px`;
+    //   // 更新 extractedPDFText
+    //   this.extractedPDFText += textContent.items.map(item => item.str).join(' ') + '\n';
+    // },
 
-            const renderContext = {
-              canvasContext: context,
-              viewport: viewport,
-            };
+    async renderPdfPage(pageNumber) {
+        if (pageNumber < 1 || pageNumber > this.pdfParams.pdfPageTotal) {
+          throw new Error(`Invalid page number: ${pageNumber}`);
+        }
+        const page = await this.pdfDocument.getPage(pageNumber);
 
-
-            // var pageDiv = document.getElementById(`pageDiv${pageNumber}`);
-            page.render(renderContext).promise.then(() => {
-              // console.log(page.getTextContent());
-              resolve();
-              this.renderTextLayer(page, viewport, pageNumber, canvas);
-              // 渲染成功后设置滚动条位置
-              this.centerScroll();
-            }).catch(error => {
-              reject(error);
-            });
-          });
-        }).catch(error => {
-          reject(error);
+        //获取默认的 viewport（缩放）
+        const viewport = page.getViewport({
+          scale: this.pdfParams.pdfScale * window.devicePixelRatio, // 根据设备像素比调整 scale
         });
-      });
+        const canvas = document.getElementById(`pdf-render${pageNumber}`);
+        if(!canvas) {
+          console.error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
+          throw new Error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
+          // return reject('Canvas not found');
+        }
+        const context = canvas.getContext('2d');
+        if (!context) {
+          console.error('无法获取 2D 绘图上下文');
+          throw new Error('无法获取 2D 绘图上下文');
+        }
+
+        //设置 Canvas 尺寸（根据 viewport 尺寸缩放）
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        // 缩放 canvas 显示比例
+        canvas.style.width = `${viewport.width / window.devicePixelRatio}px`;
+        canvas.style.height = `${viewport.height / window.devicePixelRatio}px`;
+
+        await page.render({
+          canvasContext: context,
+          viewport: viewport,
+        }).promise;
+
+        // 渲染成功后设置滚动条位置
+        this.centerScroll();
+        // 提取文本内容
+        const textContent = await page.getTextContent();
+        this.renderTextLayer(textContent, viewport, pageNumber);
     },
+
+    // // 渲染指定页码的 PDF 页面
+    // async renderPdfPage(pageNumber) {
+    //   // 确保 pdfDoc 已经加载成功
+    //   if (!this.pdfDocu) {
+    //     console.error('PDF 文档未加载成功！');
+    //     return;
+    //   }
+    //   const page = await this.pdfDocu.getPage(pageNumber);
+    //   const viewport = page.getViewport({ scale: this.pdfParams.pdfScale });
+
+    //   const canvas = document.getElementById(`pdf-render${pageNumber}`);
+    //   if (!canvas) return;
+
+    //   const context = canvas.getContext('2d');
+
+    //   // 计算适应父容器的宽高
+    //   const container = document.querySelector('.file-preview');
+    //   const containerWidth = container.clientWidth;
+    //   const containerHeight = container.clientHeight;
+    //   const originalWidth = viewport.width;
+    //   const originalHeight = viewport.height;
+    //   const aspectRatio = originalWidth / originalHeight;
+
+    //   let newWidth = containerWidth;
+    //   let newHeight = containerWidth / aspectRatio;
+
+    //   if (newHeight > containerHeight) {
+    //     newHeight = containerHeight;
+    //     newWidth = containerHeight * aspectRatio;
+    //   }
+
+    //   canvas.width = newWidth * window.devicePixelRatio;
+    //   canvas.height = newHeight * window.devicePixelRatio;
+    //   canvas.style.width = `${newWidth}px`;
+    //   canvas.style.height = `${newHeight}px`;
+
+    //   const renderContext = {
+    //     canvasContext: context,
+    //     viewport: page.getViewport({ scale: newWidth / originalWidth }),
+    //     transform: [window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0],
+    //   };
+
+    //   await page.render(renderContext).promise;
+    // },
+    
+    // getPdfPage(pageNumber) {
+    //   // 清空所有 Canvas 内容
+    //   // this.clearCanvas();
+    //   return new Promise((resolve, reject) => {
+    //     this.pdfDocu.getPage(pageNumber).then(async page => {
+    //       // 使用 nextTick 确保元素已被渲染
+    //       nextTick(() => {
+    //         // 在请求页面之前验证页码
+    //         if (pageNumber < 1 || pageNumber > this.pdfParams.pdfPageTotal) {
+    //           throw new Error(`Invalid page number: ${pageNumber}`);
+    //         }
+    //         const canvas = document.getElementById(`pdf-render${pageNumber}`);
+    //         if(!canvas) {
+    //           console.error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
+    //           return reject('Canvas not found');
+    //         }
+    //         const context = canvas.getContext('2d');
+    //         if (!context) {
+    //           console.error('无法获取 2D 绘图上下文');
+    //           return reject('Context not found');
+    //         }
+    //         // 获取默认的 viewport（缩放）
+    //         const viewport = page.getViewport({
+    //           scale: this.pdfParams.pdfScale * window.devicePixelRatio, // 根据设备像素比调整 scale
+    //         });
+
+    //         // 设置 Canvas 尺寸（根据 viewport 尺寸缩放）
+    //         canvas.width = viewport.width;
+    //         canvas.height = viewport.height;
+
+    //         // 缩放 canvas 显示比例
+    //         canvas.style.width = `${viewport.width / window.devicePixelRatio}px`;
+    //         canvas.style.height = `${viewport.height / window.devicePixelRatio}px`;
+
+    //         const renderContext = {
+    //           canvasContext: context,
+    //           viewport: viewport,
+    //         };
+
+
+    //         // var pageDiv = document.getElementById(`pageDiv${pageNumber}`);
+    //         page.render(renderContext).promise.then(() => {
+    //           // console.log(page.getTextContent());
+    //           resolve();
+    //           // this.renderTextLayer(page, viewport, pageNumber, canvas);
+    //           // 渲染成功后设置滚动条位置
+    //           this.centerScroll();
+    //         }).catch(error => {
+    //           reject(error);
+    //         });
+    //       });
+    //     }).catch(error => {
+    //       reject(error);
+    //     });
+    //   });
+    // },
+
     // 清空所有 Canvas 内容
     clearCanvas() {
       const canvases = document.querySelectorAll(".pdf-viewer");
@@ -641,52 +751,73 @@ export default {
       });
     },
 
-    async renderTextLayer(page, viewport, pageNumber, canvas) {
-      try {
-        const textContent = await page.getTextContent();
-        const textLayerDiv = document.getElementById(`text-layer${pageNumber}`);
+    // async renderTextLayer(page, viewport, pageNumber, canvas) {
+    //   try {
+    //     const textContent = await page.getTextContent();
+    //     const textLayerDiv = document.getElementById(`text-layer${pageNumber}`);
 
-        if (!textLayerDiv) {
-          console.log(`text-layer${pageNumber}`)
-          return;
-        }
+    //     if (!textLayerDiv) {
+    //       console.log(`text-layer${pageNumber}`)
+    //       return;
+    //     }
 
-        textLayerDiv.style.position = 'absolute';
-        textLayerDiv.style.left = canvas.offsetLeft + 'px';
-        textLayerDiv.style.top = canvas.offsetTop + 'px';
-        textLayerDiv.style.width = canvas.offsetWidth + 'px';
-        textLayerDiv.style.height = canvas.offsetHeight + 'px';
+    //     textLayerDiv.style.position = 'absolute';
+    //     textLayerDiv.style.left = canvas.offsetLeft + 'px';
+    //     textLayerDiv.style.top = canvas.offsetTop + 'px';
+    //     textLayerDiv.style.width = canvas.offsetWidth + 'px';
+    //     textLayerDiv.style.height = canvas.offsetHeight + 'px';
          
-        var pageDiv = document.getElementById(`pageDiv${pageNumber}`);
+    //     var pageDiv = document.getElementById(`pageDiv${pageNumber}`);
 
-        // // 创建 PDF.js 的 TextLayerBuilder
-        // pdfjs.renderTextLayer({
-        //   textContent: textContent,
-        //   container: textLayerDiv,
-        //   viewport: viewport,
-        //   textDivs: [],
-        //   enhanceTextSelection: true, // 开启文本选择增强功能
-        // });
-        pageDiv.append(textLayerDiv);
+    //     // // 创建 PDF.js 的 TextLayerBuilder
+    //     // pdfjs.renderTextLayer({
+    //     //   textContent: textContent,
+    //     //   container: textLayerDiv,
+    //     //   viewport: viewport,
+    //     //   textDivs: [],
+    //     //   enhanceTextSelection: true, // 开启文本选择增强功能
+    //     // });
+    //     pageDiv.append(textLayerDiv);
 
-        const textLayer = new TextLayerBuilder({
-          // container: ,
-          textLayerDiv: textLayerDiv,
-          pageIndex: page.pageIndex,
-          viewport: viewport,
-          enhanceTextSelection: true, // 开启文本选择增强功能
-          eventBus,
-          // textDivs: []
-        });
+    //     const textLayer = new TextLayerBuilder({
+    //       // container: ,
+    //       textLayerDiv: textLayerDiv,
+    //       pageIndex: page.pageIndex,
+    //       viewport: viewport,
+    //       enhanceTextSelection: true, // 开启文本选择增强功能
+    //       eventBus,
+    //       // textDivs: []
+    //     });
 
-        textLayer.setTextContent(textContent);
-        textLayer.render();
-      } catch (error) {
-        console.error("渲染文本层时出错：", error);
-      }
-    },
+    //     textLayer.setTextContent(textContent);
+    //     textLayer.render();
+    //   } catch (error) {
+    //     console.error("渲染文本层时出错：", error);
+    //   }
+    // },
 
     // 上一页功能
+    
+    renderTextLayer(textContent, viewport, pageNumber) {
+      // const textLayer = document.getElementById(`text-layer${pageNumber}`);
+      // textLayer.innerHTML = ''; // Clear existing text layer
+
+      // textContent.items.forEach(item => {
+      //   const span = document.createElement('span');
+      //   span.textContent = item.str;
+      //   span.style.fontSize = `${item.height}px`;
+      //   span.style.left = `${item.transform[4] * viewport.scale}px`;
+      //   span.style.top = `${item.transform[5] * viewport.scale}px`;
+      //   span.style.position = 'absolute';
+      //   span.style.whiteSpace = 'pre'; // Preserve whitespace
+      //   span.style.color = 'black'; // Ensure text is visible
+      //   textLayer.appendChild(span);
+      // });
+
+      // Update extractedPDFText
+      this.extractedPDFText += textContent.items.map(item => item.str).join(' ') + '\n';
+    },
+    
     prevPage() {
       if (this.pdfParams.currentPageNumber > 1) {
         this.pdfParams.currentPageNumber = this.pdfParams.currentPageNumber - 1;
@@ -709,7 +840,7 @@ export default {
       if (this.pdfParams.pdfScale < maxScale) {
         this.pdfParams.pdfScale += 0.1;
         for (let pageNum = 1; pageNum <= this.pdfParams.pdfPageTotal; pageNum++) {
-            await this.getPdfPage(pageNum);
+            await this.renderPdfPage(pageNum);
         }
         // await this.getPdfPage(this.pdfParams.currentPageNumber);
       }
@@ -721,7 +852,7 @@ export default {
       if (this.pdfParams.pdfScale > minScale) {
         this.pdfParams.pdfScale -= 0.1;
         for (let pageNum = 1; pageNum <= this.pdfParams.pdfPageTotal; pageNum++) {
-            await this.getPdfPage(pageNum);
+            await this.renderPdfPage(pageNum);
         }
         // await this.getPdfPage(this.pdfParams.currentPageNumber);
       }
@@ -1154,17 +1285,21 @@ body {
   margin-bottom: 20px;
 }
 
+.pdf-viewer {
+  border: 1px solid black;
+  display: block;
+}
+
 .textLayer {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  font-family: sans-serif;
-  line-height: 1;
-  white-space: pre;
+  pointer-events: none; /* Allow text selection and copying */
   overflow: hidden;
+  white-space: pre;
+  line-height: 1.2;
+  width: 100%; /* Ensure the text layer covers the full width of the canvas */
+  height: 100%; /* Ensure the text layer covers the full height of the canvas */
 }
 .pdf_down {
   position: absolute;
@@ -1246,7 +1381,7 @@ body {
   padding: 15px;
   background-color: #f5f5f5;
   border: 1px solid #ddd;
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: auto;
   text-align: initial;
 }

@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-17 13:59:34
+ * @LastEditTime: 2024-08-17 14:00:22
  * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -78,11 +78,11 @@ import 'highlightjs-line-numbers.js';      // 引入行号插件
 // import 'highlight.js/styles/atom-one-dark.css'; // 选择你喜欢的样式
 import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
 // import { isPdfFile } from 'pdfjs-dist/build/pdf';
-import { reactive, nextTick } from 'vue';
+import { reactive } from 'vue';
 import * as pdfjs from 'pdfjs-dist/build/pdf';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 // import { TextLayerBuilder } from 'pdfjs-dist/web/pdf_viewer.js';
-import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer.js'
+// import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer.js'
 import 'pdfjs-dist/web/pdf_viewer.css'
 import mammoth from "mammoth";
 // import docx4js from "docx4js";

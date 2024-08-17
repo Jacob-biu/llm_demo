@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-17 14:00:22
+ * @LastEditTime: 2024-08-17 14:53:10
  * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -77,6 +77,8 @@ import 'highlightjs-line-numbers.js';      // 引入行号插件
 // import 'highlight.js/styles/monokai-sublime.css';
 // import 'highlight.js/styles/atom-one-dark.css'; // 选择你喜欢的样式
 import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
+import katex from 'katex';
+import 'katex/dist/katex.min.css'; // 必须引入 KaTeX 的 CSS
 // import { isPdfFile } from 'pdfjs-dist/build/pdf';
 import { reactive } from 'vue';
 import * as pdfjs from 'pdfjs-dist/build/pdf';
@@ -225,6 +227,13 @@ export default {
         smartLists: true,
         tables: true,
         smartypants: false,
+        math: function(text, math) {
+          // 使用katex渲染数学公式
+          katex.render(math, document.createElement('div'), {
+            displayMode: true
+          });
+          return text;
+        }
       });
 
       if (this.inputData.trim() !== "") {
@@ -306,11 +315,11 @@ export default {
           const reader = response.body.getReader();
           const decoder = new TextDecoder('utf-8');
           let buffer = '';
+          this.wholeMessage = '';
 
           while (true) {  //eslint-disable-line no-constant-condition
             const { done, value } = await reader.read();
             if (done) {
-              this.wholeMessage = '';
               break;
             }
 
@@ -335,11 +344,13 @@ export default {
                       const content = delta.content || '';
                       if (content) {
                         this.wholeMessage += content;
-                        let handledMessage = '';                   
-                        handledMessage = marked(this.wholeMessage);
+                        // console.log(this.wholeMessage);
+                        let handledMessage = '';
+                        let latexMessage = '';
+                        latexMessage = this.renderMath(this.wholeMessage);                   
+                        handledMessage = marked(latexMessage);
                         messageElementSystem.innerHTML = handledMessage;
 
-                            
                         // 高亮代码块
                         document.querySelectorAll('pre code').forEach(function(block) {
                           // 添加语言标签，确保只添加一次
@@ -378,7 +389,7 @@ export default {
                           hljs.highlightBlock(block);
                         });
                         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
-                        console.log(content);
+                        // console.log(content);
                       }
                     }
                   } catch (error) {
@@ -388,6 +399,7 @@ export default {
               }
             }
           }
+          console.log(this.wholeMessage);
           this.history.push({'role': 'assistant', 'content': this.wholeMessage})
           this.loading = false;
           // this.returnMessage = '';
@@ -396,6 +408,26 @@ export default {
           this.loading = false;
         }
       }
+    },
+
+    renderMath(text) {
+      // 匹配并处理块级公式，例如 $$...$$ 或 \[...\]
+      text = text.replace(/(\$\$|\\\[)([\s\S]+?)(\$\$|\\\])/g, function(_, delimiter, math) {
+        return katex.renderToString(math, {
+          displayMode: true,
+          throwOnError: false,
+        });
+      });
+
+      // 匹配并处理行内公式，例如 $...$ 或 \(...\)
+      text = text.replace(/(\$|\\\()(.+?)(\$|\\\))/g, function(_, delimiter, math) {
+        return katex.renderToString(math, {
+          displayMode: false,
+          throwOnError: false,
+        });
+      });
+
+      return text;
     },
 
     async addLineNumbersToBlock(block){

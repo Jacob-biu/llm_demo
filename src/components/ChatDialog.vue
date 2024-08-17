@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-17 12:53:19
+ * @LastEditTime: 2024-08-17 13:59:34
  * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -81,7 +81,7 @@ import 'highlight.js/styles/github.css'; // 引入你喜欢的代码高亮样式
 import { reactive, nextTick } from 'vue';
 import * as pdfjs from 'pdfjs-dist/build/pdf';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
-import { TextLayerBuilder } from 'pdfjs-dist/web/pdf_viewer.js';
+// import { TextLayerBuilder } from 'pdfjs-dist/web/pdf_viewer.js';
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer.js'
 import 'pdfjs-dist/web/pdf_viewer.css'
 import mammoth from "mammoth";
@@ -89,7 +89,7 @@ import mammoth from "mammoth";
 
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-const eventBus = new pdfjsViewer.EventBus();
+// const eventBus = new pdfjsViewer.EventBus();
 
 export default {
   name: 'ChatDialog',
@@ -635,7 +635,7 @@ export default {
         this.centerScroll();
         // 提取文本内容
         const textContent = await page.getTextContent();
-        this.renderTextLayer(textContent, viewport, pageNumber);
+        this.renderTextLayer(textContent);
     },
 
     // // 渲染指定页码的 PDF 页面
@@ -798,7 +798,7 @@ export default {
 
     // 上一页功能
     
-    renderTextLayer(textContent, viewport, pageNumber) {
+    renderTextLayer(textContent) {
       // const textLayer = document.getElementById(`text-layer${pageNumber}`);
       // textLayer.innerHTML = ''; // Clear existing text layer
 

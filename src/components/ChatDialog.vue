@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-17 14:53:10
+ * @LastEditTime: 2024-08-19 22:00:16
  * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -82,15 +82,15 @@ import 'katex/dist/katex.min.css'; // 必须引入 KaTeX 的 CSS
 // import { isPdfFile } from 'pdfjs-dist/build/pdf';
 import { reactive } from 'vue';
 import * as pdfjs from 'pdfjs-dist/build/pdf';
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
-// import { TextLayerBuilder } from 'pdfjs-dist/web/pdf_viewer.js';
-// import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer.js'
-import 'pdfjs-dist/web/pdf_viewer.css'
+import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
+import { GlobalWorkerOptions } from 'pdfjs-dist/webpack';
+// import { TextLayerBuilder } from 'pdfjs-dist/web/pdf_viewer';
+import 'pdfjs-dist/web/pdf_viewer.css';
 import mammoth from "mammoth";
 // import docx4js from "docx4js";
 
 
-pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist/build/pdf.worker.js';
 // const eventBus = new pdfjsViewer.EventBus();
 
 export default {
@@ -127,6 +127,15 @@ export default {
       isTxtFile: false,
       isDocxFile: false,
       isDocFile: false,
+      textLayerFactory: {
+        createTextLayerBuilder: function (textLayerDiv, viewport, enhanceTextSelection) {
+          return new pdfjsViewer.TextLayerBuilder({
+            textLayerDiv,
+            viewport,
+            enhanceTextSelection,
+          });
+        },
+      },
       
       pdfParams: reactive({
         currentPageNumber: 1,
@@ -629,45 +638,63 @@ export default {
     // },
 
     async renderPdfPage(pageNumber) {
-        if (pageNumber < 1 || pageNumber > this.pdfParams.pdfPageTotal) {
-          throw new Error(`Invalid page number: ${pageNumber}`);
-        }
-        const page = await this.pdfDocument.getPage(pageNumber);
+      if (pageNumber < 1 || pageNumber > this.pdfParams.pdfPageTotal) {
+        throw new Error(`Invalid page number: ${pageNumber}`);
+      }
+      const page = await this.pdfDocument.getPage(pageNumber);
 
-        //获取默认的 viewport（缩放）
-        const viewport = page.getViewport({
-          scale: this.pdfParams.pdfScale * window.devicePixelRatio, // 根据设备像素比调整 scale
-        });
-        const canvas = document.getElementById(`pdf-render${pageNumber}`);
-        if(!canvas) {
-          console.error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
-          throw new Error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
-          // return reject('Canvas not found');
-        }
-        const context = canvas.getContext('2d');
-        if (!context) {
-          console.error('无法获取 2D 绘图上下文');
-          throw new Error('无法获取 2D 绘图上下文');
-        }
+      //获取默认的 viewport（缩放）
+      const viewport = page.getViewport({
+        scale: this.pdfParams.pdfScale * window.devicePixelRatio, // 根据设备像素比调整 scale
+      });
+      const canvas = document.getElementById(`pdf-render${pageNumber}`);
+      if(!canvas) {
+        console.error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
+        throw new Error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
+        // return reject('Canvas not found');
+      }
+      const context = canvas.getContext('2d');
+      if (!context) {
+        console.error('无法获取 2D 绘图上下文');
+        throw new Error('无法获取 2D 绘图上下文');
+      }
 
-        //设置 Canvas 尺寸（根据 viewport 尺寸缩放）
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+      //设置 Canvas 尺寸（根据 viewport 尺寸缩放）
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
 
-        // 缩放 canvas 显示比例
-        canvas.style.width = `${viewport.width / window.devicePixelRatio}px`;
-        canvas.style.height = `${viewport.height / window.devicePixelRatio}px`;
+      // 缩放 canvas 显示比例
+      canvas.style.width = `${viewport.width / window.devicePixelRatio}px`;
+      canvas.style.height = `${viewport.height / window.devicePixelRatio}px`;
 
-        await page.render({
-          canvasContext: context,
-          viewport: viewport,
-        }).promise;
+      var renderContext = {
+        canvasContext: context,
+        viewport: viewport,
+        // textLayer: {
+        //   textContentStream: page.streamTextContent(),
+        //   container: document.getElementById(`text-layer${pageNumber}`),
+        //   viewport: viewport,
+        //   enhanceTextSelection: true, // 选择文本时的优化
+        //   textDivs: [] // 存储文本块的数组
+        // },
+        textLayerFactory: this.textLayerFactory,
+        textLayerDiv: document.getElementById(`text-layer${pageNumber}`),
+        textContent: await page.getTextContent(),
+      };
+      page.render(renderContext).promise.then(function() {
+        console.log('Page rendered');
+      });
 
-        // 渲染成功后设置滚动条位置
-        this.centerScroll();
-        // 提取文本内容
-        const textContent = await page.getTextContent();
-        this.renderTextLayer(textContent);
+      // await page.render({
+      //   canvasContext: context,
+      //   viewport: viewport,
+      // }).promise;
+
+      // 渲染成功后设置滚动条位置
+      this.centerScroll();
+      // 提取文本内容
+      const textContent = await page.getTextContent();
+      this.renderTextLayer(textContent);
     },
 
     // // 渲染指定页码的 PDF 页面
@@ -1319,20 +1346,20 @@ body {
 
 .pdf-viewer {
   border: 1px solid black;
-  display: block;
+  z-index: 1;
 }
 
 .textLayer {
   position: absolute;
+  pointer-events: visiblePainted;
   top: 0;
   left: 0;
-  pointer-events: none; /* Allow text selection and copying */
-  overflow: hidden;
-  white-space: pre;
-  line-height: 1.2;
-  width: 100%; /* Ensure the text layer covers the full width of the canvas */
-  height: 100%; /* Ensure the text layer covers the full height of the canvas */
+  right: 0;
+  bottom: 0;
+  z-index: 2999;
+  color: red
 }
+
 .pdf_down {
   position: absolute;
   display: flex;

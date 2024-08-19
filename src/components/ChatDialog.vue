@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-19 22:00:16
+ * @LastEditTime: 2024-08-19 23:09:33
  * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -49,18 +49,24 @@
     <div v-show="isPreview" class="fileContainer">
       <div v-show="isPreview" class="file-preview" ref="pdfContainer">
         <img class="preview-image" v-if="isImageFile" :src="previewUrl" alt="File Preview" />
-        <div v-else-if="isPdfFile" class="pdf-page" v-for="i in pdfParams.pdfPageTotal" :key="i" :id="'pageDiv' + i">
-          <div :id="'text-layer' + i" class="textLayer"></div>
-          <canvas class="pdf-viewer" :id="'pdf-render' + i" ></canvas>
+        
+        <div v-else-if="isPdfFile">
+          <div v-show="pdfFileShown" class="pdf-page" v-for="i in pdfParams.pdfPageTotal" :key="i" :id="'pageDiv' + i">
+            <div :id="'text-layer' + i" class="textLayer"></div>
+            <canvas class="pdf-viewer" :id="'pdf-render' + i" ></canvas>
+          </div>
+          <iframe id="ifm" :src="this.previewUrl" width="100%" height="500px" />
         </div>
+
         <div v-else-if="isTxtFile" class = "txtPage">
           <pre>{{ txtFileContent }}</pre>
         </div>
+        
         <div v-else-if="isDocxFile" class="docx-preview" v-html="docxContent"></div>
         <div v-else-if="isDocFile" class="doc-preview" v-html="docContent"></div>
         <span v-else>文件预览不可用</span>
       </div>
-      <div class="pdf_down" v-if="isPdfFile">
+      <div class="pdf_down" v-if="isPdfFile" v-show="pdfFileShown">
         <button class="pdf_set_left" @click="scaleUp">➕</button>
         <button class="pdf_set_middle" @click="scaleDown">➖</button>
         <!-- <div class="pdf-pre" @click="prePage">上一页</div>
@@ -121,6 +127,7 @@ export default {
       fileName: '',
       selectedFile: null,
       isPreview: false,
+      pdfFileShown: false,
       previewUrl: '', // 文件预览的 URL
       isPdfFile: false,
       isImageFile: false,
@@ -459,6 +466,7 @@ export default {
       this.isPreview = true;
       const file = event.target.files[0];
       this.fileName = file.name;  // 获取文件名称
+      var pdfPath = encodeURIComponent(file);
       if (file) {
         if (file.type === 'application/pdf') {
           this.isPdfFile = true;
@@ -471,8 +479,11 @@ export default {
 
           const reader = new FileReader();
           reader.onload = async (e) => {
+            const viewerUrl = `${process.env.BASE_URL}lib/pdfjs/web/viewer.html?file=`;
             const typedArray = new Uint8Array(e.target.result);
             const pdfUrl = URL.createObjectURL(new Blob([typedArray], { type: 'application/pdf' }));
+            this.previewUrl = `${viewerUrl}${encodeURIComponent(pdfUrl)}`;
+             // 使用 PDF.js 的 viewer.html 来展示 PDF
             console.log(pdfUrl);
             try{
               await this.loadPdf(pdfUrl);

@@ -13,3 +13,4 @@ declare module 'string-similarity';
 declare module 'pdfjs-dist/legacy/build/pdf.worker.js';
 declare module 'pdfjs-dist/build/pdf.worker.min.js';
 declare module 'katex';
+declare module 'web-highlighter/example/local.store.js';

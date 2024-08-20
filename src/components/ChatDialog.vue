@@ -2,9 +2,9 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-19 23:09:33
+ * @LastEditTime: 2024-08-20 13:25:52
  * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
- * @Description: 
+ * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
 
@@ -58,9 +58,7 @@
           <iframe id="ifm" :src="this.previewUrl" width="100%" height="500px" />
         </div>
 
-        <div v-else-if="isTxtFile" class = "txtPage">
-          <pre>{{ txtFileContent }}</pre>
-        </div>
+        <div v-else-if="isTxtFile" id="txtFileContent" class="txtPage" v-html="txtFileContentPage"></div>
         
         <div v-else-if="isDocxFile" class="docx-preview" v-html="docxContent"></div>
         <div v-else-if="isDocFile" class="doc-preview" v-html="docContent"></div>
@@ -150,14 +148,16 @@ export default {
         pdfPageTotal: 0,
       }),
       extractedPDFText: "", // 存储pdf提取的文本内容
-      // pdfDocument: null, // 保存加载的PDF实例
+      pdfDocumentContent: "", // 保存加载的PDF实例
 
       txtFileContent: "", // 保存 txt 文件的内容
+      txtFileContentPage: "", //保存解析的txt HTML的内容
 
       docxContent: '', //// 保存docx解析后的 HTML 内容
       docContent: '', //// 保存doc解析后的 HTML 内容
       docxPlainTextContent: "", // 保存docx纯文本内容
       docPlainTextContent: '',// 保存doc纯文本内容
+      keywords: [],
     };
   },
 
@@ -278,7 +278,7 @@ export default {
         if(this.isImageFile){
           userMessageContent = "问题：" + usermessage;
         }else if(this.isPdfFile){
-          userMessageContent = this.extractedPDFText + '\n\n' + "问题：" + usermessage;
+          userMessageContent = this.pdfDocumentContent + '\n\n' + "问题：" + usermessage;
         }else if(this.isTxtFile){
           userMessageContent = this.txtFileContent + '\n\n' + "问题：" + usermessage;
         }else if(this.docxPlainTextContent){
@@ -416,6 +416,14 @@ export default {
             }
           }
           console.log(this.wholeMessage);
+          //返回消息在预览文档中高亮文字
+          if (this.isTxtFile) {
+            await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage);
+            this.txtFileContentPage = this.highlightedContent(this.txtFileContentPage);
+          }else if(this.isPdfFile){
+            await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage);
+            this.searchFile();
+          }
           this.history.push({'role': 'assistant', 'content': this.wholeMessage})
           this.loading = false;
           // this.returnMessage = '';
@@ -466,7 +474,7 @@ export default {
       this.isPreview = true;
       const file = event.target.files[0];
       this.fileName = file.name;  // 获取文件名称
-      var pdfPath = encodeURIComponent(file);
+      // var pdfPath = encodeURIComponent(file);
       if (file) {
         if (file.type === 'application/pdf') {
           this.isPdfFile = true;
@@ -483,11 +491,14 @@ export default {
             const typedArray = new Uint8Array(e.target.result);
             const pdfUrl = URL.createObjectURL(new Blob([typedArray], { type: 'application/pdf' }));
             this.previewUrl = `${viewerUrl}${encodeURIComponent(pdfUrl)}`;
-             // 使用 PDF.js 的 viewer.html 来展示 PDF
+
+            await this.loadPdfContent(pdfUrl);
+
+            // 使用 PDF.js 的 viewer.html 来展示 PDF
             console.log(pdfUrl);
             try{
               await this.loadPdf(pdfUrl);
-              console.log(this.extractedPDFText);
+              // console.log(this.extractedPDFText);
             }catch(error){
               console.error('从PDF提取文本时出错', error);  
             }          
@@ -503,6 +514,7 @@ export default {
           const reader = new FileReader();
           reader.onload = (e) => {
             this.txtFileContent = e.target.result; // 读取到的内容赋值给 fileContent
+            this.txtFileContentPage = this.txtFileContent;
             console.log(this.txtFileContent);
           };
           reader.readAsText(file); // 以文本形式读取文件
@@ -556,6 +568,36 @@ export default {
       return tempDiv.textContent || tempDiv.innerText || "";
     },
 
+    async loadPdfContent(pdfUrl){
+      const self = this;
+      // 使用 pdf.js 获取 PDF 文件
+      pdfjs.getDocument(pdfUrl).promise.then(function (pdf) {
+        const numPages = pdf.numPages;
+        const textPromises = [];
+
+        // 遍历每一页获取文本内容
+        for (let i = 1; i <= numPages; i++) {
+          textPromises.push(
+            pdf.getPage(i).then(function (page) {
+              return page.getTextContent().then(function (textContent) {
+                // 将文本内容拼接成字符串
+                return textContent.items.map(item => item.str).join(' ');
+              });
+            })
+          );
+        }
+
+        // 等待所有页面的文本内容解析完毕
+        Promise.all(textPromises).then(function (pagesText) {
+          // 将所有页面的文本合并成一个完整的字符串
+          const fullText = pagesText.join('\n');
+          self.pdfDocumentContent = fullText;
+          console.log(self.cleanPdfText(self.pdfDocumentContent)); // 在这里可以对文本进行操作
+        });
+      }).catch(function (error) {
+        console.error('Error loading PDF:', error);
+      });
+    },
     // async loadPdf(url) {      
     //   pdfjs.getDocument(url).promise.then(async doc => {
     //     try{
@@ -821,53 +863,7 @@ export default {
       });
     },
 
-    // async renderTextLayer(page, viewport, pageNumber, canvas) {
-    //   try {
-    //     const textContent = await page.getTextContent();
-    //     const textLayerDiv = document.getElementById(`text-layer${pageNumber}`);
-
-    //     if (!textLayerDiv) {
-    //       console.log(`text-layer${pageNumber}`)
-    //       return;
-    //     }
-
-    //     textLayerDiv.style.position = 'absolute';
-    //     textLayerDiv.style.left = canvas.offsetLeft + 'px';
-    //     textLayerDiv.style.top = canvas.offsetTop + 'px';
-    //     textLayerDiv.style.width = canvas.offsetWidth + 'px';
-    //     textLayerDiv.style.height = canvas.offsetHeight + 'px';
-         
-    //     var pageDiv = document.getElementById(`pageDiv${pageNumber}`);
-
-    //     // // 创建 PDF.js 的 TextLayerBuilder
-    //     // pdfjs.renderTextLayer({
-    //     //   textContent: textContent,
-    //     //   container: textLayerDiv,
-    //     //   viewport: viewport,
-    //     //   textDivs: [],
-    //     //   enhanceTextSelection: true, // 开启文本选择增强功能
-    //     // });
-    //     pageDiv.append(textLayerDiv);
-
-    //     const textLayer = new TextLayerBuilder({
-    //       // container: ,
-    //       textLayerDiv: textLayerDiv,
-    //       pageIndex: page.pageIndex,
-    //       viewport: viewport,
-    //       enhanceTextSelection: true, // 开启文本选择增强功能
-    //       eventBus,
-    //       // textDivs: []
-    //     });
-
-    //     textLayer.setTextContent(textContent);
-    //     textLayer.render();
-    //   } catch (error) {
-    //     console.error("渲染文本层时出错：", error);
-    //   }
-    // },
-
     // 上一页功能
-    
     renderTextLayer(textContent) {
       // const textLayer = document.getElementById(`text-layer${pageNumber}`);
       // textLayer.innerHTML = ''; // Clear existing text layer
@@ -955,7 +951,115 @@ export default {
     triggerFileUpload() {
       // 触发隐藏的文件上传 input
       this.$refs.fileInput.click();
-    }
+    },
+
+    // 向后端发送数据以提取关键词
+    async sendDataToBackendForKeys(ContentFromFile, ContentFromSystem) {
+      const url = 'http://localhost:8999/longcontext/uploadfile';
+      const requestBody = {
+        contents: [ContentFromFile],
+        answer: ContentFromSystem
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        // 检查请求是否成功
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // 解析JSON响应
+        const responseData = await response.json();
+
+        // 检查返回的 code 是否为 0
+        if (responseData.code === 0) {
+          // 处理成功返回的数据
+          // console.log('Response:', responseData.data.response);
+          this.keywords = responseData.data.response;
+          console.log('Keywords:', this.keywords);
+        } else {
+          // 处理错误消息
+          console.error('Error message:', responseData.message);
+        }
+      } catch (error) {
+        // 捕获并处理错误
+        console.error('Fetch error:', error);
+      }
+    },
+    // 高亮匹配关键词的函数
+    highlightedContent(rawTextContent) {
+      let content = rawTextContent;
+
+      console.log(this.keywords);
+      // 如果没有提取到关键词，直接返回原始内容
+      if (!this.keywords.length) {
+        return content;
+      }
+
+      this.keywords.forEach((word) => {
+        // 转义关键词中的特殊字符，并替换换行符为 \s*，以便匹配多行内容
+        const escapedWord = this.escapeRegExp(word).replace(/\r\n|\n|\r/g, "\\s*");
+        // console.log('escapedWord: '+ escapedWord);
+        const regex = new RegExp(`${escapedWord}`, "gi");
+        content = content.replace(regex, '<span class="highlight">$1</span>');
+      });
+      return content;
+    },
+    // 对特殊字符进行转义
+    escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // 将正则表达式中的特殊字符进行转义
+    },
+    searchFile() {
+      // 如果没有提取到关键词，直接返回原始内容
+      if (!this.keywords.length) {
+        return;
+      }
+      let iframe = document.getElementById('ifm')
+      if(iframe && iframe.contentWindow && iframe.contentWindow.PDFViewerApplication){
+        console.log("pdf已加载");
+
+        let text = 'Wasserstein'
+        // this.keywords.forEach((word) => {
+        //   const escapedWord = this.escapeRegExp(word).replace(/\r\n|\n|\r/g, "\\s*");
+        //   iframe.contentWindow.postMessage(text,'*');
+        //   iframe.contentWindow.addEventListener('message', (event) => {
+        //     console.log("data: " + event.data);
+        //     // console.log('iframe.contentWindow:', iframe.contentWindow);
+        //     // console.log('iframe.contentWindow.PDFViewerApplication:', iframe.contentWindow.PDFViewerApplication);
+        //     // iframe.contentWindow.PDFViewerApplication.findBar.open();
+        //     iframe.contentWindow.PDFViewerApplication.findBar.findField.value = event.data;
+        //     iframe.contentWindow.PDFViewerApplication.findBar.highlightAll.checked = true;
+        //     iframe.contentWindow.PDFViewerApplication.findBar.dispatchEvent('highlightallchange');
+            
+        //   },false);
+        // });
+        this.keywords.forEach((word) => {
+          const escapedWord = this.escapeRegExp(word).replace(/\r\n|\n|\r/g, "\\s*");
+          console.log(escapedWord);
+            // console.log('iframe.contentWindow:', iframe.contentWindow);
+            // console.log('iframe.contentWindow.PDFViewerApplication:', iframe.contentWindow.PDFViewerApplication);
+            // iframe.contentWindow.PDFViewerApplication.findBar.open();
+          iframe.contentWindow.PDFViewerApplication.findBar.findField.value = text;
+          iframe.contentWindow.PDFViewerApplication.findBar.highlightAll.checked = true;
+          iframe.contentWindow.PDFViewerApplication.findBar.dispatchEvent('highlightallchange');
+        });
+      }
+    },
+    cleanPdfText(text) {
+      // 去除多余的空格，但保留单个英文空格和换行符
+      return text
+        .replace(/[^\S\r\n]+/g, ' ') // 替换所有非换行的多余空白字符为一个空格
+        .replace(/ +/g, ' ') // 将多个空格压缩为一个
+        .replace(/([\u4e00-\u9fa5])\s+([\u4e00-\u9fa5])/g, '$1$2')
+        .trim(); // 去除文本开头和结尾的空格
+    },
   },
 }
 </script>

@@ -5298,6 +5298,8 @@ class PDFFindBar {
   reset() {
     this.updateUIState();
   }
+
+  // 插眼
   dispatchEvent(type, findPrev = false) {
     this.eventBus.dispatch("find", {
       source: this,
@@ -8749,6 +8751,7 @@ class TextAccessibilityManager {
 }
 
 ;// CONCATENATED MODULE: ./web/text_highlighter.js
+//插眼
 class TextHighlighter {
   #eventAbortController = null;
   constructor({
@@ -8948,22 +8951,25 @@ class TextHighlighter {
       textContentItemsStr,
       textDivs
     } = this;
-    let clearedUntilDivIdx = -1;
-    for (const match of matches) {
-      const begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
-      for (let n = begin, end = match.end.divIdx; n <= end; n++) {
-        const div = textDivs[n];
-        div.textContent = textContentItemsStr[n];
-        div.className = "";
-      }
-      clearedUntilDivIdx = match.end.divIdx + 1;
-    }
+
+    //插眼：清除匹配项
+    // let clearedUntilDivIdx = -1;
+    // for (const match of matches) {
+    //   const begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
+    //   for (let n = begin, end = match.end.divIdx; n <= end; n++) {
+    //     const div = textDivs[n];
+    //     div.textContent = textContentItemsStr[n];
+    //     div.className = "";
+    //   }
+    //   clearedUntilDivIdx = match.end.divIdx + 1;
+    // }
     if (!findController?.highlightMatches || reset) {
       return;
     }
     const pageMatches = findController.pageMatches[pageIdx] || null;
     const pageMatchesLength = findController.pageMatchesLength[pageIdx] || null;
-    this.matches = this._convertMatches(pageMatches, pageMatchesLength);
+    // this.matches = this._convertMatches(pageMatches, pageMatchesLength);
+    this.matches = this.matches.concat(this._convertMatches(pageMatches, pageMatchesLength));
     this._renderMatches(this.matches);
   }
 }

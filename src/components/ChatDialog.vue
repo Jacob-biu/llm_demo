@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-20 13:25:52
+ * @LastEditTime: 2024-08-23 11:26:21
  * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -278,7 +278,7 @@ export default {
         if(this.isImageFile){
           userMessageContent = "问题：" + usermessage;
         }else if(this.isPdfFile){
-          userMessageContent = this.pdfDocumentContent + '\n\n' + "问题：" + usermessage;
+          userMessageContent = this.cleanPdfText(this.pdfDocumentContent) + '\n\n' + "问题：" + usermessage;
         }else if(this.isTxtFile){
           userMessageContent = this.txtFileContent + '\n\n' + "问题：" + usermessage;
         }else if(this.docxPlainTextContent){
@@ -421,6 +421,10 @@ export default {
             await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage);
             this.txtFileContentPage = this.highlightedContent(this.txtFileContentPage);
           }else if(this.isPdfFile){
+            if(!this.pdfDocumentContent){
+              console.log("pdfDocumentContent Null!");
+              return;
+            }
             await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage);
             this.searchFile();
           }
@@ -964,6 +968,7 @@ export default {
       try {
         const response = await fetch(url, {
           method: 'POST',
+          // credentials: "include",
           headers: {
             'Content-Type': 'application/json',
           },
@@ -1006,7 +1011,7 @@ export default {
       this.keywords.forEach((word) => {
         // 转义关键词中的特殊字符，并替换换行符为 \s*，以便匹配多行内容
         const escapedWord = this.escapeRegExp(word).replace(/\r\n|\n|\r/g, "\\s*");
-        // console.log('escapedWord: '+ escapedWord);
+        console.log('escapedWord: '+ escapedWord);
         const regex = new RegExp(`${escapedWord}`, "gi");
         content = content.replace(regex, '<span class="highlight">$1</span>');
       });
@@ -1014,9 +1019,9 @@ export default {
     },
     // 对特殊字符进行转义
     escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // 将正则表达式中的特殊字符进行转义
+      return string.replace(/\\([.()?!,;])/g, "$1"); // 将正则表达式中的特殊字符进行转义
     },
-    searchFile() {
+    async searchFile() {
       // 如果没有提取到关键词，直接返回原始内容
       if (!this.keywords.length) {
         return;
@@ -1025,7 +1030,7 @@ export default {
       if(iframe && iframe.contentWindow && iframe.contentWindow.PDFViewerApplication){
         console.log("pdf已加载");
 
-        let text = 'Wasserstein'
+        // let text = ' quality'
         // this.keywords.forEach((word) => {
         //   const escapedWord = this.escapeRegExp(word).replace(/\r\n|\n|\r/g, "\\s*");
         //   iframe.contentWindow.postMessage(text,'*');
@@ -1040,24 +1045,75 @@ export default {
             
         //   },false);
         // });
-        this.keywords.forEach((word) => {
-          const escapedWord = this.escapeRegExp(word).replace(/\r\n|\n|\r/g, "\\s*");
-          console.log(escapedWord);
-            // console.log('iframe.contentWindow:', iframe.contentWindow);
-            // console.log('iframe.contentWindow.PDFViewerApplication:', iframe.contentWindow.PDFViewerApplication);
-            // iframe.contentWindow.PDFViewerApplication.findBar.open();
-          iframe.contentWindow.PDFViewerApplication.findBar.findField.value = text;
-          iframe.contentWindow.PDFViewerApplication.findBar.highlightAll.checked = true;
-          iframe.contentWindow.PDFViewerApplication.findBar.dispatchEvent('highlightallchange');
-        });
+        // this.keywords = ['quality', 'management', 'system'];
+        // iframe.contentWindow.PDFViewerApplication.findBar.open();
+        iframe.contentWindow.PDFViewerApplication.findBar.findField.click();
+        iframe.contentWindow.PDFViewerApplication.findBar.findField.focus();
+        // Promise.all(this.keywords.map((word) => {
+        //   // console.log(`Keywords: ${word}`);
+        //   return this.contentHighlighter(word, iframe);
+        // }));
+        for (const word of this.keywords) {
+          // console.log(`Keywords: ${word}`);
+          await this.contentHighlighter(word, iframe);
+          // 在每个关键词完成高亮后等待一小段时间，以确保渲染完成
+          await new Promise(resolve => setTimeout(resolve, 500));  // 等待 500 毫秒
+        }
+        // iframe.contentWindow.PDFViewerApplication.findBar.dispatchEvent(new Event('highlightallchange'));
+        // iframe.contentWindow.PDFViewerApplication.findBar.close();
       }
+    },
+    contentHighlighter(word, iframe) {
+      // 转义关键词中的特殊字符，并替换换行符为 \s*，以便匹配多行内容
+      const escapedWord = this.escapeRegExp(word).replace(/\r\n|\n|\r/g, "\\s*");
+      console.log(escapedWord);
+      // console.log('iframe.contentWindow:', iframe.contentWindow);
+      // console.log('iframe.contentWindow.PDFViewerApplication:', iframe.contentWindow.PDFViewerApplication);
+      // 模拟按下 Enter 键
+      const enterEvent = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        keyCode: 13,  // Enter 键的 keyCode 是 13
+        code: 'Enter',
+        which: 13,
+        bubbles: true
+      });
+      return new Promise((resolve) => {
+        iframe.contentWindow.PDFViewerApplication.findBar.findField.click();
+        iframe.contentWindow.PDFViewerApplication.findBar.findField.focus();
+        iframe.contentWindow.PDFViewerApplication.findBar.highlightAll.checked = true;
+        iframe.contentWindow.PDFViewerApplication.findBar.findField.value = escapedWord;
+        iframe.contentWindow.PDFViewerApplication.findBar.findField.dispatchEvent(enterEvent);
+        iframe.contentWindow.PDFViewerApplication.findBar.dispatchEvent(new Event('highlightallchange'));
+        // iframe.contentWindow.PDFViewerApplication.findBar.findNextButton.click();
+        resolve();
+        setTimeout(function() {
+          console.log('等待完成，继续渲染');
+        }, 2000);
+      });
     },
     cleanPdfText(text) {
       // 去除多余的空格，但保留单个英文空格和换行符
       return text
-        .replace(/[^\S\r\n]+/g, ' ') // 替换所有非换行的多余空白字符为一个空格
+        .replace(/[^\S\r\n]+/g, ' ')  // 替换所有非换行的多余空白字符为一个空格
+        .replace(/(?<!\s)-\s+/g, "")  // 左侧无空格右侧有空格删除
+        .replace(/\s+-(?!\s)/g, "-")   // 左侧有空格右侧无空格删除
+        .replace(/(\(|（)\s+/g, '$1') // 去除中英文前括号后的空格
+        .replace(/\s+(?=[（])/g, '')
+        .replace(/(?<=[）])\s+/g, '')
+        .replace(/\s+(\)|）)/g, '$1') // 去除中英文后括号前的空格
+        .replace(/\s+(:|：)/g, '$1')  // 去除中英文冒号前的空格
+        .replace(/\s+(,|，)/g, "$1")  //去除中英文逗号前的空格
+        .replace(/\s+\./g, ".")       // 去除句号前的空格
+        .replace(/\s+。/g, "。")      // 去除句号前的空格
+        .replace(/(\“|\“|\“|\‘)\s+/g, "$1") //去除中英文前冒号后的空格
+        .replace(/\s+(\”|\”|\”|\’)/g, "$1") //去除中英文后冒号前的空格
+        .replace(/(\{|\｛)\s+/g, "$1") //去除中英文前大括号后的空格
+        .replace(/\s+(\}|\｝)/g, "$1") //去除中英文后大括号前的空格
+        .replace(/†\s+/g, '†') //去除†后的空格
         .replace(/ +/g, ' ') // 将多个空格压缩为一个
-        .replace(/([\u4e00-\u9fa5])\s+([\u4e00-\u9fa5])/g, '$1$2')
+        .replace(/(?<=\b[A-Z])\s+(?=[A-Z]{2,})/g, "")
+        .replace(/([。？！])\s+/g, '$1') //去除，。？！之后的空格
+        .replace(/([\u4e00-\u9fff])\s+([\u4e00-\u9fff])/g, '$1$2')  // 去除中文字符之间的空格 
         .trim(); // 去除文本开头和结尾的空格
     },
   },

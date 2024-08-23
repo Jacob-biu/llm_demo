@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-23 11:26:21
+ * @LastEditTime: 2024-08-23 12:34:03
  * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -64,12 +64,12 @@
         <div v-else-if="isDocFile" class="doc-preview" v-html="docContent"></div>
         <span v-else>文件预览不可用</span>
       </div>
-      <div class="pdf_down" v-if="isPdfFile" v-show="pdfFileShown">
+      <!-- <div class="pdf_down" v-if="isPdfFile" v-show="pdfFileShown">
         <button class="pdf_set_left" @click="scaleUp">➕</button>
-        <button class="pdf_set_middle" @click="scaleDown">➖</button>
+        <button class="pdf_set_middle" @click="scaleDown">➖</button> -->
         <!-- <div class="pdf-pre" @click="prePage">上一页</div>
         <div class="pdf-next" @click="nextPage">下一页</div> -->
-      </div>
+      <!-- </div> -->
     </div>
   </div>
 </template>
@@ -419,7 +419,7 @@ export default {
           //返回消息在预览文档中高亮文字
           if (this.isTxtFile) {
             await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage);
-            this.txtFileContentPage = this.highlightedContent(this.txtFileContentPage);
+            this.txtFileContentPage = this.highlightedContent(this.txtFileContent);
           }else if(this.isPdfFile){
             if(!this.pdfDocumentContent){
               console.log("pdfDocumentContent Null!");
@@ -1010,9 +1010,9 @@ export default {
 
       this.keywords.forEach((word) => {
         // 转义关键词中的特殊字符，并替换换行符为 \s*，以便匹配多行内容
-        const escapedWord = this.escapeRegExp(word).replace(/\r\n|\n|\r/g, "\\s*");
+        const escapedWord = word.replace(/\\([.*+?^${}()|[\]\\])/g, '\\$&');
         console.log('escapedWord: '+ escapedWord);
-        const regex = new RegExp(`${escapedWord}`, "gi");
+        const regex = new RegExp(`(${escapedWord})`, "gi");
         content = content.replace(regex, '<span class="highlight">$1</span>');
       });
       return content;
@@ -1029,30 +1029,9 @@ export default {
       let iframe = document.getElementById('ifm')
       if(iframe && iframe.contentWindow && iframe.contentWindow.PDFViewerApplication){
         console.log("pdf已加载");
-
-        // let text = ' quality'
-        // this.keywords.forEach((word) => {
-        //   const escapedWord = this.escapeRegExp(word).replace(/\r\n|\n|\r/g, "\\s*");
-        //   iframe.contentWindow.postMessage(text,'*');
-        //   iframe.contentWindow.addEventListener('message', (event) => {
-        //     console.log("data: " + event.data);
-        //     // console.log('iframe.contentWindow:', iframe.contentWindow);
-        //     // console.log('iframe.contentWindow.PDFViewerApplication:', iframe.contentWindow.PDFViewerApplication);
-        //     // iframe.contentWindow.PDFViewerApplication.findBar.open();
-        //     iframe.contentWindow.PDFViewerApplication.findBar.findField.value = event.data;
-        //     iframe.contentWindow.PDFViewerApplication.findBar.highlightAll.checked = true;
-        //     iframe.contentWindow.PDFViewerApplication.findBar.dispatchEvent('highlightallchange');
-            
-        //   },false);
-        // });
-        // this.keywords = ['quality', 'management', 'system'];
-        // iframe.contentWindow.PDFViewerApplication.findBar.open();
         iframe.contentWindow.PDFViewerApplication.findBar.findField.click();
         iframe.contentWindow.PDFViewerApplication.findBar.findField.focus();
-        // Promise.all(this.keywords.map((word) => {
-        //   // console.log(`Keywords: ${word}`);
-        //   return this.contentHighlighter(word, iframe);
-        // }));
+
         for (const word of this.keywords) {
           // console.log(`Keywords: ${word}`);
           await this.contentHighlighter(word, iframe);
@@ -1634,5 +1613,9 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
 	background-color: rgba(0, 0, 0, 0.5);
+}
+
+.highlight {
+  background-color: yellow;
 }
 </style>

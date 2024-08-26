@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-26 15:18:58
+ * @LastEditTime: 2024-08-26 16:03:29
  * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -427,6 +427,9 @@ export default {
             }
             await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage);
             this.searchFile();
+          }else if(this.isDocxFile){
+            await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage);
+            this.docxContent = this.highlightKeySentences(this.docxContent);
           }
           this.history.push({'role': 'assistant', 'content': this.wholeMessage})
           this.loading = false;
@@ -869,7 +872,7 @@ export default {
         console.error('Fetch error:', error);
       }
     },
-    // 高亮匹配关键词的函数
+    // 高亮匹配txt关键词的函数
     highlightedContent(rawTextContent) {
       let content = rawTextContent;
 
@@ -892,7 +895,36 @@ export default {
     escapeRegExp(string) {
       return string.replace(/\\([.()?!,;])/g, "$1"); // 将正则表达式中的特殊字符进行转义
     },
+
+    highlightKeySentences(htmlContent) {
+      console.log(this.keywords);
+
+      // 如果没有提取到关键词，直接返回原始内容
+      if (!this.keywords.length) {
+        return htmlContent;
+      }
+      let highlightedContent = htmlContent;
+
+      for (const word of this.keywords) {
+        const sentenceLength = word.length;
+        const partLength = Math.ceil(sentenceLength / 10); // 计算每部分的长度
+        const results = [];
+
+        for (let i = 0; i < sentenceLength; i += partLength) {
+          results.push(word.slice(i, i + partLength)); // 切割句子
+        }
+          
+        for (const result of results) {
+          // 创建正则表达式，使用 `g` 标志进行全局匹配
+          const regex = new RegExp(`(${result})`, 'gi');
+          // 使用 <span> 标签高亮匹配到的句子
+          highlightedContent = highlightedContent.replace(regex, '<span class="highlight">$1</span>');
+        }
+      }
+      return highlightedContent;
+    },
     
+    // 匹配pdf关键词的高亮函数
     async searchFile() {
       // 如果没有提取到关键词，直接返回原始内容
       if (!this.keywords.length) {
@@ -928,6 +960,7 @@ export default {
         // iframe.contentWindow.PDFViewerApplication.findBar.close();
       }
     },
+    // 高亮pdf关键词的函数
     contentHighlighter(word, iframe) {
       // 转义关键词中的特殊字符，并替换换行符为 \s*，以便匹配多行内容
       const escapedWord = this.escapeRegExp(word).replace(/\r\n|\n|\r/g, "\\s*");

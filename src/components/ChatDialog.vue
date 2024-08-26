@@ -2,8 +2,8 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-23 12:34:03
- * @FilePath: \llm-demo-0.1.1\llm_demo\src\components\ChatDialog.vue
+ * @LastEditTime: 2024-08-26 15:18:58
+ * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
@@ -602,34 +602,7 @@ export default {
         console.error('Error loading PDF:', error);
       });
     },
-    // async loadPdf(url) {      
-    //   pdfjs.getDocument(url).promise.then(async doc => {
-    //     try{
-    //       console.log(doc.numPages);
-    //       this.pdfDocu = await pdfjs.getDocument(url).promise;
-    //       // 确保 pdfDoc 已经加载成功
-    //       if (!this.pdfDocu) {
-    //         console.error('PDF 文档未加载成功!!');
-    //         return;
-    //       }
-    //       console.log(this.pdfDocu);
-    //       this.extractTextFromPdf();
-    //       // this.pdfParams.pdfPageTotal = this.pdfDocu.numPages;
-    //       this.pdfParams.pdfPageTotal = doc.numPages;
-    //       // 使用 nextTick 确保 DOM 渲染完成后再操作 canvas 元素
-    //       await nextTick();
-    //       this.pdfParams.currentPageNumber = 1; // 重置到第一页
-    //       // await this.getPdfPage(this.pdfParams.currentPageNumber);
-    //       for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
-    //         await this.getPdfPage(pageNum);
-    //       }
-    //       // 渲染成功后设置滚动条位置
-    //       this.centerScroll();
-    //     }catch (error) {
-    //       console.error('从 PDF 提取文本时出错', error);
-    //     }
-    //   });
-    // },
+    
 
     async loadPdf(url) {
       try {
@@ -753,108 +726,6 @@ export default {
       const textContent = await page.getTextContent();
       this.renderTextLayer(textContent);
     },
-
-    // // 渲染指定页码的 PDF 页面
-    // async renderPdfPage(pageNumber) {
-    //   // 确保 pdfDoc 已经加载成功
-    //   if (!this.pdfDocu) {
-    //     console.error('PDF 文档未加载成功！');
-    //     return;
-    //   }
-    //   const page = await this.pdfDocu.getPage(pageNumber);
-    //   const viewport = page.getViewport({ scale: this.pdfParams.pdfScale });
-
-    //   const canvas = document.getElementById(`pdf-render${pageNumber}`);
-    //   if (!canvas) return;
-
-    //   const context = canvas.getContext('2d');
-
-    //   // 计算适应父容器的宽高
-    //   const container = document.querySelector('.file-preview');
-    //   const containerWidth = container.clientWidth;
-    //   const containerHeight = container.clientHeight;
-    //   const originalWidth = viewport.width;
-    //   const originalHeight = viewport.height;
-    //   const aspectRatio = originalWidth / originalHeight;
-
-    //   let newWidth = containerWidth;
-    //   let newHeight = containerWidth / aspectRatio;
-
-    //   if (newHeight > containerHeight) {
-    //     newHeight = containerHeight;
-    //     newWidth = containerHeight * aspectRatio;
-    //   }
-
-    //   canvas.width = newWidth * window.devicePixelRatio;
-    //   canvas.height = newHeight * window.devicePixelRatio;
-    //   canvas.style.width = `${newWidth}px`;
-    //   canvas.style.height = `${newHeight}px`;
-
-    //   const renderContext = {
-    //     canvasContext: context,
-    //     viewport: page.getViewport({ scale: newWidth / originalWidth }),
-    //     transform: [window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0],
-    //   };
-
-    //   await page.render(renderContext).promise;
-    // },
-    
-    // getPdfPage(pageNumber) {
-    //   // 清空所有 Canvas 内容
-    //   // this.clearCanvas();
-    //   return new Promise((resolve, reject) => {
-    //     this.pdfDocu.getPage(pageNumber).then(async page => {
-    //       // 使用 nextTick 确保元素已被渲染
-    //       nextTick(() => {
-    //         // 在请求页面之前验证页码
-    //         if (pageNumber < 1 || pageNumber > this.pdfParams.pdfPageTotal) {
-    //           throw new Error(`Invalid page number: ${pageNumber}`);
-    //         }
-    //         const canvas = document.getElementById(`pdf-render${pageNumber}`);
-    //         if(!canvas) {
-    //           console.error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
-    //           return reject('Canvas not found');
-    //         }
-    //         const context = canvas.getContext('2d');
-    //         if (!context) {
-    //           console.error('无法获取 2D 绘图上下文');
-    //           return reject('Context not found');
-    //         }
-    //         // 获取默认的 viewport（缩放）
-    //         const viewport = page.getViewport({
-    //           scale: this.pdfParams.pdfScale * window.devicePixelRatio, // 根据设备像素比调整 scale
-    //         });
-
-    //         // 设置 Canvas 尺寸（根据 viewport 尺寸缩放）
-    //         canvas.width = viewport.width;
-    //         canvas.height = viewport.height;
-
-    //         // 缩放 canvas 显示比例
-    //         canvas.style.width = `${viewport.width / window.devicePixelRatio}px`;
-    //         canvas.style.height = `${viewport.height / window.devicePixelRatio}px`;
-
-    //         const renderContext = {
-    //           canvasContext: context,
-    //           viewport: viewport,
-    //         };
-
-
-    //         // var pageDiv = document.getElementById(`pageDiv${pageNumber}`);
-    //         page.render(renderContext).promise.then(() => {
-    //           // console.log(page.getTextContent());
-    //           resolve();
-    //           // this.renderTextLayer(page, viewport, pageNumber, canvas);
-    //           // 渲染成功后设置滚动条位置
-    //           this.centerScroll();
-    //         }).catch(error => {
-    //           reject(error);
-    //         });
-    //       });
-    //     }).catch(error => {
-    //       reject(error);
-    //     });
-    //   });
-    // },
 
     // 清空所有 Canvas 内容
     clearCanvas() {
@@ -1021,6 +892,7 @@ export default {
     escapeRegExp(string) {
       return string.replace(/\\([.()?!,;])/g, "$1"); // 将正则表达式中的特殊字符进行转义
     },
+    
     async searchFile() {
       // 如果没有提取到关键词，直接返回原始内容
       if (!this.keywords.length) {
@@ -1033,10 +905,24 @@ export default {
         iframe.contentWindow.PDFViewerApplication.findBar.findField.focus();
 
         for (const word of this.keywords) {
+          const sentenceLength = word.length;
+          const partLength = Math.ceil(sentenceLength / 10); // 计算每部分的长度
+          const results = [];
+
+          for (let i = 0; i < sentenceLength; i += partLength) {
+            results.push(word.slice(i, i + partLength)); // 切割句子
+          }
+          
+          for (const result of results) {
+            // console.log(`Keywords: ${word}`);
+            await this.contentHighlighter(result, iframe);
+            // 在每个关键词完成高亮后等待一小段时间，以确保渲染完成
+            await new Promise(resolve => setTimeout(resolve, 50));  // 等待 500 毫秒
+          }
           // console.log(`Keywords: ${word}`);
-          await this.contentHighlighter(word, iframe);
-          // 在每个关键词完成高亮后等待一小段时间，以确保渲染完成
-          await new Promise(resolve => setTimeout(resolve, 500));  // 等待 500 毫秒
+          // await this.contentHighlighter(word, iframe);
+          // // 在每个关键词完成高亮后等待一小段时间，以确保渲染完成
+          // await new Promise(resolve => setTimeout(resolve, 500));  // 等待 500 毫秒
         }
         // iframe.contentWindow.PDFViewerApplication.findBar.dispatchEvent(new Event('highlightallchange'));
         // iframe.contentWindow.PDFViewerApplication.findBar.close();

@@ -122,7 +122,8 @@ export default {
       //对话历史
       history: [],
       API_URL: "http://localhost:8009/v1/chat/completions",
-      fileName: '',
+      fileName: '',   //存储当前文件名
+      set:'',   //存储上一个文件名
       selectedFile: null,
       isPreview: false,
       pdfFileShown: false,
@@ -162,6 +163,7 @@ export default {
       docxPlainTextContent: "", // 保存docx纯文本内容
       docPlainTextContent: '',// 保存doc纯文本内容
       keywords: [],
+      isHighlighted:false, //
     };
   },
 
@@ -291,20 +293,31 @@ export default {
 
         //合成用户发送的信息
         var userMessageContent = '';
-        if(this.isImageFile){
-          userMessageContent = "问题：" + usermessage;
-        }else if(this.isPdfFile){
-          userMessageContent = this.cleanPdfText(this.pdfDocumentContent) + '\n\n' + "问题：" + usermessage;
-        }else if(this.isTxtFile){
-          userMessageContent = this.txtFileContent + '\n\n' + "问题：" + usermessage;
-        }else if(this.docxPlainTextContent){
-          userMessageContent = this.docxPlainTextContent + '\n\n' + "问题：" + usermessage;
-        }else{
-          userMessageContent =  "问题：" +  usermessage;
-        }
 
+        if (this.set != this.fileName) {
+          this.isHighlighted = false;
+          this.set = this.fileName;
+          if (this.isImageFile) {
+            userMessageContent = "问题：" + usermessage;
+          } else if (this.isPdfFile) {
+            userMessageContent = this.cleanPdfText(this.pdfDocumentContent) + '\n\n' + "问题：" + usermessage;
+          } else if (this.isTxtFile) {
+            userMessageContent = this.txtFileContent + '\n\n' + "问题：" + usermessage;
+          } else if (this.docxPlainTextContent) {
+            userMessageContent = this.docxPlainTextContent + '\n\n' + "问题：" + usermessage;
+          } else {
+            userMessageContent = "问题：" + usermessage;
+          }
+        }else{
+          userMessageContent = "问题：" + usermessage;
+        }
+        
+        if(this.history.length >= 10){
+          this.history.shift();
+        }
         // 更新对话历史
         this.history.push({"role": "user", "content": userMessageContent});
+        console.log("userMessageContent: "+userMessageContent);
         // 构建请求数据
         var data = {
           "model": "qwen2-7b",
@@ -432,20 +445,24 @@ export default {
             }
           }
           console.log(this.wholeMessage);
-          //返回消息在预览文档中高亮文字
-          if (this.isTxtFile) {
-            await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage);
-            this.txtFileContentPage = this.highlightedContent(this.txtFileContent);
-          }else if(this.isPdfFile){
-            if(!this.pdfDocumentContent){
-              console.log("pdfDocumentContent Null!");
-              return;
+
+          if (!this.isHighlighted) {
+            this.isHighlighted = true;
+            //返回消息在预览文档中高亮文字
+            if (this.isTxtFile) {
+              await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage);
+              this.txtFileContentPage = this.highlightedContent(this.txtFileContent);
+            } else if (this.isPdfFile) {
+              if (!this.pdfDocumentContent) {
+                console.log("pdfDocumentContent Null!");
+                return;
+              }
+              await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage);
+              this.searchFile();
+            } else if (this.isDocxFile) {
+              await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage);
+              this.docxContent = this.highlightKeySentences(this.docxContent);
             }
-            await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage);
-            this.searchFile();
-          }else if(this.isDocxFile){
-            await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage);
-            this.docxContent = this.highlightKeySentences(this.docxContent);
           }
           // this.history.push({'role': 'assistant', 'content': this.wholeMessage});
           this.loading = false;
@@ -969,9 +986,9 @@ export default {
           
           for (const result of results) {
             // console.log(`Keywords: ${word}`);
-            await this.contentHighlighter(result, iframe);
             // 在每个关键词完成高亮后等待一小段时间，以确保渲染完成
-            await new Promise(resolve => setTimeout(resolve, 50));  // 等待 500 毫秒
+            await new Promise(resolve => setTimeout(resolve, 400));  // 等待 500 毫秒
+            await this.contentHighlighter(result, iframe);
           }
           // console.log(`Keywords: ${word}`);
           // await this.contentHighlighter(word, iframe);
@@ -1008,7 +1025,7 @@ export default {
         resolve();
         setTimeout(function() {
           console.log('等待完成，继续渲染');
-        }, 2000);
+        }, 200);
       });
     },
     cleanPdfText(text) {

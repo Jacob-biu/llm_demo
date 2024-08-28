@@ -46,17 +46,9 @@
     </div>
     
     <!-- 文件预览区 -->
-    <div v-show="isPreview" class="fileContainer">
+    <div v-show="isPreviewFile" class="fileContainer">
       <div v-show="isPreview" class="file-preview" ref="pdfContainer">
-        <img class="preview-image" v-if="isImageFile" :src="previewUrl" alt="File Preview" />
-        
-        <div v-else-if="isPdfFile">
-          <div v-show="pdfFileShown" class="pdf-page" v-for="i in pdfParams.pdfPageTotal" :key="i" :id="'pageDiv' + i">
-            <div :id="'text-layer' + i" class="textLayer"></div>
-            <canvas class="pdf-viewer" :id="'pdf-render' + i" ></canvas>
-          </div>
-          <iframe id="ifm" :src="this.previewUrl" width="100%" height="500px" />
-        </div>
+        <img class="preview-image" v-if="isImageFile" :src="previewUrl" alt="File Preview" />   
 
         <div v-else-if="isTxtFile" id="txtFileContent" class="txtPage" v-html="txtFileContentPage"></div>
         
@@ -64,12 +56,18 @@
         <div v-else-if="isDocFile" class="doc-preview" v-html="docContent"></div>
         <span v-else>文件预览不可用</span>
       </div>
-      <!-- <div class="pdf_down" v-if="isPdfFile" v-show="pdfFileShown">
-        <button class="pdf_set_left" @click="scaleUp">➕</button>
-        <button class="pdf_set_middle" @click="scaleDown">➖</button> -->
-        <!-- <div class="pdf-pre" @click="prePage">上一页</div>
-        <div class="pdf-next" @click="nextPage">下一页</div> -->
-      <!-- </div> -->
+      <div id="filePreviewButtonDiv">
+        <button @click="toggleFilePreview" id="filePreviewButton" :class="{ active: isActive }"></button>
+      </div>
+    </div>
+    <div id="buttonDiv" v-if="isPdfFile">
+        <button @click="togglePdfView" id="PdfViewButtonTwo"></button>
+    </div>
+    <div v-if="isPdfFile" v-show="showPdfFile" class="pdfFileView">
+      <iframe id="ifm" :src="this.previewUrl" width="100%" height="100%" />
+      <div id="buttonDiv">
+        <button @click="togglePdfView" id="PdfViewButton"></button>
+      </div>
     </div>
   </div>
 </template>
@@ -126,9 +124,11 @@ export default {
       set:'',   //存储上一个文件名
       selectedFile: null,
       isPreview: false,
+      isPreviewFile:false,
       pdfFileShown: false,
       previewUrl: '', // 文件预览的 URL
       isPdfFile: false,
+      showPdfFile:false,
       isImageFile: false,
       isTxtFile: false,
       isDocxFile: false,
@@ -183,6 +183,14 @@ export default {
     async toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen;
       this.isActive = !this.isActive;
+    },
+    async togglePdfView(){
+      if(this.isPdfFile){
+        this.showPdfFile = !this.showPdfFile;
+      }
+    },
+    async toggleFilePreview(){
+      this.isPreview = !this.isPreview;
     },
 
     async toggleDarkMode() {
@@ -457,6 +465,7 @@ export default {
                 console.log("pdfDocumentContent Null!");
                 return;
               }
+              this.showPdfFile = true;
               await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage);
               this.searchFile();
             } else if (this.isDocxFile) {
@@ -511,13 +520,17 @@ export default {
     },
 
     async handleFileChange(event) {
+      this.isPreviewFile = true;
       this.isPreview = true;
       const file = event.target.files[0];
       this.fileName = file.name;  // 获取文件名称
       // var pdfPath = encodeURIComponent(file);
       if (file) {
         if (file.type === 'application/pdf') {
+          this.isPreviewFile = false;
+          this.isPreview = false;
           this.isPdfFile = true;
+          this.showPdfFile = true;
           this.isImageFile = false;
           this.isTxtFile = false;
           this.isDocxFile = false;
@@ -1410,6 +1423,90 @@ body {
   position: relative;
   height: 540px;
 }
+
+.pdfFileView{
+  position: fixed;
+  top: 2%;
+  left: 15%;
+  width: 70%;
+  height: 95%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+}
+.filePreviewButtonDiv{
+  height:100%;
+  position:relative;
+}
+#filePreviewButton{
+  position: absolute;
+  top: 10px;
+  left:0px;
+  width:25px;
+  height:25px;
+  border-radius: 50%;
+  border:none;
+  cursor: pointer;
+  background-image: url("../assets/green_icon.svg"); /* 替换为点击后 SVG 图片路径 */
+  background-size: auto 70%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+}
+/* 切换后的背景图片 */
+#filePreviewButton.active {
+  background-image: url("../assets/red_x.svg"); /* 替换为点击后 SVG 图片路径 */
+}
+#filePreviewButton:hover {
+  background-color: green;
+}
+#filePreviewButton.active:hover {
+  background-color: red;
+}
+#PdfViewButtonTwo{
+  margin-top: 10px;
+  margin-left: 10px;
+  width:25px;
+  height:25px;
+  border-radius: 50%;
+  border:none;
+  cursor: pointer;
+  background-image: url("../assets/green_icon.svg"); /* 替换为点击后 SVG 图片路径 */
+  background-size: auto 70%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+}
+#PdfViewButtonTwo:hover {
+  background-color: green;
+}
+#PdfViewButton{
+  width:25px;
+  height:25px;
+  border-radius: 50%;
+  border:none;
+  cursor: pointer;
+  background-image: url("../assets/red_x.svg"); /* 替换为点击后 SVG 图片路径 */
+  background-size: auto 70%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+}
+#PdfViewButton:hover {
+  background-color: red;
+}
+
+#buttonDiv{
+  position: relative;
+  height:100%;
+}
+#PdfViewButton{
+  position: absolute;
+  top:0;
+}
+
 
 .file-preview{
   width:500px;

@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-28 17:59:54
+ * @LastEditTime: 2024-08-28 19:14:30
  * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -929,7 +929,7 @@ export default {
 
       for (const word of this.keywords) {
         const sentenceLength = word.length;
-        const partLength = Math.ceil(sentenceLength / 10); // 计算每部分的长度
+        const partLength = Math.ceil(sentenceLength / 5); // 计算每部分的长度
         const results = [];
 
         for (let i = 0; i < sentenceLength; i += partLength) {
@@ -960,7 +960,7 @@ export default {
 
         for (const word of this.keywords) {
           const sentenceLength = word.length;
-          const partLength = Math.ceil(sentenceLength / 10); // 计算每部分的长度
+          const partLength = Math.ceil(sentenceLength / 5); // 计算每部分的长度
           const results = [];
 
           for (let i = 0; i < sentenceLength; i += partLength) {

@@ -960,7 +960,7 @@ export default {
 
         for (const word of this.keywords) {
           const sentenceLength = word.length;
-          const partLength = Math.ceil(sentenceLength / 5); // 计算每部分的长度
+          const partLength = Math.ceil(sentenceLength / 2); // 计算每部分的长度
           const results = [];
 
           for (let i = 0; i < sentenceLength; i += partLength) {

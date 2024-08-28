@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-26 16:03:29
+ * @LastEditTime: 2024-08-28 12:36:55
  * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -121,7 +121,7 @@ export default {
       gif: {url: require('../assets/loading2.gif')},
       //对话历史
       history: [],
-      API_URL: "http://localhost:9999/v1/chat/completions",
+      API_URL: "http://localhost:8009/v1/chat/completions",
       fileName: '',
       selectedFile: null,
       isPreview: false,

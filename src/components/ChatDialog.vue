@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-28 12:36:55
+ * @LastEditTime: 2024-08-28 16:31:39
  * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -149,6 +149,7 @@ export default {
       }),
       extractedPDFText: "", // 存储pdf提取的文本内容
       pdfDocumentContent: "", // 保存加载的PDF实例
+      pdfFileOpen: false, // 用于跟踪 PDF 文件是否已加载
 
       txtFileContent: "", // 保存 txt 文件的内容
       txtFileContentPage: "", //保存解析的txt HTML的内容
@@ -223,6 +224,10 @@ export default {
 
     async sendData() {
       if (this.loading) {
+        return;
+      }
+      if(!this.pdfFileOpen){
+        alert('请等待pdf加载完毕');
         return;
       }
 
@@ -431,7 +436,7 @@ export default {
             await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage);
             this.docxContent = this.highlightKeySentences(this.docxContent);
           }
-          this.history.push({'role': 'assistant', 'content': this.wholeMessage})
+          // this.history.push({'role': 'assistant', 'content': this.wholeMessage});
           this.loading = false;
           // this.returnMessage = '';
         }
@@ -508,7 +513,9 @@ export default {
               // console.log(this.extractedPDFText);
             }catch(error){
               console.error('从PDF提取文本时出错', error);  
-            }          
+            }
+            this.pdfFileOpen = true;
+            alert("PDF上传成功！");
           };
           reader.readAsArrayBuffer(file);
         }else if(file.type === "text/plain"){

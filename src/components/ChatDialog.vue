@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-28 16:31:39
+ * @LastEditTime: 2024-08-28 17:59:13
  * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -153,8 +153,11 @@ export default {
 
       txtFileContent: "", // 保存 txt 文件的内容
       txtFileContentPage: "", //保存解析的txt HTML的内容
+      txtFileOpen: false, // 用于跟踪 txt 文件是否已加载
 
       docxContent: '', //// 保存docx解析后的 HTML 内容
+      docxFileOpen: false, // 用于跟踪 docx 文件是否已加载
+
       docContent: '', //// 保存doc解析后的 HTML 内容
       docxPlainTextContent: "", // 保存docx纯文本内容
       docPlainTextContent: '',// 保存doc纯文本内容
@@ -226,8 +229,16 @@ export default {
       if (this.loading) {
         return;
       }
-      if(!this.pdfFileOpen){
+      if(!this.pdfFileOpen && this.isPdfFile){
         alert('请等待pdf加载完毕');
+        return;
+      }
+      if(!this.docxFileOpen && this.isDocxFile){
+        alert('请等待文档加载完毕');
+        return;
+      }
+      if(!this.txtFileOpen && this.isTxtFile){
+        alert('请等待文档加载完毕');
         return;
       }
 
@@ -532,6 +543,8 @@ export default {
             console.log(this.txtFileContent);
           };
           reader.readAsText(file); // 以文本形式读取文件
+          this.txtFileOpen = true;
+          alert("Txt上传成功！");
         }else if(file.name.endsWith(".docx")){
           this.isPdfFile = false;
           this.isImageFile = false;
@@ -551,6 +564,8 @@ export default {
             console.error("文档解析失败:", error);
             alert("文档解析失败，请检查文件格式或内容！");
           }
+          this.docxFileOpen = true;
+          alert("docx文档上传成功！");
         }else if(this.isImage()){
           this.isPdfFile = false;
           this.isImageFile = true;

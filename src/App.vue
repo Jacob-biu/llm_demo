@@ -2,8 +2,8 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 21:52:26
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-15 12:11:43
- * @FilePath: \llm-demo-0.1.1\llm_demo\src\App.vue
+ * @LastEditTime: 2024-08-28 17:33:00
+ * @FilePath: \llm-demo-0.2.1\llm_demo\src\App.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
@@ -11,7 +11,7 @@
   <!-- <div class="background"></div> -->
   <!-- <router-view/> -->
   <p id="Sen">大模型AI 也可能会犯错哦。请核查重要信息。</p>
-  <ChatDialog msg="Version 0.1.1"/>
+  <ChatDialog msg="Version 0.2.1"/>
 </template>
 
 <script>

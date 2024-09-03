@@ -94,7 +94,7 @@ class Particle {
     this.directionY = 0.5 - Math.random();
     this.directionX = 0.5 - Math.random();
     this.size = 2;
-    this.speed = 0.5; // 控制粒子向鼠标移动的速度
+    this.speed = 5; // 控制粒子向鼠标移动的速度
     this.mouse = mouse;
   }
   update(mouse, canvas) {

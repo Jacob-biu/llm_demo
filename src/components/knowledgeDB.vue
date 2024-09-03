@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-09-02 15:11:44
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-09-02 22:33:34
+ * @LastEditTime: 2024-09-03 18:06:47
  * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\knowledgeDB.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -44,7 +44,9 @@
           </div>
         </div>
       </div>
-      <div id="rightBox"></div>
+      <div id="rightBox">
+        <!-- 右侧表单内容 -->
+      </div>
     </div>
   </div>
 </template>
@@ -57,9 +59,9 @@ import { ref } from 'vue';
 export default {
   data() {
     return {
-      selectedOption: null, // 用于接口调用的实际值
+      selectedOption: 'null', // 用于接口调用的实际值
       options: [ // 下拉框的选项，模拟接口返回的值，包含显示的标签和实际的值
-        { label: '不使用知识库', value: null },
+        { label: '不使用知识库', value: 'null' },
         { label: 'DB', value: 'DB' },
         { label: 'DB2', value: 'DB2' },
       ],
@@ -130,7 +132,7 @@ export default {
     },
     initButtonList(){
       this.buttonList = this.options
-        .filter(option => option.value !== null)
+        .filter(option => option.value !== 'null')
         .map(option => ({
           text: option.label,
           value: option.value

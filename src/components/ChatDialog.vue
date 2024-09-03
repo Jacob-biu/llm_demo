@@ -205,7 +205,7 @@ export default {
 
     async toggleFilePreview(){
       this.isPreviewFile = !this.isPreviewFile;
-      this.isPreview = !this.isPreview;
+      this.isPreview = !this.isPreviewFile;
     },
 
     async toggleDarkMode() {
@@ -483,6 +483,7 @@ export default {
               //返回消息在预览文档中高亮文字
               if (this.isTxtFile) {
                 this.isPreviewFile = true;
+                this.isPreview = false;
                 await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage);
                 this.txtFileContentPage = this.highlightedContent(this.txtFileContent);
               } else if (this.isPdfFile) {
@@ -491,10 +492,12 @@ export default {
                   return;
                 }
                 this.isPreviewFile = true;
+                this.isPreview = false;
                 await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage);
                 this.searchFile();
               } else if (this.isDocxFile) {
                 this.isPreviewFile = true;
+                this.isPreview = false;
                 await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage);
                 this.docxContent = this.highlightKeySentences(this.docxContent);
               }
@@ -550,7 +553,7 @@ export default {
 
     async handleFileChange(event) {
       this.isPreviewFile = true;
-      // this.isPreview = true;
+      this.isPreview = false;
       const file = event.target.files[0];
       this.fileName = file.name;  // 获取文件名称
       // var pdfPath = encodeURIComponent(file);

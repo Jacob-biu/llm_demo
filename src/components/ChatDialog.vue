@@ -205,6 +205,7 @@ export default {
 
     async toggleFilePreview(){
       this.isPreviewFile = !this.isPreviewFile;
+      this.isPreview = !this.isPreview;
     },
 
     async toggleDarkMode() {
@@ -549,7 +550,7 @@ export default {
 
     async handleFileChange(event) {
       this.isPreviewFile = true;
-      this.isPreview = true;
+      // this.isPreview = true;
       const file = event.target.files[0];
       this.fileName = file.name;  // 获取文件名称
       // var pdfPath = encodeURIComponent(file);
@@ -643,6 +644,8 @@ export default {
           this.isDocFile = false;
 
           alert('请选择一个有效的文件');
+          this.isPreviewFile = false;
+          this.isPreview = false;
         }
       }
     },

@@ -2,8 +2,8 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 21:52:26
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-09 12:48:26
- * @FilePath: \demo\llm_demo\public\index.html
+ * @LastEditTime: 2024-09-03 15:56:51
+ * @FilePath: \llm-demo-0.2.1\llm_demo\public\index.html
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
@@ -19,6 +19,36 @@
   <body>
     <div id="background"></div>
     <div id="app"></div>
-    <!-- built files will be auto injected -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          var a_idx = 0;
+          document.getElementById('app').addEventListener('click', function(e) {
+              var a = ["❤富强❤","❤民主❤","❤文明❤","❤和谐❤","❤自由❤","❤平等❤","❤公正❤","❤法治❤","❤爱国❤","❤敬业❤","❤诚信❤","❤友善❤"];
+              var i = document.createElement('span');
+              i.textContent = a[a_idx];
+              a_idx = (a_idx + 1) % a.length;
+              var x = e.pageX,
+                  y = e.pageY;
+              i.style.zIndex = '999999999999999999999999999999999999999999999999999999999999999999999';
+              i.style.top = (y - 20) + 'px';
+              i.style.left = x + 'px';
+              i.style.position = 'absolute';
+              i.style.fontWeight = 'bold';
+              i.style.color = 'rgb(' + Math.floor(255 * Math.random()) + ',' + Math.floor(255 * Math.random()) + ',' + Math.floor(255 * Math.random()) + ')';
+              document.getElementById('app').appendChild(i);
+  
+              setTimeout(function() {
+                  i.style.transition = 'top 1.5s, opacity 1.5s';
+                  i.style.top = (y - 180) + 'px';
+                  i.style.opacity = '0';
+                  setTimeout(function() {
+                      i.remove();
+                  }, 1500);
+              }, 0);
+          });
+      });
+    </script>
+  
+  <!-- built files will be auto injected -->
   </body>
 </html>

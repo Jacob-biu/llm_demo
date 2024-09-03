@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-08-28 19:14:30
+ * @LastEditTime: 2024-09-02 21:06:30
  * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -17,6 +17,10 @@
       <p>工具栏</P>
       <div id="Bar" >
         <button id="palmLogo" @click="navigateToPage"></button>
+        <div id="knowledgeDB" style="display:flex;  flex-direction: column;  justify-content: center;  align-items: center;">
+          <button @click="triggerKnowledgeDBView" id="KnowledgeDBButton"></button>
+          <span>知识库</span>
+        </div>
         <div :class="{'dark-mode': isDarkMode, 'white-mode': !isDarkMode}" id="mode">
           <button @click="toggleDarkMode" id="modeButton" :class="{ active: isDarkMode }">
           </button>
@@ -39,34 +43,34 @@
           <button @click="triggerFileUpload" class="custom-file-upload">
           </button>
           <input type="text" id="userInput" v-model="inputData" @keyup.enter="sendData" placeholder="尽管问！" autofocus :class="{ active: isDarkMode }">
-          <button id="sendBtn" @click="sendData" :loading="loading" :class="{ active: isDarkMode }">
-          </button>
+          <div>
+            <button v-if="!loading" id="sendBtn" @click="sendData" :loading="loading" :class="{ active: isDarkMode }"></button>
+            <button v-else id="sendBtnStop" @click="stopSendMessage" ></button>
+          </div>
         </div>
       </div>
     </div>
     
+    <div id="buttonDiv" v-show="isPreview">
+      <button @click="toggleFilePreview" id="fileViewButtonTwo"></button>
+    </div>
     <!-- 文件预览区 -->
-    <div v-show="isPreviewFile" class="fileContainer">
-      <div v-show="isPreview" class="file-preview" ref="pdfContainer">
-        <img class="preview-image" v-if="isImageFile" :src="previewUrl" alt="File Preview" />   
-
-        <div v-else-if="isTxtFile" id="txtFileContent" class="txtPage" v-html="txtFileContentPage"></div>
-        
-        <div v-else-if="isDocxFile" class="docx-preview" v-html="docxContent"></div>
-        <div v-else-if="isDocFile" class="doc-preview" v-html="docContent"></div>
-        <span v-else>文件预览不可用</span>
-      </div>
-      <div id="filePreviewButtonDiv">
-        <button @click="toggleFilePreview" id="filePreviewButton" :class="{ active: isActive }"></button>
-      </div>
-    </div>
-    <div id="buttonDiv" v-if="isPdfFile">
-        <button @click="togglePdfView" id="PdfViewButtonTwo"></button>
-    </div>
-    <div v-if="isPdfFile" v-show="showPdfFile" class="pdfFileView">
-      <iframe id="ifm" :src="this.previewUrl" width="100%" height="100%" />
+    <div v-show="isPreviewFile" class="fileView">
+      <img class="preview-image" v-if="isImageFile" :src="previewUrl" alt="File Preview" />   
+      <iframe v-else-if="isPdfFile" id="ifm" :src="this.previewUrl" width="100%" height="100%" />
+      <div v-else-if="isTxtFile" id="txtFileContent" class="txtPage" v-html="txtFileContentPage"></div>
+      <div v-else-if="isDocxFile" class="docx-preview" v-html="docxContent"></div>
+      <div v-else-if="isDocFile" class="doc-preview" v-html="docContent"></div>
+      <span v-else>文件预览不可用</span>
       <div id="buttonDiv">
-        <button @click="togglePdfView" id="PdfViewButton"></button>
+        <button @click="toggleFilePreview" id="fileViewButton"></button>
+      </div>
+    </div>
+    <!-- 知识库 -->
+    <div id="knowledgeDBdiv" v-show="isKnowledgeDB">
+      <knowledgeDB style="width: 97%; margin-left:5px;" @knowledgeDBContent="receiveDBContentFromChild"/>
+      <div id="buttonDiv">
+        <button @click="triggerKnowledgeDBView" id="fileViewButton"></button>
       </div>
     </div>
   </div>
@@ -90,6 +94,8 @@ import { GlobalWorkerOptions } from 'pdfjs-dist/webpack';
 import 'pdfjs-dist/web/pdf_viewer.css';
 import mammoth from "mammoth";
 // import docx4js from "docx4js";
+import knowledgeDB from './knowledgeDB.vue';
+import { ElMessage } from 'element-plus';
 
 
 GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist/build/pdf.worker.js';
@@ -100,7 +106,9 @@ export default {
   props: {
     msg: String
   },
-
+  components: {
+    knowledgeDB
+  },
   data() {
     return {
       textColor: 'white',
@@ -125,10 +133,8 @@ export default {
       selectedFile: null,
       isPreview: false,
       isPreviewFile:false,
-      pdfFileShown: false,
       previewUrl: '', // 文件预览的 URL
       isPdfFile: false,
-      showPdfFile:false,
       isImageFile: false,
       isTxtFile: false,
       isDocxFile: false,
@@ -163,7 +169,9 @@ export default {
       docxPlainTextContent: "", // 保存docx纯文本内容
       docPlainTextContent: '',// 保存doc纯文本内容
       keywords: [],
-      isHighlighted:false, //
+      isHighlighted:false, //是否高亮
+      isKnowledgeDB: false, //是否展示知识库
+      knowledgeDBContent: '', //知识库内容
     };
   },
 
@@ -179,18 +187,24 @@ export default {
       const url = 'https://palm.seu.edu.cn/';
       window.open(url, '_blank');
     },
+
+    async triggerKnowledgeDBView(){
+      this.isKnowledgeDB = !this.isKnowledgeDB;
+    },
     
+    receiveDBContentFromChild(payload) {
+      // 接收传递过来的数据
+      this.knowledgeDBContent = payload;
+      console.log("knowledgeDB: " + this.knowledgeDBContent);
+    },
+
     async toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen;
       this.isActive = !this.isActive;
     },
-    async togglePdfView(){
-      if(this.isPdfFile){
-        this.showPdfFile = !this.showPdfFile;
-      }
-    },
+
     async toggleFilePreview(){
-      this.isPreview = !this.isPreview;
+      this.isPreviewFile = !this.isPreviewFile;
     },
 
     async toggleDarkMode() {
@@ -233,6 +247,13 @@ export default {
     
     async waitSeveralSeconds() {
       await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 10));
+    },
+
+    async stopSendMessage(){
+      this.loading = false;
+      if(document.getElementById('img')){
+        document.getElementById('chatlog').removeChild(document.getElementById('img'));
+      }
     },
 
     async sendData() {
@@ -287,6 +308,7 @@ export default {
 
         // 创建一个新的img元素，用于加载动画
         var img = document.createElement('img');
+        img.id = "img";
         img.style.width = "100px";
         img.style.height = "auto";
         // 设置img的src属性
@@ -336,149 +358,155 @@ export default {
           "stream":true,
         };
 
-        const response = await fetch(this.API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        });
+        try {
+          const response = await fetch(this.API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          });
 
-        console.log(response.ok);
+          console.log(response.ok);
 
-        let messContainerSystem = document.createElement('div');
-        messContainerSystem.style.textAlign = 'right';
-        messContainerSystem.style.display = 'flex';
-        messContainerSystem.style.left = '0';
-        messContainerSystem.style.paddingRight = '10%';
-        messContainerSystem.style.height = 'fit-content';
-        document.getElementById('chatlog').appendChild(messContainerSystem);
+          let messContainerSystem = document.createElement('div');
+          messContainerSystem.style.textAlign = 'right';
+          messContainerSystem.style.display = 'flex';
+          messContainerSystem.style.left = '0';
+          messContainerSystem.style.paddingRight = '10%';
+          messContainerSystem.style.height = 'fit-content';
+          document.getElementById('chatlog').appendChild(messContainerSystem);
 
-        let messageElementSystem = document.createElement('div');
-        messageElementSystem.id = usermessage;
-        messageElementSystem.innerHTML = '';
-        messageElementSystem.className = 'message system';
-        messageElementSystem.style.maxWidth = '530px';
-        messContainerSystem.appendChild(messageElementSystem);
-        document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
-        
-        if (response.ok) {
-          document.getElementById('chatlog').removeChild(img);
+          let messageElementSystem = document.createElement('div');
+          messageElementSystem.id = usermessage;
+          messageElementSystem.innerHTML = '';
+          messageElementSystem.className = 'message system';
+          messageElementSystem.style.maxWidth = '530px';
+          messContainerSystem.appendChild(messageElementSystem);
+          document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
 
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder('utf-8');
-          let buffer = '';
-          this.wholeMessage = '';
+          if (response.ok) {
+            document.getElementById('chatlog').removeChild(img);
 
-          while (true) {  //eslint-disable-line no-constant-condition
-            const { done, value } = await reader.read();
-            if (done) {
-              break;
-            }
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let buffer = '';
+            this.wholeMessage = '';
 
-            buffer += decoder.decode(value, { stream: true });
+            while (true) {  //eslint-disable-line no-constant-condition
+              const { done, value } = await reader.read();
+              if (done) {
+                break;
+              }
 
-            // Split buffer by lines
-            const lines = buffer.split('\n');
+              buffer += decoder.decode(value, { stream: true });
 
-            // Keep the last incomplete line in buffer
-            buffer = lines.pop() || '';
+              // Split buffer by lines
+              const lines = buffer.split('\n');
 
-            // Process each line
-            for (const line of lines) {
-              const trimmedLine = line.trim();
-              if (trimmedLine.startsWith('data: ')) {
-                const dataStr = trimmedLine.slice('data: '.length);
-                if (dataStr !== '[DONE]') {
-                  try {
-                    const jsonData = JSON.parse(dataStr);
-                    if (jsonData.choices && jsonData.choices.length > 0) {
-                      const delta = jsonData.choices[0].delta || {};
-                      const content = delta.content || '';
-                      if (content) {
-                        this.wholeMessage += content;
-                        // console.log(this.wholeMessage);
-                        let handledMessage = '';
-                        let latexMessage = '';
-                        latexMessage = this.renderMath(this.wholeMessage);                   
-                        handledMessage = marked(latexMessage);
-                        messageElementSystem.innerHTML = handledMessage;
+              // Keep the last incomplete line in buffer
+              buffer = lines.pop() || '';
 
-                        // 高亮代码块
-                        document.querySelectorAll('pre code').forEach(function(block) {
-                          // 添加语言标签，确保只添加一次
-                          if (!block.hasAttribute('data-language-tagged')) {
-                            // 通过类名获取语言
-                            const language = block.className.replace('language-', '');
-                
-                            // 创建一个新的 div 元素来显示语言名称
-                            const header = document.createElement('div');
-                            header.className = 'code-header';
-                            header.innerText = language.toUpperCase(); // 将语言名称转换为大写
+              // Process each line
+              for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (trimmedLine.startsWith('data: ')) {
+                  const dataStr = trimmedLine.slice('data: '.length);
+                  if (dataStr !== '[DONE]') {
+                    try {
+                      const jsonData = JSON.parse(dataStr);
+                      if (jsonData.choices && jsonData.choices.length > 0) {
+                        const delta = jsonData.choices[0].delta || {};
+                        const content = delta.content || '';
+                        if (content) {
+                          this.wholeMessage += content;
+                          // console.log(this.wholeMessage);
+                          let handledMessage = '';
+                          let latexMessage = '';
+                          latexMessage = this.renderMath(this.wholeMessage);
+                          handledMessage = marked(latexMessage);
+                          messageElementSystem.innerHTML = handledMessage;
 
-                            // 在 pre 元素的顶部插入这个 div 元素
-                            block.parentNode.insertBefore(header, block.parentNode.firstChild);
-                            // 标记代码块为已添加语言标签
-                            block.setAttribute('data-language-tagged', 'true');
-                          }
+                          // 高亮代码块
+                          document.querySelectorAll('pre code').forEach(function (block) {
+                            // 添加语言标签，确保只添加一次
+                            if (!block.hasAttribute('data-language-tagged')) {
+                              // 通过类名获取语言
+                              const language = block.className.replace('language-', '');
 
-                          if(!block.hasAttribute('line-number-tagged')) {
-                            //为行插入行号
-                            const lines = block.innerHTML.split('\n');
-                            // 移除最后一个空行
-                            if (lines[lines.length - 1].trim() === '') {
-                              lines.pop();
+                              // 创建一个新的 div 元素来显示语言名称
+                              const header = document.createElement('div');
+                              header.className = 'code-header';
+                              header.innerText = language.toUpperCase(); // 将语言名称转换为大写
+
+                              // 在 pre 元素的顶部插入这个 div 元素
+                              block.parentNode.insertBefore(header, block.parentNode.firstChild);
+                              // 标记代码块为已添加语言标签
+                              block.setAttribute('data-language-tagged', 'true');
                             }
-                            let numberedLines = '';
 
-                            lines.forEach((line, index) => {
-                              numberedLines += `<span class="line-number">${index + 1}  </span>${line}\n`;
-                            });
+                            if (!block.hasAttribute('line-number-tagged')) {
+                              //为行插入行号
+                              const lines = block.innerHTML.split('\n');
+                              // 移除最后一个空行
+                              if (lines[lines.length - 1].trim() === '') {
+                                lines.pop();
+                              }
+                              let numberedLines = '';
 
-                            block.innerHTML = numberedLines;
-                            block.setAttribute('line-number-tagged', 'true');
-                          }
-                          //高亮代码
-                          hljs.highlightBlock(block);
-                        });
-                        document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
-                        // console.log(content);
+                              lines.forEach((line, index) => {
+                                numberedLines += `<span class="line-number">${index + 1}  </span>${line}\n`;
+                              });
+
+                              block.innerHTML = numberedLines;
+                              block.setAttribute('line-number-tagged', 'true');
+                            }
+                            //高亮代码
+                            hljs.highlightBlock(block);
+                          });
+                          document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
+                          // console.log(content);
+                        }
                       }
+                    } catch (error) {
+                      console.error('Error parsing JSON:', error);
                     }
-                  } catch (error) {
-                    console.error('Error parsing JSON:', error);
                   }
                 }
               }
             }
-          }
-          console.log(this.wholeMessage);
+            console.log(this.wholeMessage);
 
-          if (!this.isHighlighted) {
-            this.isHighlighted = true;
-            //返回消息在预览文档中高亮文字
-            if (this.isTxtFile) {
-              await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage);
-              this.txtFileContentPage = this.highlightedContent(this.txtFileContent);
-            } else if (this.isPdfFile) {
-              if (!this.pdfDocumentContent) {
-                console.log("pdfDocumentContent Null!");
-                return;
+            if (!this.isHighlighted) {
+              this.isHighlighted = true;
+              //返回消息在预览文档中高亮文字
+              if (this.isTxtFile) {
+                this.isPreviewFile = true;
+                await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage);
+                this.txtFileContentPage = this.highlightedContent(this.txtFileContent);
+              } else if (this.isPdfFile) {
+                if (!this.pdfDocumentContent) {
+                  console.log("pdfDocumentContent Null!");
+                  return;
+                }
+                this.isPreviewFile = true;
+                await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage);
+                this.searchFile();
+              } else if (this.isDocxFile) {
+                this.isPreviewFile = true;
+                await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage);
+                this.docxContent = this.highlightKeySentences(this.docxContent);
               }
-              this.showPdfFile = true;
-              await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage);
-              this.searchFile();
-            } else if (this.isDocxFile) {
-              await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage);
-              this.docxContent = this.highlightKeySentences(this.docxContent);
             }
+            // this.history.push({'role': 'assistant', 'content': this.wholeMessage});
+            this.loading = false;
+            // this.returnMessage = '';
           }
-          // this.history.push({'role': 'assistant', 'content': this.wholeMessage});
-          this.loading = false;
-          // this.returnMessage = '';
-        }
-        else{
-          this.loading = false;
+          else {
+            this.loading = false;
+          }
+        } catch (error) {
+          console.error('Error parsing JSON:', error);
         }
       }
     },
@@ -527,10 +555,7 @@ export default {
       // var pdfPath = encodeURIComponent(file);
       if (file) {
         if (file.type === 'application/pdf') {
-          this.isPreviewFile = false;
-          this.isPreview = false;
           this.isPdfFile = true;
-          this.showPdfFile = true;
           this.isImageFile = false;
           this.isTxtFile = false;
           this.isDocxFile = false;
@@ -556,7 +581,8 @@ export default {
               console.error('从PDF提取文本时出错', error);  
             }
             this.pdfFileOpen = true;
-            alert("PDF上传成功！");
+            ElMessage.success( 'PDF上传成功！');
+            // alert("PDF上传成功！");
           };
           reader.readAsArrayBuffer(file);
         }else if(file.type === "text/plain"){
@@ -574,7 +600,8 @@ export default {
           };
           reader.readAsText(file); // 以文本形式读取文件
           this.txtFileOpen = true;
-          alert("Txt上传成功！");
+          ElMessage.success( 'Txt上传成功！');
+          // alert("Txt上传成功！");
         }else if(file.name.endsWith(".docx")){
           this.isPdfFile = false;
           this.isImageFile = false;
@@ -595,7 +622,8 @@ export default {
             alert("文档解析失败，请检查文件格式或内容！");
           }
           this.docxFileOpen = true;
-          alert("docx文档上传成功！");
+          ElMessage.success( 'docx文档上传成功！');
+          // alert("docx文档上传成功！");
         }else if(this.isImage()){
           this.isPdfFile = false;
           this.isImageFile = true;
@@ -903,7 +931,8 @@ export default {
 
         // 检查请求是否成功
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          ElMessage.error( 'HTTP error! status: '+ response.status);
+          // throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         // 解析JSON响应
@@ -1197,6 +1226,25 @@ export default {
   background-repeat: no-repeat;
   cursor: pointer;
 }
+#palmLogo:hover {
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+
+#KnowledgeDBButton{
+  width:60px;
+  height:30px;
+  border-radius: 10px;
+  border: none;
+  background-color: rgba(255,255,255,0.8);
+  background-image: url("../assets/sharpicons_connection-points.svg");
+  background-size: auto 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+#KnowledgeDBButton:hover {
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
 
 #msg {
   background-color: thistle;
@@ -1368,9 +1416,25 @@ export default {
   right: 15px; /* 定位到容器的右侧 */
   /*top: 3px;*/
 }
-
-
 #sendBtn:hover {
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+
+#sendBtnStop{
+  padding: 10px;
+  width: 40px;
+  height:40px;
+  border: none;
+  background-color: transparent;
+  background-image: url("../assets/Stop.svg");
+  background-size: auto 70%;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: black;
+  border-radius: 50%;
+  cursor: pointer;
+}
+#sendBtnStop:hover {
   box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
 }
 
@@ -1424,7 +1488,7 @@ body {
   height: 540px;
 }
 
-.pdfFileView{
+.fileView{
   position: fixed;
   top: 2%;
   left: 15%;
@@ -1436,36 +1500,8 @@ body {
   justify-content: center;
   border-radius: 5px;
 }
-.filePreviewButtonDiv{
-  height:100%;
-  position:relative;
-}
-#filePreviewButton{
-  position: absolute;
-  top: 10px;
-  left:0px;
-  width:25px;
-  height:25px;
-  border-radius: 50%;
-  border:none;
-  cursor: pointer;
-  background-image: url("../assets/green_icon.svg"); /* 替换为点击后 SVG 图片路径 */
-  background-size: auto 70%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: transparent;
-}
-/* 切换后的背景图片 */
-#filePreviewButton.active {
-  background-image: url("../assets/red_x.svg"); /* 替换为点击后 SVG 图片路径 */
-}
-#filePreviewButton:hover {
-  background-color: green;
-}
-#filePreviewButton.active:hover {
-  background-color: red;
-}
-#PdfViewButtonTwo{
+
+#fileViewButtonTwo{
   margin-top: 10px;
   margin-left: 10px;
   width:25px;
@@ -1479,10 +1515,10 @@ body {
   background-repeat: no-repeat;
   background-color: transparent;
 }
-#PdfViewButtonTwo:hover {
+#fileViewButtonTwo:hover {
   background-color: green;
 }
-#PdfViewButton{
+#fileViewButton{
   width:25px;
   height:25px;
   border-radius: 50%;
@@ -1494,7 +1530,7 @@ body {
   background-repeat: no-repeat;
   background-color: transparent;
 }
-#PdfViewButton:hover {
+#fileViewButton:hover {
   background-color: red;
 }
 
@@ -1502,47 +1538,11 @@ body {
   position: relative;
   height:100%;
 }
-#PdfViewButton{
+#fileViewButton{
   position: absolute;
   top:0;
 }
 
-
-.file-preview{
-  width:500px;
-  height: 500px;
-  margin-left: 20px;
-  margin-top: 20px;
-  text-align: center;
-  position: relative;
-  /*display: flex;*/
-  align-items: center;
-  justify-content: center;
-  /*overflow: hidden;*/
-  overflow-y:auto;
-  overflow-x:auto;
-  position: relative;
-}
-.file-preview::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
-}
-::-webkit-scrollbar-button {
-	display: none;
-}
-::-webkit-scrollbar-track {
-	background-color: rgba(70, 166, 255, 0.1);
-	display: none;
-}
-::-webkit-scrollbar-thumb {
-	background-color: rgba(70, 166, 255, 0.4);
-	border: 2px solid transparent;
-	border-radius: 6px;
-	background-clip: padding-box;
-}
-::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(0, 0, 0, 0.5);
-}
 
 .pdf-page {
   position: relative;
@@ -1672,5 +1672,18 @@ body {
 
 .highlight {
   background-color: yellow;
+}
+
+#knowledgeDBdiv{
+  position: fixed;
+  top: 2%;
+  left: 15%;
+  width: 70%;
+  height: 95%;
+  background-color: rgba(255,255,255,0.9);
+  display: flex;
+  /*align-items: center;
+  justify-content: center;*/
+  border-radius: 5px;
 }
 </style>

@@ -95,6 +95,7 @@ export default {
     // 递归计算每个文件夹下所有子文件的数量
     calculateFileCounts(nodes) {
       nodes.forEach((node) => {
+        node.fileCount = 0;
         if (node.children && node.children.length > 0) {
           node.fileCount = this.calculateTotalFileCount(node.children); // 递归计算子文件数量
           this.calculateFileCounts(node.children); // 继续遍历子节点

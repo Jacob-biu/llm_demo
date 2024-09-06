@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 # 设置文件上传保存路径
-UPLOAD_FOLDER = './llm_demo/dataBase/files'
+UPLOAD_FOLDER = './files'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # 确保上传文件夹存在

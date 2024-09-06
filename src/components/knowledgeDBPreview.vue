@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-09-06 09:31:35
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-09-06 11:56:20
+ * @LastEditTime: 2024-09-06 15:15:11
  * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\knowledgeDBPreview.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -17,8 +17,11 @@
         :data="fileTree"
         :props="defaultProps"
         node-key="id"
+        :default-expanded-keys="defaultExpandedKeys" 
         @node-click="handleNodeClick"
         @node-contextmenu="handleExpandToggle"
+        @node-expand="handleNodeExpand" 
+        @node-collapse="handleNodeCollapse" 
         :expand-on-click-node="true"
         style="border-radius: 10px;"
       >
@@ -66,6 +69,7 @@ export default {
       },
       totalFileCount: 0, // 用于保存所有文件的总数
       refreshInterval: null, // 定时器引用
+      defaultExpandedKeys: [], // Store expanded node IDs
     };
   },
 
@@ -83,7 +87,7 @@ export default {
         nodes.forEach((node) => {
           if (node.children && node.children.length > 0) {
             traverse(node.children);
-          } else {
+          } else if (!node.children) {
             count += 1;
           }
         });
@@ -129,6 +133,18 @@ export default {
         }
       }
     },
+
+    handleNodeExpand(node) {
+      if (!this.defaultExpandedKeys.includes(node.id)) {
+        this.defaultExpandedKeys.push(node.id);
+      }
+    },
+    handleNodeCollapse(node) {
+      const index = this.defaultExpandedKeys.indexOf(node.id);
+      if (index !== -1) {
+        this.defaultExpandedKeys.splice(index, 1);
+      }
+    },
   },
 
   created() {
@@ -138,7 +154,7 @@ export default {
     // 每隔 10 秒刷新文件树
     this.refreshInterval = setInterval(() => {
       this.fetchFileTree();
-    }, 5000); // 每10秒刷新一次
+    }, 5000); // 每2秒刷新一次
   },
 
   beforeDestroy() {

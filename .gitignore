@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 /dist
+/dataBase
 
 # Ignore package-lock.json
 package-lock.json

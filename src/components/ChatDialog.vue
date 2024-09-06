@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-09-02 21:06:30
+ * @LastEditTime: 2024-09-06 10:53:05
  * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -18,7 +18,23 @@
       <div id="Bar" >
         <button id="palmLogo" @click="navigateToPage"></button>
         <div id="knowledgeDB" style="display:flex;  flex-direction: column;  justify-content: center;  align-items: center;">
-          <button @click="triggerKnowledgeDBView" id="KnowledgeDBButton"></button>
+          <el-dropdown id="KnowledgeDBButton">
+            <button>
+              <i class="el-icon-arrow-down el-icon--right"></i>
+            </button>
+            <!-- 下拉菜单 -->
+            <template #dropdown>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item @click.native="triggerKnowledgeDBView" style="display: flex; align-items: center;">
+                  <i>选择</i>
+                </el-dropdown-item>
+                <el-dropdown-item @click.native="triggerKnowledgeDBPreview" style="display: flex; align-items: center;">
+                  <i>预览</i>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <!-- <button @click="triggerKnowledgeDBView" id="KnowledgeDBButton"></button>-->
           <span>知识库</span>
         </div>
         <div :class="{'dark-mode': isDarkMode, 'white-mode': !isDarkMode}" id="mode">
@@ -68,9 +84,16 @@
     </div>
     <!-- 知识库 -->
     <div id="knowledgeDBdiv" v-show="isKnowledgeDB">
-      <knowledgeDB style="width: 97%; margin-left:5px;" @knowledgeDBContent="receiveDBContentFromChild"/>
+      <knowledgeDB style="width: 97%; margin-left:5px;" @selectedOption="receiveDBContentFromChild"/>
       <div id="buttonDiv">
         <button @click="triggerKnowledgeDBView" id="fileViewButton"></button>
+      </div>
+    </div>
+    <!-- 知识库预览 -->
+    <div id="knowledgeDBPreviewDiv" v-show="isKnowledgeDBPreview">
+      <knowledgeDBPreview style="width: 97%; height:100%"/>
+      <div id="buttonDiv">
+        <button @click="triggerKnowledgeDBPreview" id="fileViewButton"></button>
       </div>
     </div>
   </div>
@@ -95,7 +118,8 @@ import 'pdfjs-dist/web/pdf_viewer.css';
 import mammoth from "mammoth";
 // import docx4js from "docx4js";
 import knowledgeDB from './knowledgeDB.vue';
-import { ElMessage } from 'element-plus';
+import knowledgeDBPreview from './knowledgeDBPreview.vue';
+import { ElMessage , ElDropdown , ElDropdownMenu , ElDropdownItem , ElButton } from 'element-plus';
 
 
 GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist/build/pdf.worker.js';
@@ -107,7 +131,12 @@ export default {
     msg: String
   },
   components: {
-    knowledgeDB
+    knowledgeDB,
+    knowledgeDBPreview,
+    ElDropdown,
+    ElDropdownMenu,
+    ElDropdownItem,
+    ElButton,
   },
   data() {
     return {
@@ -171,7 +200,8 @@ export default {
       keywords: [],
       isHighlighted:false, //是否高亮
       isKnowledgeDB: false, //是否展示知识库
-      knowledgeDBContent: '', //知识库内容
+      selectedOption: '', //知识库内容
+      isKnowledgeDBPreview: false, //是否预览所有知识库内容
     };
   },
 
@@ -191,11 +221,15 @@ export default {
     async triggerKnowledgeDBView(){
       this.isKnowledgeDB = !this.isKnowledgeDB;
     },
+
+    triggerKnowledgeDBPreview(){
+      this.isKnowledgeDBPreview = !this.isKnowledgeDBPreview;
+    },
     
     receiveDBContentFromChild(payload) {
-      // 接收传递过来的数据
-      this.knowledgeDBContent = payload;
-      console.log("knowledgeDB: " + this.knowledgeDBContent);
+      // 接收传递过来的知识库value
+      this.selectedOption = payload;
+      console.log("knowledgeDB: " + this.selectedOption);
     },
 
     async toggleSidebar() {
@@ -1691,5 +1725,19 @@ body {
   /*align-items: center;
   justify-content: center;*/
   border-radius: 5px;
+}
+
+#knowledgeDBPreviewDiv{
+  position: fixed;
+  top: 2%;
+  left: 7%;
+  width: 86%;
+  height: 95%;
+  background-color: rgba(255,255,255,0.9);
+  display: flex;
+  /*align-items: center;
+  justify-content: center;*/
+  border-radius: 10px;
+  padding: 0.5%;
 }
 </style>

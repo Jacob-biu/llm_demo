@@ -39,8 +39,12 @@
       </el-tree>
     </div>
     <div class="file-preview">
+      <div v-show="showSen">
+        请选择文件打开
+      </div>
+      <VueOfficeDocx v-if="isDocx" :src="fileUrl" v-show="isDocxShow" class="docx-preview" />
       <iframe
-        v-if="selectedFile"
+        v-else-if="!isDocx && selectedFile"
         :src="fileUrl"
         frameborder="0"
         width="100%"
@@ -55,7 +59,7 @@
 import axios from 'axios';
 import { ElCard , ElTree , ElTooltip } from 'element-plus';
 import 'element-plus/es/components/tooltip/style/css';  // 引入样式
-
+import VueOfficeDocx from '@vue-office/docx';
 
 export default {
   name: 'knowledgeDBPreview',
@@ -70,6 +74,9 @@ export default {
       totalFileCount: 0, // 用于保存所有文件的总数
       refreshInterval: null, // 定时器引用
       isShow: false,
+      showSen: true,
+      isDocxShow: false,
+      isDocx: false,
     };
   },
 
@@ -77,6 +84,7 @@ export default {
     ElCard,
     ElTree,
     ElTooltip,
+    VueOfficeDocx,
   },
 
   methods: {
@@ -122,7 +130,13 @@ export default {
     handleNodeClick(node) {
       if (!node.children) {
         this.selectedFile = node.filePath;
-        this.isShow = true;
+        this.previewFile(node.filePath);
+        this.showSen = false;
+        if(this.isDocx){
+          this.isDocxShow = true;
+        }else{
+          this.isShow = true;
+        }
       }
     },
     handleExpandToggle(node) {
@@ -132,6 +146,15 @@ export default {
         } else {
           node.expand();
         }
+      }
+    },
+
+    previewFile(filePath) {
+      const fileExtension = filePath.split('.').pop().toLowerCase();
+      this.isDocx = false;
+
+      if (fileExtension === 'docx') {
+        this.isDocx = true;
       }
     },
   },
@@ -185,6 +208,9 @@ export default {
   width: 80%;
   height: 100%;
   border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* 控制文件名的显示，防止超长内容溢出 */
@@ -216,5 +242,18 @@ export default {
 .el-tooltip {
   max-width: 300px;
   word-wrap: break-word;
+}
+
+.docx-preview {
+  width: 90%;
+  height: 90%;
+  overflow: auto;
+  max-height: 200px; /* 你可以根据需要调整这个值 */
+}
+.vue-office-docx.docx-preview{
+  margin: 0;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
 }
 </style>

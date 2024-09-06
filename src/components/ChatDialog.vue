@@ -226,6 +226,8 @@ export default {
       this.$refs.knowledgeDBPreview.fetchFileTree();
       this.isKnowledgeDBPreview = !this.isKnowledgeDBPreview;
       this.$refs.knowledgeDBPreview.isShow = false;
+      this.$refs.knowledgeDBPreview.isDocxShow = false;
+      this.$refs.knowledgeDBPreview.showSen = true;
       this.$refs.knowledgeDBPreview.selectedFile = null;
     },
     

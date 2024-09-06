@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-09-06 09:31:35
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-09-06 15:15:11
+ * @LastEditTime: 2024-09-06 16:31:19
  * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\knowledgeDBPreview.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -14,14 +14,13 @@
         <span style="margin-left: 4%;">全部文献  {{ totalFileCount }}</span>
       </div>
       <el-tree
+        ref="tree"
         :data="fileTree"
         :props="defaultProps"
         node-key="id"
-        :default-expanded-keys="defaultExpandedKeys" 
+        :default-expanded-keys="defaultExpandedKeys"
         @node-click="handleNodeClick"
         @node-contextmenu="handleExpandToggle"
-        @node-expand="handleNodeExpand" 
-        @node-collapse="handleNodeCollapse" 
         :expand-on-click-node="true"
         style="border-radius: 10px;"
       >
@@ -46,6 +45,7 @@
         frameborder="0"
         width="100%"
         height="100%"
+        v-show="isShow"
       ></iframe>
     </div>
   <!-- </el-card> -->
@@ -69,7 +69,7 @@ export default {
       },
       totalFileCount: 0, // 用于保存所有文件的总数
       refreshInterval: null, // 定时器引用
-      defaultExpandedKeys: [], // Store expanded node IDs
+      isShow: false,
     };
   },
 
@@ -122,6 +122,7 @@ export default {
     handleNodeClick(node) {
       if (!node.children) {
         this.selectedFile = node.filePath;
+        this.isShow = true;
       }
     },
     handleExpandToggle(node) {
@@ -133,28 +134,16 @@ export default {
         }
       }
     },
-
-    handleNodeExpand(node) {
-      if (!this.defaultExpandedKeys.includes(node.id)) {
-        this.defaultExpandedKeys.push(node.id);
-      }
-    },
-    handleNodeCollapse(node) {
-      const index = this.defaultExpandedKeys.indexOf(node.id);
-      if (index !== -1) {
-        this.defaultExpandedKeys.splice(index, 1);
-      }
-    },
   },
 
   created() {
     // 初始化时获取文件树
     this.fetchFileTree();
 
-    // 每隔 10 秒刷新文件树
-    this.refreshInterval = setInterval(() => {
-      this.fetchFileTree();
-    }, 5000); // 每2秒刷新一次
+    // // 每隔 10 秒刷新文件树
+    // this.refreshInterval = setInterval(() => {
+    //   this.fetchFileTree();
+    // }, 5000); // 每2秒刷新一次
   },
 
   beforeDestroy() {

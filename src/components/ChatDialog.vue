@@ -2,7 +2,7 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-09-06 10:53:05
+ * @LastEditTime: 2024-09-06 16:32:24
  * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
@@ -91,7 +91,7 @@
     </div>
     <!-- 知识库预览 -->
     <div id="knowledgeDBPreviewDiv" v-show="isKnowledgeDBPreview">
-      <knowledgeDBPreview style="width: 97%; height:100%"/>
+      <knowledgeDBPreview style="width: 97%; height:100%" ref="knowledgeDBPreview" />
       <div id="buttonDiv">
         <button @click="triggerKnowledgeDBPreview" id="fileViewButton"></button>
       </div>
@@ -223,7 +223,9 @@ export default {
     },
 
     triggerKnowledgeDBPreview(){
+      this.$refs.knowledgeDBPreview.fetchFileTree();
       this.isKnowledgeDBPreview = !this.isKnowledgeDBPreview;
+      this.$refs.knowledgeDBPreview.isShow = false;
     },
     
     receiveDBContentFromChild(payload) {

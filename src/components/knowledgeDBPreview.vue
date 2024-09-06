@@ -65,6 +65,7 @@ export default {
         label: 'name',
       },
       totalFileCount: 0, // 用于保存所有文件的总数
+      refreshInterval: null, // 定时器引用
     };
   },
 
@@ -130,7 +131,20 @@ export default {
   },
 
   created() {
+    // 初始化时获取文件树
     this.fetchFileTree();
+
+    // 每隔 10 秒刷新文件树
+    this.refreshInterval = setInterval(() => {
+      this.fetchFileTree();
+    }, 5000); // 每10秒刷新一次
+  },
+
+  beforeDestroy() {
+    // 清除定时器
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
   },
 
   computed: {
@@ -140,6 +154,10 @@ export default {
         : '';
     },
   },
+
+  mounted(){
+    this.fetchFileTree();
+  }
 };
 </script>
 

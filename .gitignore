@@ -2,6 +2,7 @@
 node_modules
 /dist
 /dataBase
+/server/llm_demo
 
 # Ignore package-lock.json
 package-lock.json

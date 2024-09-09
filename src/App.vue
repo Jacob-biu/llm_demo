@@ -2,8 +2,8 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-07 21:52:26
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-09-03 16:28:31
- * @FilePath: \llm-demo-0.2.1\llm_demo\src\App.vue
+ * @LastEditTime: 2024-09-09 19:09:24
+ * @FilePath: \llm_demo\src\App.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
@@ -11,7 +11,7 @@
   <!-- <div class="background"></div> -->
   <ParticleCanvas class="backgroundParticleCanvas" />
   <!-- <router-view/> -->
-  <p id="Sen">大模型AI 也可能会犯错哦。请核查重要信息。</p>
+  <!-- <p id="Sen">大模型AI 也可能会犯错哦。请核查重要信息。</p> -->
   <ChatDialog msg="Version 0.2.1"/>
 </template>
 
@@ -56,7 +56,7 @@ body{
 #background{
   width: 100%;
   height: 100%;
-  background-image: url("./assets/image.jpg");
+  background-image: url("./assets/blue-grey-bg.webp");
   background-size: cover;
   background-position: center;
   filter: blur(3px);

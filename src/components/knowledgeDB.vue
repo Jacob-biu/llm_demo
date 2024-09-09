@@ -2,15 +2,14 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-09-02 15:11:44
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-09-05 22:21:41
- * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\knowledgeDB.vue
+ * @LastEditTime: 2024-09-09 21:30:36
+ * @FilePath: \llm_demo\src\components\knowledgeDB.vue
  * @Description: 
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
-
 <template>
   <div id="knowledgeDBElement" style="width:100%; height:100%;">
-    <el-dialog title="新建知识库" v-model="dialogVisible" @close="handleCancel" width="300px">
+    <el-dialog title="新建知识库" v-model="dialogVisible" @close="handleCancel" width="480px">
       <el-form :model="form" :rules="rules" ref="formRef">
         <el-form-item label="名称" prop="name">
           <el-input v-model="form.name"></el-input>
@@ -42,7 +41,7 @@
         <button id="createKnowledgeDB" @click="this.dialogVisible = true; this.handleCancel();">➕ 新建知识库</button>
         <div id="knowledgeDBHistory">
           <div v-for="(item, index) in buttonList" :key="index" class="DB_List">
-            <button @click="handleClick(item)" class="DB_ListButton">
+            <button @click="handleClick(item)" class="DB_ListButton" :class="{ active: activeButton === item.value }">
               {{ item.label }}
             </button>
           </div>
@@ -170,9 +169,22 @@ import { ref } from 'vue';
 import axios from 'axios';
 import moment from 'moment'; // 用于格式化日期
 import { Check, Close, Delete } from '@element-plus/icons-vue'; // 引入图标
+import { EventBusOne } from '../event-bus.js';
+
 
 export default {
   data() {
+    const validateName = (rule, value, callback) => {
+      const regex = /^(?!_)[a-z0-9_\u4e00-\u9fa5]+$/;
+      if (!value) {
+        callback(new Error('名称不能为空'));
+      } else if (!regex.test(value)) {
+        callback(new Error('名称只能包含小写字母、数字、中文字符和下划线，且不能以下划线开头'));
+      } else {
+        callback();
+      }
+    };
+
     return {
       isRightBox: false,
       isCardOne: true,
@@ -180,9 +192,9 @@ export default {
       selectedOption: 'null', // 用于接口调用的实际值
       options: [ // 下拉框的选项，模拟接口返回的值，包含显示的标签和实际的值
         { label: '不使用知识库', value: 'null' , description: ''},
-        { label: 'DB', value: 'DB' , description: 'DB'},
-        { label: 'DB2', value: 'DB2' , description: 'DB2'},
-        { label: 'DB3', value: 'DB3' , description: 'DB3'},
+        // { label: 'DB', value: 'DB' , description: 'DB'},
+        // { label: 'DB2', value: 'DB2' , description: 'DB2'},
+        // { label: 'DB3', value: 'DB3' , description: 'DB3'},
       ],
       dialogVisible: false,
       form: {
@@ -199,7 +211,8 @@ export default {
       buttonList: [],
       rules: {
         name: [
-          { required: true, message: '请输入名称', trigger: 'blur' }
+          { required: true, message: '请输入名称', trigger: 'blur' },
+          { validator: validateName, trigger: 'blur' }
         ],
         description: [
           { required: false }
@@ -207,10 +220,11 @@ export default {
       },
       searchQuery: '', // 搜索框内容
       selectedFiles: [], // 选择的文件，用于批量操作
-      dataset: null,  //当前数据集信息（和button绑定）
+      dataset: { label: '不使用知识库', value: 'null' , description: ''} ,  //当前数据集信息（和button绑定）
       datasetsFile: [],  // 数据集文件列表
       isLoading: false, // 加载状态
       selectedRows: [],
+      activeButton: 'null',
     };
   },
 
@@ -255,12 +269,32 @@ export default {
           this.dialogVisible = false;
           document.getElementById('knowledgeDBHistory').scrollTop = document.getElementById('knowledgeDBHistory').scrollHeight;
           this.handleClick(option);
+
+          //向数据库提交新建知识库的信息
+          this.createIndex(this.form.name);
         } else {
           console.log('Form validation failed');
           return false;
         }
       });
     },
+    //向数据库发出新增索引要求
+    async createIndex(name) {
+      try {
+        const response = await axios.post('http://localhost:8999/es/create_index', {
+          datasetName: name
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(response.data); // { code: 1 }
+        ElMessage.success('知识库创建成功！');
+      } catch (error) {
+        console.error('Error creating index:', error);
+      }
+    },
+
     handleCancel() {
       // 取消表单时的逻辑
       // 可以选择重置表单
@@ -279,9 +313,11 @@ export default {
           value: option.value,
           description: option.description,
         }));
+      this.sendOptions();
     },
     // 点击事件的处理函数
     handleClick(item) {
+      this.activeButton = item.value;
       this.isRightBox = true;
       this.dataset = item;
       this.formTwo.name = item.label;
@@ -367,11 +403,29 @@ export default {
           },
         });
         console.log("文件上传成功", response);
+        console.log(response.data.file_path); // 文件路径
+        this.uploadFileToDataBase(this.dataset.label,response.data.file_path);
         ElMessage.success( '文件上传成功！');
         this.fetchFiles();
       } catch (error) {
         console.error("文件上传失败", error);
         ElMessage.error( '文件上传失败！');
+      }
+    },
+    //向数据库发出新增索引要求
+    async uploadFileToDataBase(name,path) {
+      try {
+        const response = await axios.post('http://localhost:8999/es/uploadfile', {
+          datasetName: name,
+          file_abs_paths: path
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(response.data); // { code: 1 }
+      } catch (error) {
+        console.error('Error upload file:', error);
       }
     },
 
@@ -414,6 +468,9 @@ export default {
       try {
         const response = await axios.delete(`http://localhost:5000/delete/${this.dataset.label}/${row.name}`);
         console.log(response.data.message);
+        console.log(response.data.file_path);
+
+        this.deleteFileFromDataBase(this.dataset.label,response.data.file_path);
         ElMessage.success( '删除文件成功');
         this.fetchFiles(); // 刷新文件列表
       } catch (error) {
@@ -421,6 +478,25 @@ export default {
         ElMessage.error( '删除文件失败');
       }
     },
+    //向数据库发出新增索引要求
+    async deleteFileFromDataBase(name,path) {
+      try {
+        const response = await axios.post('http://localhost:8999/es/deletefile', {
+          datasetName: name,
+          file_abs_paths: path,
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(response.data); // { code: 1 }
+      } catch (error) {
+        console.error('Error upload file:', error);
+      }
+    },
+
+
+
     // 更改文件名
     async changeNameAction(row) {
       const newFilename = prompt('请输入新的文件名', row.name);
@@ -449,12 +525,29 @@ export default {
     // 删除数据集
     async deleteDataset() {
       try {
+        this.deleteIndex(this.dataset.label);
         const response = await axios.delete(`http://localhost:5000/delete_dataset/${this.dataset.label}`);
         console.log(response.data.message);
         this.datasetsFile = []; // 清空当前文件列表
         ElMessage.success( '文件名更改成功');
       } catch (error) {
         console.error('删除数据集失败:', error);
+      }
+    },
+    //向数据库发出新增索引要求
+    async deleteIndex(name) {
+      try {
+        const response = await axios.post('http://localhost:8999/es/delete_index', {
+          datasetName: name
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(response.data); // { code: 1 }
+        ElMessage.success( '知识库删除成功！');
+      } catch (error) {
+        console.error('Error deleting index:', error);
       }
     },
 
@@ -480,7 +573,12 @@ export default {
       this.selectedRows.forEach(row => {
         this.deleteAction(row);
       });
-    }
+    },
+
+    sendOptions() {
+      EventBusOne.setOptions(this.options);
+      console.log('Options sent:', this.options);
+    },
   },
 
   mounted() {
@@ -611,6 +709,9 @@ export default {
   border: none;
 }
 .DB_ListButton:hover {
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+.DB_ListButton.active{
   box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
 }
 .DB_List{

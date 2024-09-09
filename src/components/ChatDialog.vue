@@ -2,8 +2,8 @@
  * @Author: Jacob-biu 2777245228@qq.com
  * @Date: 2024-08-15 09:15:52
  * @LastEditors: Jacob-biu 2777245228@qq.com
- * @LastEditTime: 2024-09-06 16:32:24
- * @FilePath: \llm-demo-0.2.1\llm_demo\src\components\ChatDialog.vue
+ * @LastEditTime: 2024-09-09 19:37:30
+ * @FilePath: \llm_demo\src\components\ChatDialog.vue
  * @Description: ./src/components/ChatDialog.vue
  * Copyright (c) 2024 by Jacob John, All Rights Reserved. 
 -->
@@ -13,17 +13,17 @@
     <div id="SlideButtonDiv">
       <button @click="toggleSidebar" id="slideBarButton" :class="{ active: isActive }"></button>
     </div>
-    <div id="BarContainer" v-if="isSidebarOpen" :class="{ active: isDarkMode }">
+    <div id="BarContainer" v-show="isSidebarOpen" :class="{ active: isDarkMode }">
       <p>工具栏</P>
       <div id="Bar" >
         <button id="palmLogo" @click="navigateToPage"></button>
-        <div id="knowledgeDB" style="display:flex;  flex-direction: column;  justify-content: center;  align-items: center;">
+        <!-- <div id="knowledgeDB" style="display:flex;  flex-direction: column;  justify-content: center;  align-items: center;">
           <el-dropdown id="KnowledgeDBButton">
             <button>
               <i class="el-icon-arrow-down el-icon--right"></i>
-            </button>
+            </button> -->
             <!-- 下拉菜单 -->
-            <template #dropdown>
+            <!-- <template #dropdown>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item @click.native="triggerKnowledgeDBView" style="display: flex; align-items: center;">
                   <i>选择</i>
@@ -33,15 +33,25 @@
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
-          </el-dropdown>
-          <!-- <button @click="triggerKnowledgeDBView" id="KnowledgeDBButton"></button>-->
-          <span>知识库</span>
+          </el-dropdown> -->
+          <!-- <button @click="triggerKnowledgeDBView" id="KnowledgeDBButton"></button> -->
+          <!-- <span>知识库</span>
+        </div> -->
+        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center;  width:100%; aspect-ratio: 1 / 1;">
+          <button @click="triggerKnowledgeDBView" id="KnowledgeDBButton"></button>
+          <span>编辑知识库</span>
+          <button @click="triggerKnowledgeDBPreview" id="KnowledgeDBButton"></button>
+          <span>预览知识库</span>
         </div>
+        
         <div :class="{'dark-mode': isDarkMode, 'white-mode': !isDarkMode}" id="mode">
           <button @click="toggleDarkMode" id="modeButton" :class="{ active: isDarkMode }">
           </button>
         </div>
       </div>
+    </div>
+    <div id="sideBarOfDB" v-if="isSidebarOpen" :class="{ active: isDarkMode }">
+      <sideBarOfDB style="width: 100%; height: 100%;" ref="sidebarOfDB" @selectedDB-sent-from-side="handleValueUpdate" />
     </div>
     <div id="ChatContainer">
       <div id="container">
@@ -56,10 +66,10 @@
         <div id="messagebox" >
           <input type="file" id="fileInput" ref="fileInput" @change="handleFileChange" class="file-upload" style="display: none;" />
           <!-- 自定义文件上传按钮 -->
-          <button @click="triggerFileUpload" class="custom-file-upload">
+          <button @click="triggerFileUpload" class="custom-file-upload" :class="{ active: isDisabled }">
           </button>
           <input type="text" id="userInput" v-model="inputData" @keyup.enter="sendData" placeholder="尽管问！" autofocus :class="{ active: isDarkMode }">
-          <div>
+          <div style="height:80%;   aspect-ratio: 1 / 1;">
             <button v-if="!loading" id="sendBtn" @click="sendData" :loading="loading" :class="{ active: isDarkMode }"></button>
             <button v-else id="sendBtnStop" @click="stopSendMessage" ></button>
           </div>
@@ -119,8 +129,9 @@ import mammoth from "mammoth";
 // import docx4js from "docx4js";
 import knowledgeDB from './knowledgeDB.vue';
 import knowledgeDBPreview from './knowledgeDBPreview.vue';
+import sideBarOfDB from './sidebarOfDB.vue'
 import { ElMessage , ElDropdown , ElDropdownMenu , ElDropdownItem , ElButton } from 'element-plus';
-
+import { EventBusOne } from '../event-bus.js';
 
 GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist/build/pdf.worker.js';
 // const eventBus = new pdfjsViewer.EventBus();
@@ -133,6 +144,7 @@ export default {
   components: {
     knowledgeDB,
     knowledgeDBPreview,
+    sideBarOfDB,
     ElDropdown,
     ElDropdownMenu,
     ElDropdownItem,
@@ -202,6 +214,8 @@ export default {
       isKnowledgeDB: false, //是否展示知识库
       selectedOption: '', //知识库内容
       isKnowledgeDBPreview: false, //是否预览所有知识库内容
+      selectedButton: { label: '不使用知识库', value: 'null' , description: ''}, // 选中的知识库按钮
+      isDisabled: false,
     };
   },
 
@@ -213,6 +227,19 @@ export default {
   },
 
   methods:{
+    handleValueUpdate(newValue){
+      this.selectedButton.label = newValue.label;
+      this.selectedButton.value = newValue.value;
+      this.selectedButton.description = newValue.description;
+      console.log("Update-selectedButton: " + this.selectedButton);
+
+      if(this.selectedButton.value == 'null'){
+        this.isDisabled = false;
+      }else{
+        this.isDisabled = true;
+      }
+    },
+    
     async navigateToPage(){
       const url = 'https://palm.seu.edu.cn/';
       window.open(url, '_blank');
@@ -238,8 +265,26 @@ export default {
     },
 
     async toggleSidebar() {
-      this.isSidebarOpen = !this.isSidebarOpen;
-      this.isActive = !this.isActive;
+      if(this.isSidebarOpen){
+        this.$refs.sidebarOfDB.selectedDB.label = this.selectedButton.label;
+        this.$refs.sidebarOfDB.selectedDB.value = this.selectedButton.value;
+        this.$refs.sidebarOfDB.selectedDB.description = this.selectedButton.description;
+        this.$refs.sidebarOfDB.activeButton = this.selectedButton.value;
+
+        console.log("关闭：" + this.selectedButton);
+        this.isSidebarOpen = !this.isSidebarOpen;
+        this.isActive = !this.isActive;
+      }else{
+        this.isSidebarOpen = !this.isSidebarOpen;
+        this.isActive = !this.isActive;
+        this.$nextTick(() => {
+          this.$refs.sidebarOfDB.selectedDB.label = this.selectedButton.label;
+          this.$refs.sidebarOfDB.selectedDB.value = this.selectedButton.value;
+          this.$refs.sidebarOfDB.selectedDB.description = this.selectedButton.description;
+          this.$refs.sidebarOfDB.activeButton = this.selectedButton.value;
+          console.log("开启： " + this.selectedButton);
+        });
+      }
     },
 
     async toggleFilePreview(){
@@ -952,8 +997,10 @@ export default {
     },
 
     triggerFileUpload() {
-      // 触发隐藏的文件上传 input
-      this.$refs.fileInput.click();
+      if(!this.isDisabled){
+        // 触发隐藏的文件上传 input
+        this.$refs.fileInput.click();
+      }
     },
 
     // 向后端发送数据以提取关键词
@@ -1171,22 +1218,26 @@ export default {
 
 #SlideButtonDiv{
   display: inline-block;
-  width:20px;
-  height: 20px;
+  padding: 0;
+  margin-top: 1%;
+  width:1.7%;
+  height: 98%;
+  margin-top: 1%;
+  margin-bottom: 1%;
+  margin-right: 0.3%;
   text-align: center;
   justify-content: center;
-  margin-top:15px;
-  margin-right: 5px;
 }
 
 #slideBarButton{
-  width:25px;
-  height:25px;
+  padding: 0;
+  width: 100%;
+  padding-top: 100%;
   border-radius: 50%;
   border:none;
   cursor: pointer;
   background-image: url("../assets/green_icon.svg"); /* 替换为点击后 SVG 图片路径 */
-  background-size: auto 70%;
+  background-size: 99% 99%;
   background-position: center;
   background-repeat: no-repeat;
   background-color: transparent;
@@ -1203,11 +1254,14 @@ export default {
 }
 
 #BarContainer {
+  justify-content:center; 
+  align-items:center;
   display: inline-block;
-  width: 100px;
-  height: 512px;
-  margin-top: 15px;
-  margin-right: 5px;
+  width: 10%;
+  height: 95.5%;
+  margin-top: 1%;
+  margin-bottom: 1%;
+  margin-right: 0.5%;
   padding: 0;
   text-align: center;
   background: rgba(255,255,255,0.75);
@@ -1226,31 +1280,46 @@ export default {
   width:100%;
   height:90%;
   text-align: center;
+  justify-content:center; 
+  align-items:center;
+}
+
+#sideBarOfDB{
+  justify-content:center; 
+  align-items:center;
+  display: inline-block;
+  width: 10%;
+  height: 95.5%;
+  margin-top: 1%;
+  margin-bottom: 1%;
+  margin-right: 0.5%;
+  padding: 0;
+  text-align: center;
+  background: rgba(255,255,255,0.75);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 #ChatContainer {
   display: inline-block;
-  width:600px;
+  width:70%;
+  margin-top: 1%;
+  margin-bottom: 1%;
   text-align: center;
   justify-content: center;
 }
 
 #container {
   /*background: rgba(255,255,255,0.75);*/
-  top:10px;
+  display: flex;
+  flex-direction: column;
   position: relative;
   background-color: transparent;
-  padding-top:0;
-  padding-right: 5px;
-  padding-left: 5px;
-  padding-bottom: 10px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 600px;
-  height: 502px;
+  width: 100%;
+  height: 100%;
   text-align: center;
-  margin-top: 5px;
-  margin-bottom: 5px;
 }
 
 .Picture{
@@ -1260,8 +1329,8 @@ export default {
 }
 
 #palmLogo{
-  width:60px;
-  height:60px;
+  width:60%;
+  aspect-ratio: 1 / 1; /* 设置宽高比为1:1，使宽度等于高度 */
   border-radius: 10px;
   border: none;
   background-color: rgba(255,255,255,0.8);
@@ -1276,8 +1345,8 @@ export default {
 }
 
 #KnowledgeDBButton{
-  width:60px;
-  height:30px;
+  width:60%;
+  aspect-ratio: 2 / 1; /* 设置宽高比为1:1，使宽度等于高度 */
   border-radius: 10px;
   border: none;
   background-color: rgba(255,255,255,0.8);
@@ -1296,12 +1365,10 @@ export default {
   opacity: 0.8;
 
   border-radius: 10px;
-  height:25px;
+  height: 4%;
   text-align: center;
   justify-content: center;
-  padding-top:7px;
-  margin-top: 7px;
-  margin-bottom: 2.5px;
+  margin-bottom: 0.05%;
 }
 #msg p{
   font-size: 100%;
@@ -1316,26 +1383,18 @@ export default {
 #chatbox {
   border: 1px solid transparent;
   border-radius: 10px;
-  padding: 2.5px;
-  height: 420px;
+  height: 85%;
+  padding: 0.05%;
   overflow-y: scroll;
-  margin-bottom: 2.5px;
+  margin-top: 0.15%;
+  margin-bottom: 0.05%;
   overflow-y: auto;
   overflow-x: auto;
   background: rgba(255,255,255,0.8);
 }
 #chatbox.active{
-  border: 1px solid transparent;
-  border-radius: 10px;
-  padding: 2.5px;
-  height: 420px;
-  overflow-y: scroll;
-  margin-bottom: 2.5px;
-  overflow:auto;
   background-color: rgba(0,0,0,0.5);
 }
-
-
 #chatbox::-webkit-scrollbar {
 	width: 8px;
 	height: 8px;
@@ -1371,10 +1430,9 @@ export default {
 
 #messagebox {
   position: absolute;
-  left:-0.5px;
-  bottom: 3.5px;
+  bottom: 0.05%;
   border-radius: 10px;
-  height: 45px;
+  height: 10%;
   width: 100%;
   display: flex;
   align-items: center;
@@ -1383,9 +1441,9 @@ export default {
 }
 
 .custom-file-upload {
-  padding: 10px;
-  width: 40px;
-  height:40px;
+  margin-left: 1%;
+  height: 80%;
+  aspect-ratio: 1 / 1; /* 设置宽高比为1:1，使宽度等于高度 */
   border: none;
   background-color: transparent;
   background-image: url("../assets/attachment.svg");
@@ -1399,6 +1457,12 @@ export default {
 
 .custom-file-upload:hover {
   box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+.custom-file-upload.active {
+  opacity: 0.5;
+}
+.custom-file-upload.active:hover {
+  cursor: not-allowed;
 }
 
 .message {
@@ -1421,10 +1485,10 @@ export default {
 }
 
 #userInput {
-  height: 25px; /* 设置最小高度 */
+  flex-grow: 1; /* 第二个元素占据剩余的宽度 */
+  margin-right: 1%;
+  height: 100%; /* 设置最小高度 */
   overflow: hidden; /* 防止溢出显示 */  
-  width: 580px;
-  padding: 10px;
   resize: none; /* 禁止用户手动调整大小 */
   border: none;
   border-radius: 5px;
@@ -1444,9 +1508,8 @@ export default {
 }
 
 #sendBtn {
-  padding: 10px;
-  width: 40px;
-  height:40px;
+  height: 100%;
+  aspect-ratio: 1 / 1; /* 设置宽高比为1:1，使宽度等于高度 */
   border: none;
   background-color: transparent;
   background-image: url("../assets/button_gray_plane.svg");
@@ -1466,9 +1529,8 @@ export default {
 }
 
 #sendBtnStop{
-  padding: 10px;
-  width: 40px;
-  height:40px;
+  height: 100%;
+  aspect-ratio: 1 / 1; /* 设置宽高比为1:1，使宽度等于高度 */
   border: none;
   background-color: transparent;
   background-image: url("../assets/Stop.svg");

@@ -39,7 +39,9 @@ def upload_file():
     file_path = os.path.join(dataset_folder, file.filename)
     file.save(file_path)
     
-    return jsonify({'message': 'File uploaded successfully', 'file_path': file_path})
+    # 获取文件的绝对路径
+    absolute_file_path = os.path.abspath(file_path)
+    return jsonify({'message': 'File uploaded successfully', 'file_path': absolute_file_path})
 
 # 获取文件列表 API
 @app.route('/files', methods=['GET'])
@@ -73,16 +75,19 @@ def list_files():
 # 删除文件 API
 @app.route('/delete/<dataset_name>/<file_name>', methods=['DELETE'])
 def delete_file(dataset_name, file_name):
-    try:
-        dataset_folder = os.path.join(UPLOAD_FOLDER, dataset_name)
-        file_path = os.path.join(dataset_folder, file_name)
+  try:
+    dataset_folder = os.path.join(UPLOAD_FOLDER, dataset_name)
+    file_path = os.path.join(dataset_folder, file_name)
 
-        if not os.path.exists(file_path):
-            return jsonify({'error': 'File not found'}), 404
+    if not os.path.exists(file_path):
+      return jsonify({'error': 'File not found'}), 404
 
-        os.remove(file_path)  # 删除文件
-        return jsonify({'message': 'File deleted successfully'}), 200
-    except Exception as e:
+    # 获取文件的绝对路径
+    absolute_file_path = os.path.abspath(file_path)
+  
+    os.remove(file_path)  # 删除文件
+    return jsonify({'message': 'File deleted successfully','file_path': absolute_file_path}), 200
+  except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 # 更改文件名 API

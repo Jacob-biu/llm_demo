@@ -125,7 +125,7 @@
                 <!-- 自定义动作列 -->
                 <template v-slot="scope">
                   <el-button @click="deleteAction(scope.row)" style="width:15px; border:none;">删除</el-button>
-                  <el-button @click="changeNameAction(scope.row)" style="border:none; ">更改文件名</el-button>
+                  <!--<el-button @click="changeNameAction(scope.row)" style="border:none; ">更改文件名</el-button>-->
                   <el-button @click="downloadAction(scope.row)" style="width: 15px; size:10; border:none;">下载</el-button>
                 </template>
               </el-table-column>

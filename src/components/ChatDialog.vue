@@ -216,9 +216,12 @@ export default {
       selectedOption: '', //知识库内容
       isKnowledgeDBPreview: false, //是否预览所有知识库内容
       selectedButton: { label: '不使用知识库', value: 'null' , description: ''}, // 选中的知识库按钮
+      selectedButtonHistory: { label: '不使用知识库', value: 'null' , description: ''},
       isDisabled: false,
+      disabledHistory: false,
       filePaths: [],  //知识库文件路径
       RAG: '',
+      userMessageHistory: '',
     };
   },
 
@@ -259,12 +262,17 @@ export default {
     },
 
     handleValueUpdate(newValue){
+      this.selectedButtonHistory.label = this.selectedButton.label;
+      this.selectedButtonHistory.value = this.selectedButton.value;
+      this.selectedButtonHistory.description = this.selectedButton.description;
+
       this.selectedButton.label = newValue.label;
       this.selectedButton.value = newValue.value;
       this.selectedButton.description = newValue.description;
       console.log("Update-selectedButton: " + this.selectedButton);
 
       this.$refs.knowledgeDB.selectedOption = this.selectedButton.value;
+      this.disabledHistory = this.isDisabled;
       if(this.selectedButton.value == 'null'){
         this.isDisabled = false;
       }else{
@@ -468,14 +476,23 @@ export default {
           }
         }else{
           userMessageContent = this.RAG + '\n\n' + "问题：" + usermessage;
-          console.log("userMessageContent：" + userMessageContent);
         }
         
         if(this.history.length >= 10){
           this.history.shift();
         }
+
+        if((this.disabledHistory == this.isDisabled && this.isDisabled) || (this.disabledHistory && !this.isDisabled)){
+          if(!(this.history.length === 1)){
+            let lastElement = this.history.pop();
+            this.history.push({"role": "user", "content": this.userMessageHistory});
+          }
+        }
+        this.userMessageHistory = usermessage;
         // 更新对话历史
         this.history.push({"role": "user", "content": userMessageContent});
+
+        console.log("Question History: " + this.history);
         console.log("userMessageContent: "+userMessageContent);
         // 构建请求数据
         var data = {
@@ -1518,14 +1535,14 @@ export default {
   margin-left:auto;
   padding: 5px;
   text-align: left;
-  background: rgba(255,255,255,0.9);
+  background-color: rgb(136, 213, 185,0.9);
 }
 
 .system {
   white-space: pre-wrap;
   text-align: left;
   padding: 5px;
-  background: rgba(255,255,255,0.9)
+  background-color: rgb(136, 213, 185,0.9);
 }
 
 #userInput {

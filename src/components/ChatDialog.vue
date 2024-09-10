@@ -51,7 +51,7 @@
       </div>
     </div>
     <div id="sideBarOfDB" v-if="isSidebarOpen" :class="{ active: isDarkMode }">
-      <sideBarOfDB style="width: 100%; height: 100%;" ref="sidebarOfDB" @selectedDB-sent-from-side="handleValueUpdate" />
+      <sideBarOfDB style="width: 100%; height: 100%;" ref="sidebarOfDB" @selectedDB-sent-from-side="handleValueUpdate" @filePaths-sent-from-side="handlePathsUpdate" />
     </div>
     <div id="ChatContainer">
       <div id="container">
@@ -94,7 +94,7 @@
     </div>
     <!-- 知识库 -->
     <div id="knowledgeDBdiv" v-show="isKnowledgeDB">
-      <knowledgeDB style="width: 97%; margin-left:5px;" @selectedOption="receiveDBContentFromChild"/>
+      <knowledgeDB style="width: 97%; margin-left:5px;" @selectedOption="receiveDBContentFromChild" ref="knowledgeDB" />
       <div id="buttonDiv">
         <button @click="triggerKnowledgeDBView" id="fileViewButton"></button>
       </div>
@@ -132,6 +132,7 @@ import knowledgeDBPreview from './knowledgeDBPreview.vue';
 import sideBarOfDB from './sidebarOfDB.vue'
 import { ElMessage , ElDropdown , ElDropdownMenu , ElDropdownItem , ElButton } from 'element-plus';
 import { EventBusOne } from '../event-bus.js';
+import axios from 'axios';
 
 GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist/build/pdf.worker.js';
 // const eventBus = new pdfjsViewer.EventBus();
@@ -216,6 +217,8 @@ export default {
       isKnowledgeDBPreview: false, //是否预览所有知识库内容
       selectedButton: { label: '不使用知识库', value: 'null' , description: ''}, // 选中的知识库按钮
       isDisabled: false,
+      filePaths: [],  //知识库文件路径
+      RAG: '',
     };
   },
 
@@ -227,12 +230,41 @@ export default {
   },
 
   methods:{
+    handlePathsUpdate(newValue){
+      this.filePaths = newValue;
+    },
+
+    async submitFormForRAG() {
+      try {
+        console.log("paths: "+ this.filePaths);
+        const requestBody = {
+          datasetName: this.selectedButton.value,
+          question: this.inputData,
+          file_abs_paths: this.filePaths,
+        };
+        const res = await axios.post('http://localhost:8999/es/rag_prompt', requestBody,{
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        // console.log("responseFromServer: " + res.data);
+        console.log(res.data);
+        this.RAG = res.data.prompt;
+        console.log("RAG:" + this.RAG);
+      } catch (error) {
+        console.error('Error:', error);
+        this.response = '请求失败，请检查控制台获取更多信息。';
+      }
+    },
+
     handleValueUpdate(newValue){
       this.selectedButton.label = newValue.label;
       this.selectedButton.value = newValue.value;
       this.selectedButton.description = newValue.description;
       console.log("Update-selectedButton: " + this.selectedButton);
 
+      this.$refs.knowledgeDB.selectedOption = this.selectedButton.value;
       if(this.selectedButton.value == 'null'){
         this.isDisabled = false;
       }else{
@@ -357,6 +389,13 @@ export default {
         alert('请等待文档加载完毕');
         return;
       }
+      console.log("isDisabled："+ this.isDisabled);
+      if(this.isDisabled){
+        console.log('datasetName: ' + this.selectedButton.value);
+        console.log('question: ' + this.inputData);
+        console.log('file_abs_paths: ' + this.filePaths);
+        await this.submitFormForRAG();
+      }
 
       // 配置marked，使其与highlight.js集成
       marked.setOptions({
@@ -409,22 +448,27 @@ export default {
         //合成用户发送的信息
         var userMessageContent = '';
 
-        if (this.set != this.fileName) {
-          this.isHighlighted = false;
-          this.set = this.fileName;
-          if (this.isImageFile) {
-            userMessageContent = "问题：" + usermessage;
-          } else if (this.isPdfFile) {
-            userMessageContent = this.cleanPdfText(this.pdfDocumentContent) + '\n\n' + "问题：" + usermessage;
-          } else if (this.isTxtFile) {
-            userMessageContent = this.txtFileContent + '\n\n' + "问题：" + usermessage;
-          } else if (this.docxPlainTextContent) {
-            userMessageContent = this.docxPlainTextContent + '\n\n' + "问题：" + usermessage;
-          } else {
+        if(!this.isDisabled){
+          if (this.set != this.fileName) {
+            this.isHighlighted = false;
+            this.set = this.fileName;
+            if (this.isImageFile) {
+              userMessageContent = "问题：" + usermessage;
+            } else if (this.isPdfFile) {
+              userMessageContent = this.cleanPdfText(this.pdfDocumentContent) + '\n\n' + "问题：" + usermessage;
+            } else if (this.isTxtFile) {
+              userMessageContent = this.txtFileContent + '\n\n' + "问题：" + usermessage;
+            } else if (this.docxPlainTextContent) {
+              userMessageContent = this.docxPlainTextContent + '\n\n' + "问题：" + usermessage;
+            } else {
+              userMessageContent = "问题：" + usermessage;
+            }
+          }else{
             userMessageContent = "问题：" + usermessage;
           }
         }else{
-          userMessageContent = "问题：" + usermessage;
+          userMessageContent = this.RAG + '\n\n' + "问题：" + usermessage;
+          console.log("userMessageContent：" + userMessageContent);
         }
         
         if(this.history.length >= 10){

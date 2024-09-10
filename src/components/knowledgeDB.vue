@@ -24,7 +24,7 @@
         <el-button type="primary" @click="handleSubmit">确 定</el-button>
       </span>
     </el-dialog>
-    <el-card id="topBar">
+    <!-- <el-card id="topBar">
       <span>当前知识库：</span>
       <el-select v-model="selectedOption" placeholder="请选择知识库" @change="handleChange" style="width: 200px;">
         <el-option
@@ -35,6 +35,9 @@
         </el-option>
       </el-select>
       <span>（默认不使用）</span>
+    </el-card> -->
+    <el-card id="topBar">
+      <span>当前知识库：{{ options.find(option => option.value === selectedOption) ? options.find(option => option.value === selectedOption).label : '未找到匹配的选项' }}</span>
     </el-card>
     <div id="majorBar">
       <div id="leftBar">
@@ -247,7 +250,34 @@ export default {
     Delete // 删除图标
   },
 
+  created(){
+  },
+
   methods: {
+    //初始化options
+    fetchKnowledgeBases() {
+      this.options = [];
+      axios.post('http://localhost:8999/es/indeces', {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          const data = response.data;
+          this.options.push({ label: '不使用知识库', value: 'null' , description: ''});
+
+          for (const [key, value] of Object.entries(data)) {
+            this.options.push({ label: key, value: key, description: value });
+            this.buttonList.push({ label: key, value: key, description: value });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching knowledge bases:', error);
+        });
+        // this.initButtonList();
+        this.sendOptions();
+    },
+
     // 你可以在这里添加一个方法来处理选项选择后的操作，例如调用接口
     handleChange() {
       this.$emit('selectedOption', this.selectedOption);
@@ -417,7 +447,7 @@ export default {
       try {
         const response = await axios.post('http://localhost:8999/es/uploadfile', {
           datasetName: name,
-          file_abs_paths: path
+          file_abs_paths: [path,]
         }, {
           headers: {
             'Content-Type': 'application/json'
@@ -483,7 +513,7 @@ export default {
       try {
         const response = await axios.post('http://localhost:8999/es/deletefile', {
           datasetName: name,
-          file_abs_paths: path,
+          file_abs_paths: [path,]
         }, {
           headers: {
             'Content-Type': 'application/json'
@@ -582,7 +612,7 @@ export default {
   },
 
   mounted() {
-    this.initButtonList(); // 在组件挂载后初始化 buttonList
+    this.fetchKnowledgeBases();
   },
 
   computed: {

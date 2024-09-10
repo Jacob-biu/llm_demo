@@ -23,6 +23,7 @@
 
 <script>
 import { EventBusOne } from '../event-bus.js';
+import axios from 'axios';
 
 export default{
   data(){
@@ -33,6 +34,8 @@ export default{
       ],
       selectedDB: { label: '不使用知识库', value: 'null' , description: ''},
       activeButton: 'null',
+      textFromServer: '', //后端返回的rag参考文字
+      filePath: [],
     }
   },
 
@@ -47,10 +50,13 @@ export default{
     },
 
     // 点击事件的处理函数
-    handleClick(item) {
+    async handleClick(item) {
       this.selectedDB = item;
       this.activeButton = item.value;
       this.$emit('selectedDB-sent-from-side', this.selectedDB);
+      await this.getFilesPath();
+      console.log(this.filePath);
+      this.$emit('filePaths-sent-from-side', this.filePath);
       console.log('selectedDB-sent-from-side:', this.selectedDB);
     },
 
@@ -58,7 +64,20 @@ export default{
       this.options = options;
       console.log('options-received:', options);
       this.initButtonList(); // 更新 options 后重新初始化 buttonList
-    }
+    },
+
+    async getFilesPath() {
+      try {
+        const getFilesResponse = await axios.post('http://localhost:5000/get_files', 
+        { 
+          dataset: this.selectedDB.value,
+        });
+        this.filePath = getFilesResponse.data.files;
+      } catch (error) {
+        console.error('Error:', error);
+        this.response = { error: '请求失败，请检查控制台获取更多信息。' };
+      }
+    },
   },
 
   mounted() {

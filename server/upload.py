@@ -10,13 +10,37 @@ app = Flask(__name__)
 CORS(app)
 
 # 设置文件上传保存路径
-UPLOAD_FOLDER = './files'
+UPLOAD_FOLDER = '/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/files'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # 确保上传文件夹存在
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
+def get_all_files(directory):
+    file_list = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.abspath(os.path.join(root, file))
+            file_list.append(file_path)
+    return file_list
+
+@app.route('/get_files', methods=['POST'])
+def get_file_paths():
+    data = request.json
+    dataset = data.get('dataset')
+    if not dataset:
+        return jsonify({'error': 'No dataset provided'}), 400
+    
+    directory = os.path.join(app.config['UPLOAD_FOLDER'], dataset)
+    if not os.path.exists(directory):
+        return jsonify({'error': 'Directory does not exist'}), 404
+    
+    try:
+        files = get_all_files(directory)
+        return jsonify({'files': files})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # 上传文件 API
 @app.route('/upload', methods=['POST'])

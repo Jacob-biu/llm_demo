@@ -130,6 +130,7 @@ export default {
     handleNodeClick(node) {
       if (!node.children) {
         this.selectedFile = node.filePath;
+        console.log('selectedFile:' + this.selectedFile );
         this.previewFile(node.filePath);
         this.showSen = false;
         if(this.isDocx){

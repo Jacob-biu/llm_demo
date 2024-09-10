@@ -15,15 +15,15 @@
     </div>
     <div id="BarContainer" v-show="isSidebarOpen" :class="{ active: isDarkMode }">
       <p>工具栏</P>
-      <div id="Bar" >
+      <div id="Bar">
         <button id="palmLogo" @click="navigateToPage"></button>
         <!-- <div id="knowledgeDB" style="display:flex;  flex-direction: column;  justify-content: center;  align-items: center;">
           <el-dropdown id="KnowledgeDBButton">
             <button>
               <i class="el-icon-arrow-down el-icon--right"></i>
             </button> -->
-            <!-- 下拉菜单 -->
-            <!-- <template #dropdown>
+        <!-- 下拉菜单 -->
+        <!-- <template #dropdown>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item @click.native="triggerKnowledgeDBView" style="display: flex; align-items: center;">
                   <i>选择</i>
@@ -33,56 +33,61 @@
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
-          </el-dropdown> -->
-          <!-- <button @click="triggerKnowledgeDBView" id="KnowledgeDBButton"></button> -->
-          <!-- <span>知识库</span>
+</el-dropdown> -->
+        <!-- <button @click="triggerKnowledgeDBView" id="KnowledgeDBButton"></button> -->
+        <!-- <span>知识库</span>
         </div> -->
-        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center;  width:100%; aspect-ratio: 1 / 1;">
+        <div
+          style="display:flex; flex-direction:column; justify-content:center; align-items:center;  width:100%; aspect-ratio: 1 / 1;">
           <button @click="triggerKnowledgeDBView" id="KnowledgeDBButton"></button>
           <span>编辑知识库</span>
           <button @click="triggerKnowledgeDBPreview" id="KnowledgeDBButton"></button>
           <span>预览知识库</span>
         </div>
-        
-        <div :class="{'dark-mode': isDarkMode, 'white-mode': !isDarkMode}" id="mode">
+
+        <div :class="{ 'dark-mode': isDarkMode, 'white-mode': !isDarkMode }" id="mode">
           <button @click="toggleDarkMode" id="modeButton" :class="{ active: isDarkMode }">
           </button>
         </div>
       </div>
     </div>
     <div id="sideBarOfDB" v-if="isSidebarOpen" :class="{ active: isDarkMode }">
-      <sideBarOfDB style="width: 100%; height: 100%;" ref="sidebarOfDB" @selectedDB-sent-from-side="handleValueUpdate" @filePaths-sent-from-side="handlePathsUpdate" />
+      <sideBarOfDB style="width: 100%; height: 100%;" ref="sidebarOfDB" @selectedDB-sent-from-side="handleValueUpdate"
+        @filePaths-sent-from-side="handlePathsUpdate" />
     </div>
     <div id="ChatContainer">
       <div id="container">
-        <div id="msg"  v-show="isChatBoxOpen" :class="{ active: isDarkMode }">
-          <p @mouseover="changeColor" @mouseout="resetColor" :style="{color: textColor}">{{ msg }}</p>
+        <div id="msg" v-show="isChatBoxOpen" :class="{ active: isDarkMode }">
+          <p @mouseover="changeColor" @mouseout="resetColor" :style="{ color: textColor }">{{ msg }}</p>
         </div>
         <div id="chatbox" v-show="isChatBoxOpen" :class="{ active: isDarkMode }">
-            <div id="chatlog" >
-              
-            </div>
+          <div id="chatlog">
+
+          </div>
         </div>
-        <div id="messagebox" >
-          <input type="file" id="fileInput" ref="fileInput" @change="handleFileChange" class="file-upload" style="display: none;" />
+        <div id="messagebox">
+          <input type="file" id="fileInput" ref="fileInput" @change="handleFileChange" class="file-upload"
+            style="display: none;" />
           <!-- 自定义文件上传按钮 -->
           <button @click="triggerFileUpload" class="custom-file-upload" :class="{ active: isDisabled }">
           </button>
-          <input type="text" id="userInput" v-model="inputData" @keyup.enter="sendData" placeholder="尽管问！" autofocus :class="{ active: isDarkMode }">
+          <input type="text" id="userInput" v-model="inputData" @keyup.enter="sendData" placeholder="尽管问！" autofocus
+            :class="{ active: isDarkMode }">
           <div style="height:80%;   aspect-ratio: 1 / 1;">
-            <button v-if="!loading" id="sendBtn" @click="sendData" :loading="loading" :class="{ active: isDarkMode }"></button>
-            <button v-else id="sendBtnStop" @click="stopSendMessage" ></button>
+            <button v-if="!loading" id="sendBtn" @click="sendData" :loading="loading"
+              :class="{ active: isDarkMode }"></button>
+            <button v-else id="sendBtnStop" @click="stopSendMessage"></button>
           </div>
         </div>
       </div>
     </div>
-    
+
     <div id="buttonDiv" v-show="isPreview">
       <button @click="toggleFilePreview" id="fileViewButtonTwo"></button>
     </div>
     <!-- 文件预览区 -->
     <div v-show="isPreviewFile" class="fileView">
-      <img class="preview-image" v-if="isImageFile" :src="previewUrl" alt="File Preview" />   
+      <img class="preview-image" v-if="isImageFile" :src="previewUrl" alt="File Preview" />
       <iframe v-else-if="isPdfFile" id="ifm" :src="this.previewUrl" width="100%" height="100%" />
       <div v-else-if="isTxtFile" id="txtFileContent" class="txtPage" v-html="txtFileContentPage"></div>
       <div v-else-if="isDocxFile" class="docx-preview" v-html="docxContent"></div>
@@ -130,7 +135,7 @@ import mammoth from "mammoth";
 import knowledgeDB from './knowledgeDB.vue';
 import knowledgeDBPreview from './knowledgeDBPreview.vue';
 import sideBarOfDB from './sidebarOfDB.vue'
-import { ElMessage , ElDropdown , ElDropdownMenu , ElDropdownItem , ElButton } from 'element-plus';
+import { ElMessage, ElDropdown, ElDropdownMenu, ElDropdownItem, ElButton } from 'element-plus';
 import { EventBusOne } from '../event-bus.js';
 import axios from 'axios';
 
@@ -156,8 +161,8 @@ export default {
       textColor: 'white',
       inputData: '',
       loading: false,
-      isStopped:false,
-      messages:[],
+      isStopped: false,
+      messages: [],
       wholeMessage: '',
       isDarkMode: false,
       isSidebarOpen: false,
@@ -166,15 +171,15 @@ export default {
       isActive: false,
       svg1: 'url(../assets/white_mode.svg)',
       svg2: 'url(../assets/dark_mode.svg)',
-      gif: {url: require('../assets/loading2.gif')},
+      gif: { url: require('../assets/loading2.gif') },
       //对话历史
       history: [],
       API_URL: "http://localhost:8009/v1/chat/completions",
       fileName: '',   //存储当前文件名
-      set:'',   //存储上一个文件名
+      set: '',   //存储上一个文件名
       selectedFile: null,
       isPreview: false,
-      isPreviewFile:false,
+      isPreviewFile: false,
       previewUrl: '', // 文件预览的 URL
       isPdfFile: false,
       isImageFile: false,
@@ -190,7 +195,7 @@ export default {
           });
         },
       },
-      
+
       pdfParams: reactive({
         currentPageNumber: 1,
         pdfScale: 1.0,
@@ -211,17 +216,18 @@ export default {
       docxPlainTextContent: "", // 保存docx纯文本内容
       docPlainTextContent: '',// 保存doc纯文本内容
       keywords: [],
-      isHighlighted:false, //是否高亮
+      isHighlighted: false, //是否高亮
       isKnowledgeDB: false, //是否展示知识库
       selectedOption: '', //知识库内容
       isKnowledgeDBPreview: false, //是否预览所有知识库内容
-      selectedButton: { label: '不使用知识库', value: 'null' , description: ''}, // 选中的知识库按钮
-      selectedButtonHistory: { label: '不使用知识库', value: 'null' , description: ''},
+      selectedButton: { label: '不使用知识库', value: 'null', description: '' }, // 选中的知识库按钮
+      selectedButtonHistory: { label: '不使用知识库', value: 'null', description: '' },
       isDisabled: false,
       disabledHistory: false,
       filePaths: [],  //知识库文件路径
       RAG: '',
       userMessageHistory: '',
+      parameters: {},
     };
   },
 
@@ -232,20 +238,20 @@ export default {
     });
   },
 
-  methods:{
-    handlePathsUpdate(newValue){
+  methods: {
+    handlePathsUpdate(newValue) {
       this.filePaths = newValue;
     },
 
     async submitFormForRAG() {
       try {
-        console.log("paths: "+ this.filePaths);
+        console.log("paths: " + this.filePaths);
         const requestBody = {
           datasetName: this.selectedButton.value,
           question: this.inputData,
           file_abs_paths: this.filePaths,
         };
-        const res = await axios.post('http://localhost:8999/es/rag_prompt', requestBody,{
+        const res = await axios.post('http://localhost:8999/es/rag_prompt', requestBody, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -254,14 +260,26 @@ export default {
         // console.log("responseFromServer: " + res.data);
         console.log(res.data);
         this.RAG = res.data.prompt;
-        console.log("RAG:" + this.RAG);
+        // console.log("RAG:" + this.RAG);
+
+        this.parameters = {};
+        for (const [key, value] of Object.entries(res.data.source)) {
+          const filePath = key;
+          const fileName = key.split('/').pop(); // Extract the file name
+          const content = value.content;
+          const fileScore = value["file score"];
+
+          this.parameters[fileName] = { 'content': content, 'fileScore': fileScore };
+        }
+
+        console.log('parameters: ' + this.parameters);
       } catch (error) {
         console.error('Error:', error);
         this.response = '请求失败，请检查控制台获取更多信息。';
       }
     },
 
-    handleValueUpdate(newValue){
+    handleValueUpdate(newValue) {
       this.selectedButtonHistory.label = this.selectedButton.label;
       this.selectedButtonHistory.value = this.selectedButton.value;
       this.selectedButtonHistory.description = this.selectedButton.description;
@@ -273,23 +291,23 @@ export default {
 
       this.$refs.knowledgeDB.selectedOption = this.selectedButton.value;
       this.disabledHistory = this.isDisabled;
-      if(this.selectedButton.value == 'null'){
+      if (this.selectedButton.value == 'null') {
         this.isDisabled = false;
-      }else{
+      } else {
         this.isDisabled = true;
       }
     },
-    
-    async navigateToPage(){
+
+    async navigateToPage() {
       const url = 'https://palm.seu.edu.cn/';
       window.open(url, '_blank');
     },
 
-    async triggerKnowledgeDBView(){
+    async triggerKnowledgeDBView() {
       this.isKnowledgeDB = !this.isKnowledgeDB;
     },
 
-    triggerKnowledgeDBPreview(){
+    triggerKnowledgeDBPreview() {
       this.$refs.knowledgeDBPreview.fetchFileTree();
       this.isKnowledgeDBPreview = !this.isKnowledgeDBPreview;
       this.$refs.knowledgeDBPreview.isShow = false;
@@ -297,7 +315,7 @@ export default {
       this.$refs.knowledgeDBPreview.showSen = true;
       this.$refs.knowledgeDBPreview.selectedFile = null;
     },
-    
+
     receiveDBContentFromChild(payload) {
       // 接收传递过来的知识库value
       this.selectedOption = payload;
@@ -305,7 +323,7 @@ export default {
     },
 
     async toggleSidebar() {
-      if(this.isSidebarOpen){
+      if (this.isSidebarOpen) {
         this.$refs.sidebarOfDB.selectedDB.label = this.selectedButton.label;
         this.$refs.sidebarOfDB.selectedDB.value = this.selectedButton.value;
         this.$refs.sidebarOfDB.selectedDB.description = this.selectedButton.description;
@@ -314,7 +332,7 @@ export default {
         console.log("关闭：" + this.selectedButton);
         this.isSidebarOpen = !this.isSidebarOpen;
         this.isActive = !this.isActive;
-      }else{
+      } else {
         this.isSidebarOpen = !this.isSidebarOpen;
         this.isActive = !this.isActive;
         this.$nextTick(() => {
@@ -327,7 +345,7 @@ export default {
       }
     },
 
-    async toggleFilePreview(){
+    async toggleFilePreview() {
       this.isPreviewFile = !this.isPreviewFile;
       this.isPreview = !this.isPreviewFile;
     },
@@ -341,18 +359,18 @@ export default {
       }
     },
 
-    async changeColor(){
+    async changeColor() {
       this.textColor = 'blue';
     },
 
-    async resetColor(){
+    async resetColor() {
       this.textColor = 'black';
       setTimeout(() => {
         this.textColor = 'white';
       }, 3000);
     },
 
-    async displayMessage(message,sender){
+    async displayMessage(message, sender) {
       //sender == user
       let messContainerUser = document.createElement('div');
       messContainerUser.style.textAlign = 'right';
@@ -369,14 +387,14 @@ export default {
       messContainerUser.appendChild(messageElementUser);
       document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
     },
-    
+
     async waitSeveralSeconds() {
       await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 10));
     },
 
-    async stopSendMessage(){
+    async stopSendMessage() {
       this.loading = false;
-      if(document.getElementById('img')){
+      if (document.getElementById('img')) {
         document.getElementById('chatlog').removeChild(document.getElementById('img'));
       }
     },
@@ -385,20 +403,20 @@ export default {
       if (this.loading) {
         return;
       }
-      if(!this.pdfFileOpen && this.isPdfFile){
+      if (!this.pdfFileOpen && this.isPdfFile) {
         alert('请等待pdf加载完毕');
         return;
       }
-      if(!this.docxFileOpen && this.isDocxFile){
+      if (!this.docxFileOpen && this.isDocxFile) {
         alert('请等待文档加载完毕');
         return;
       }
-      if(!this.txtFileOpen && this.isTxtFile){
+      if (!this.txtFileOpen && this.isTxtFile) {
         alert('请等待文档加载完毕');
         return;
       }
-      console.log("isDisabled："+ this.isDisabled);
-      if(this.isDisabled){
+      console.log("isDisabled：" + this.isDisabled);
+      if (this.isDisabled) {
         console.log('datasetName: ' + this.selectedButton.value);
         console.log('question: ' + this.inputData);
         console.log('file_abs_paths: ' + this.filePaths);
@@ -408,7 +426,7 @@ export default {
       // 配置marked，使其与highlight.js集成
       marked.setOptions({
         renderer: new marked.Renderer(),
-        highlight: function(code, lang) {
+        highlight: function (code, lang) {
           if (hljs.getLanguage(lang)) {
             return hljs.highlight(lang, code).value;
           } else {
@@ -422,7 +440,7 @@ export default {
         smartLists: true,
         tables: true,
         smartypants: false,
-        math: function(text, math) {
+        math: function (text, math) {
           // 使用katex渲染数学公式
           katex.render(math, document.createElement('div'), {
             displayMode: true
@@ -449,14 +467,14 @@ export default {
         document.getElementById('chatlog').appendChild(img);
         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
 
-        if(!this.history){
-          this.history.push({role: "system", content: "you are a helpful assistant"});
+        if (!this.history) {
+          this.history.push({ role: "system", content: "you are a helpful assistant" });
         }
 
         //合成用户发送的信息
         var userMessageContent = '';
 
-        if(!this.isDisabled){
+        if (!this.isDisabled) {
           if (this.set != this.fileName) {
             this.isHighlighted = false;
             this.set = this.fileName;
@@ -471,37 +489,37 @@ export default {
             } else {
               userMessageContent = "问题：" + usermessage;
             }
-          }else{
+          } else {
             userMessageContent = "问题：" + usermessage;
           }
-        }else{
+        } else {
           userMessageContent = this.RAG + '\n\n' + "问题：" + usermessage;
         }
-        
-        if(this.history.length >= 10){
+
+        if (this.history.length >= 10) {
           this.history.shift();
         }
 
-        if((this.disabledHistory == this.isDisabled && this.isDisabled) || (this.disabledHistory && !this.isDisabled)){
-          if(!(this.history.length === 1)){
+        if ((this.disabledHistory == this.isDisabled && this.isDisabled) || (this.disabledHistory && !this.isDisabled)) {
+          if (!(this.history.length === 1)) {
             let lastElement = this.history.pop();
-            this.history.push({"role": "user", "content": this.userMessageHistory});
+            this.history.push({ "role": "user", "content": this.userMessageHistory });
           }
         }
         this.userMessageHistory = usermessage;
         // 更新对话历史
-        this.history.push({"role": "user", "content": userMessageContent});
+        this.history.push({ "role": "user", "content": userMessageContent });
 
-        console.log("Question History: " + this.history);
-        console.log("userMessageContent: "+userMessageContent);
+        // console.log("Question History: " + this.history);
+        // console.log("userMessageContent: " + userMessageContent);
         // 构建请求数据
         var data = {
           "model": "qwen2-7b",
           "messages": this.history,
           "temperature": 0.8,
           "top_p": 0.95,
-          "repetition_penalty":1.1,
-          "stream":true,
+          "repetition_penalty": 1.1,
+          "stream": true,
         };
 
         try {
@@ -517,7 +535,8 @@ export default {
 
           let messContainerSystem = document.createElement('div');
           messContainerSystem.style.textAlign = 'right';
-          messContainerSystem.style.display = 'flex';
+          messContainerSystem.style.width = 'auto';
+          // messContainerSystem.style.display = 'flex';
           messContainerSystem.style.left = '0';
           messContainerSystem.style.paddingRight = '10%';
           messContainerSystem.style.height = 'fit-content';
@@ -623,13 +642,166 @@ export default {
             }
             console.log(this.wholeMessage);
 
+            //仅知识库状态下可用
+            if (this.isDisabled && !(Object.keys(this.parameters).length === 0)) {
+              let tool = document.createElement('div');
+              tool.id = 'tool';
+              tool.style.textAlign = 'right';
+              tool.style.width = '100%';
+
+              let span = document.createElement('span');
+              span.id = 'span';
+              span.innerHTML = '✨';
+
+              let toolTip = document.createElement('div');
+              toolTip.className = 'el-tooltip';
+              toolTip.innerHTML = '这是一个提示框';
+              toolTip.style.position = 'absolute';
+              toolTip.style.backgroundColor = '#fff';
+              toolTip.style.color = '#000';
+              toolTip.style.padding = '5px 10px';
+              toolTip.style.borderRadius = '4px';
+              toolTip.style.display = 'none'; // 初始隐藏
+              toolTip.style.width = '40%';
+              toolTip.style.maxHeight = '500px';
+              toolTip.style.overflowY = 'auto';
+              toolTip.style.border = '1px solid #ccc';
+              document.body.appendChild(toolTip);
+
+              // 示例数据
+              var parameters = {};
+
+              for (const [key, value] of Object.entries(this.parameters)) {
+                const filePath = key;
+                const fileName = key.split('/').pop(); // Extract the file name
+                const content = value.content;
+                const fileScore = value["file score"];
+
+                parameters[fileName] = { 'path': filePath, 'content': content, 'fileScore': fileScore };
+              }
+
+              // 格式化参数为 HTML
+              const formatParameters = (params) => {
+                let content = '';
+                // Convert the object to an array and sort by fileScore in descending order
+                const sortedEntries = Object.entries(params).sort((a, b) => b[1].fileScore - a[1].fileScore);
+
+                // Format the sorted entries into HTML
+                for (const [file, values] of sortedEntries) {
+                  content += `<strong style="color: blue;">${file}:</strong> <br> Content: ${values.content.join('<br> ')} <br>`;
+                }
+                return content;
+              };
+
+              // 设置 tooltip 内容
+              toolTip.innerHTML = formatParameters(parameters);
+
+
+              span.addEventListener('mouseover', function (event) {
+                toolTip.style.left = event.pageX + 'px';
+                toolTip.style.top = event.pageY + 'px';
+                toolTip.style.display = 'block';
+
+                // 确保 tooltip 在界面内
+                const tooltipRect = toolTip.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+
+                if (tooltipRect.right > viewportWidth) {
+                  toolTip.style.left = (viewportWidth - tooltipRect.width) + 'px';
+                }
+                if (tooltipRect.bottom > viewportHeight) {
+                  toolTip.style.top = (viewportHeight - tooltipRect.height) + 'px';
+                }
+              });
+
+              span.addEventListener('mouseout', function () {
+                toolTip.style.display = 'none';
+              });
+
+              toolTip.addEventListener('mouseover', function () {
+                toolTip.style.display = 'block';
+              });
+
+              toolTip.addEventListener('mouseout', function () {
+                toolTip.style.display = 'none';
+              });
+
+
+
+              tool.appendChild(span);
+              messageElementSystem.appendChild(tool);
+
+
+
+              //添加文件行
+              let fileDiv = document.createElement('div');
+              fileDiv.style.height = 'auto';
+              fileDiv.style.maxWidth = '250px';
+              fileDiv.style.padding = '0.05%';
+              fileDiv.style.borderRadius = '10px';
+              fileDiv.style.border = '1px solid #ccc';
+
+              for (const [key, value] of Object.entries(parameters)) {
+                const fileName = key;
+                const filepath = value.path;
+                let fileContainer = document.createElement('div');
+                fileContainer.style.borderRadius = '10px';
+                fileContainer.style.border = 'none';
+                fileContainer.style.display = 'flex';
+                fileContainer.style.padding = '1px';
+                fileContainer.style.overflowX = 'auto';
+
+                let icon = document.createElement('div');
+                icon.style.width = '18px';
+                icon.style.height = '18px';
+                icon.style.backgroundImage = "url('/assets/fileIcon.svg')";
+                icon.style.backgroundSize = 'contain'; // 使用 contain 以保持长宽比
+                icon.style.backgroundPosition = 'center';
+                icon.style.backgroundRepeat = 'no-repeat'; // 防止图片重复
+
+                fileContainer.appendChild(icon);
+
+                let span = document.createElement('span');
+                span.innerHTML = fileName;
+
+                fileContainer.appendChild(span);
+                fileDiv.appendChild(fileContainer);
+
+                // 添加点击事件监听器
+                fileContainer.addEventListener('click', () => {
+                  console.log(`File clicked: ${fileName}`);
+                  // 你可以在这里添加更多的逻辑，例如打开文件或显示文件详情
+                  this.isKnowledgeDBPreview = !this.isKnowledgeDBPreview;
+                  this.$refs.knowledgeDBPreview.fetchFileTree();
+                  const fileExtension = fileName.split('.').pop().toLowerCase();
+                  var isDocx = false;
+
+                  if (fileExtension === 'docx') {
+                    this.$refs.knowledgeDBPreview.isDocxShow = true;
+                    this.$refs.knowledgeDBPreview.isShow = false;
+                  }else{
+                    this.$refs.knowledgeDBPreview.isShow = true;
+                    this.$refs.knowledgeDBPreview.isDocxShow = false;
+                  }
+                  this.$refs.knowledgeDBPreview.showSen = false;
+                  const relativePath = `${this.selectedButton.label}/${fileName}`;
+                  this.$refs.knowledgeDBPreview.selectedFile = relativePath;
+                });
+              }
+
+
+              messContainerSystem.appendChild(fileDiv);
+            }
+
+
             if (!this.isHighlighted) {
               this.isHighlighted = true;
               //返回消息在预览文档中高亮文字
               if (this.isTxtFile) {
                 this.isPreviewFile = true;
                 this.isPreview = false;
-                await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage);
+                await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage, usermessage);
                 this.txtFileContentPage = this.highlightedContent(this.txtFileContent);
               } else if (this.isPdfFile) {
                 if (!this.pdfDocumentContent) {
@@ -638,12 +810,12 @@ export default {
                 }
                 this.isPreviewFile = true;
                 this.isPreview = false;
-                await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage);
+                await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage, usermessage);
                 this.searchFile();
               } else if (this.isDocxFile) {
                 this.isPreviewFile = true;
                 this.isPreview = false;
-                await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage);
+                await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage, usermessage);
                 this.docxContent = this.highlightKeySentences(this.docxContent);
               }
             }
@@ -662,7 +834,7 @@ export default {
 
     renderMath(text) {
       // 匹配并处理块级公式，例如 $$...$$ 或 \[...\]
-      text = text.replace(/(\$\$|\\\[)([\s\S]+?)(\$\$|\\\])/g, function(_, delimiter, math) {
+      text = text.replace(/(\$\$|\\\[)([\s\S]+?)(\$\$|\\\])/g, function (_, delimiter, math) {
         return katex.renderToString(math, {
           displayMode: true,
           throwOnError: false,
@@ -670,7 +842,7 @@ export default {
       });
 
       // 匹配并处理行内公式，例如 $...$ 或 \(...\)
-      text = text.replace(/(\$|\\\()(.+?)(\$|\\\))/g, function(_, delimiter, math) {
+      text = text.replace(/(\$|\\\()(.+?)(\$|\\\))/g, function (_, delimiter, math) {
         return katex.renderToString(math, {
           displayMode: false,
           throwOnError: false,
@@ -680,7 +852,7 @@ export default {
       return text;
     },
 
-    async addLineNumbersToBlock(block){
+    async addLineNumbersToBlock(block) {
       //为行插入行号
       const lines = block.innerHTML.split('\n');
       // 移除最后一个空行
@@ -723,24 +895,24 @@ export default {
 
             // 使用 PDF.js 的 viewer.html 来展示 PDF
             console.log(pdfUrl);
-            try{
+            try {
               await this.loadPdf(pdfUrl);
               // console.log(this.extractedPDFText);
-            }catch(error){
-              console.error('从PDF提取文本时出错', error);  
+            } catch (error) {
+              console.error('从PDF提取文本时出错', error);
             }
             this.pdfFileOpen = true;
-            ElMessage.success( 'PDF上传成功！');
+            ElMessage.success('PDF上传成功！');
             // alert("PDF上传成功！");
           };
           reader.readAsArrayBuffer(file);
-        }else if(file.type === "text/plain"){
+        } else if (file.type === "text/plain") {
           this.isPdfFile = false;
           this.isImageFile = false;
           this.isTxtFile = true;
           this.isDocxFile = false;
           this.isDocFile = false;
-          
+
           const reader = new FileReader();
           reader.onload = (e) => {
             this.txtFileContent = e.target.result; // 读取到的内容赋值给 fileContent
@@ -749,9 +921,9 @@ export default {
           };
           reader.readAsText(file); // 以文本形式读取文件
           this.txtFileOpen = true;
-          ElMessage.success( 'Txt上传成功！');
+          ElMessage.success('Txt上传成功！');
           // alert("Txt上传成功！");
-        }else if(file.name.endsWith(".docx")){
+        } else if (file.name.endsWith(".docx")) {
           this.isPdfFile = false;
           this.isImageFile = false;
           this.isTxtFile = false;
@@ -771,9 +943,9 @@ export default {
             alert("文档解析失败，请检查文件格式或内容！");
           }
           this.docxFileOpen = true;
-          ElMessage.success( 'docx文档上传成功！');
+          ElMessage.success('docx文档上传成功！');
           // alert("docx文档上传成功！");
-        }else if(this.isImage()){
+        } else if (this.isImage()) {
           this.isPdfFile = false;
           this.isImageFile = true;
           this.isTxtFile = false;
@@ -784,7 +956,7 @@ export default {
             this.previewUrl = e.target.result;
           };
           reader.readAsDataURL(file);
-        }else {
+        } else {
           this.isImageFile = false;
           this.isPdfFile = false;
           this.isTxtFile = false;
@@ -801,12 +973,12 @@ export default {
       // 创建一个虚拟的 DOM 元素
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = htmlContent;
-      
+
       // 提取纯文本内容
       return tempDiv.textContent || tempDiv.innerText || "";
     },
 
-    async loadPdfContent(pdfUrl){
+    async loadPdfContent(pdfUrl) {
       const self = this;
       // 使用 pdf.js 获取 PDF 文件
       pdfjs.getDocument(pdfUrl).promise.then(function (pdf) {
@@ -836,7 +1008,7 @@ export default {
         console.error('Error loading PDF:', error);
       });
     },
-    
+
 
     async loadPdf(url) {
       try {
@@ -883,7 +1055,7 @@ export default {
     //     console.log(this.extractedPDFText);
     //   }
     // },
-    
+
     // extractTextFromPage(textContent, pageNumber) {
     //   const textLayer = document.getElementById(`text-layer${pageNumber}`);
     //   textLayer.innerHTML = ''; // 清空现有的文本图层
@@ -912,7 +1084,7 @@ export default {
         scale: this.pdfParams.pdfScale * window.devicePixelRatio, // 根据设备像素比调整 scale
       });
       const canvas = document.getElementById(`pdf-render${pageNumber}`);
-      if(!canvas) {
+      if (!canvas) {
         console.error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
         throw new Error(`找不到 id 为 pdf-render${pageNumber} 的 canvas 元素`);
         // return reject('Canvas not found');
@@ -945,7 +1117,7 @@ export default {
         textLayerDiv: document.getElementById(`text-layer${pageNumber}`),
         textContent: await page.getTextContent(),
       };
-      page.render(renderContext).promise.then(function() {
+      page.render(renderContext).promise.then(function () {
         console.log('Page rendered');
       });
 
@@ -992,7 +1164,7 @@ export default {
       // Update extractedPDFText
       this.extractedPDFText += textContent.items.map(item => item.str).join(' ') + '\n';
     },
-    
+
     prevPage() {
       if (this.pdfParams.currentPageNumber > 1) {
         this.pdfParams.currentPageNumber = this.pdfParams.currentPageNumber - 1;
@@ -1015,7 +1187,7 @@ export default {
       if (this.pdfParams.pdfScale < maxScale) {
         this.pdfParams.pdfScale += 0.1;
         for (let pageNum = 1; pageNum <= this.pdfParams.pdfPageTotal; pageNum++) {
-            await this.renderPdfPage(pageNum);
+          await this.renderPdfPage(pageNum);
         }
         // await this.getPdfPage(this.pdfParams.currentPageNumber);
       }
@@ -1027,7 +1199,7 @@ export default {
       if (this.pdfParams.pdfScale > minScale) {
         this.pdfParams.pdfScale -= 0.1;
         for (let pageNum = 1; pageNum <= this.pdfParams.pdfPageTotal; pageNum++) {
-            await this.renderPdfPage(pageNum);
+          await this.renderPdfPage(pageNum);
         }
         // await this.getPdfPage(this.pdfParams.currentPageNumber);
       }
@@ -1038,8 +1210,8 @@ export default {
       this.$nextTick(() => {
         const container = this.$refs.pdfContainer;
         if (container) {
-            container.scrollLeft =
-              container.scrollWidth / 2 - container.clientWidth / 2;
+          container.scrollLeft =
+            container.scrollWidth / 2 - container.clientWidth / 2;
         }
       });
     },
@@ -1048,28 +1220,29 @@ export default {
       // 判断预览的文件是否为图片
       return /\.(jpeg|jpg|gif|png|bmp|webp)$/i.test(this.fileName);
     },
-    isPdf(){
+    isPdf() {
       // 判断预览的文件是否为PDF
       return /\.(pdf)$/i.test(this.fileName);
     },
-    isTxt(){
+    isTxt() {
       // 判断预览的文件是否为Txt
       return /\.(txt)$/i.test(this.fileName);
     },
 
     triggerFileUpload() {
-      if(!this.isDisabled){
+      if (!this.isDisabled) {
         // 触发隐藏的文件上传 input
         this.$refs.fileInput.click();
       }
     },
 
     // 向后端发送数据以提取关键词
-    async sendDataToBackendForKeys(ContentFromFile, ContentFromSystem) {
+    async sendDataToBackendForKeys(ContentFromFile, ContentFromSystem, question) {
       const url = 'http://localhost:8999/longcontext/uploadfile';
       const requestBody = {
         contents: [ContentFromFile],
-        answer: ContentFromSystem
+        answer: ContentFromSystem,
+        question: question,
       };
 
       try {
@@ -1084,7 +1257,7 @@ export default {
 
         // 检查请求是否成功
         if (!response.ok) {
-          ElMessage.error( 'HTTP error! status: '+ response.status);
+          ElMessage.error('HTTP error! status: ' + response.status);
           // throw new Error(`HTTP error! status: ${response.status}`);
         }
 
@@ -1119,7 +1292,7 @@ export default {
       this.keywords.forEach((word) => {
         // 转义关键词中的特殊字符，并替换换行符为 \s*，以便匹配多行内容
         const escapedWord = word.replace(/\\([.*+?^${}()|[\]\\])/g, '\\$&');
-        console.log('escapedWord: '+ escapedWord);
+        console.log('escapedWord: ' + escapedWord);
         const regex = new RegExp(`(${escapedWord})`, "gi");
         content = content.replace(regex, '<span class="highlight">$1</span>');
       });
@@ -1147,7 +1320,7 @@ export default {
         for (let i = 0; i < sentenceLength; i += partLength) {
           results.push(word.slice(i, i + partLength)); // 切割句子
         }
-          
+
         for (const result of results) {
           // 创建正则表达式，使用 `g` 标志进行全局匹配
           const regex = new RegExp(`(${result})`, 'gi');
@@ -1157,7 +1330,7 @@ export default {
       }
       return highlightedContent;
     },
-    
+
     // 匹配pdf关键词的高亮函数
     async searchFile() {
       // 如果没有提取到关键词，直接返回原始内容
@@ -1165,7 +1338,7 @@ export default {
         return;
       }
       let iframe = document.getElementById('ifm')
-      if(iframe && iframe.contentWindow && iframe.contentWindow.PDFViewerApplication){
+      if (iframe && iframe.contentWindow && iframe.contentWindow.PDFViewerApplication) {
         console.log("pdf已加载");
         iframe.contentWindow.PDFViewerApplication.findBar.findField.click();
         iframe.contentWindow.PDFViewerApplication.findBar.findField.focus();
@@ -1178,7 +1351,7 @@ export default {
           for (let i = 0; i < sentenceLength; i += partLength) {
             results.push(word.slice(i, i + partLength)); // 切割句子
           }
-          
+
           for (const result of results) {
             // console.log(`Keywords: ${word}`);
             // 在每个关键词完成高亮后等待一小段时间，以确保渲染完成
@@ -1218,7 +1391,7 @@ export default {
         iframe.contentWindow.PDFViewerApplication.findBar.dispatchEvent(new Event('highlightallchange'));
         // iframe.contentWindow.PDFViewerApplication.findBar.findNextButton.click();
         resolve();
-        setTimeout(function() {
+        setTimeout(function () {
           console.log('等待完成，继续渲染');
         }, 200);
       });
@@ -1255,8 +1428,10 @@ export default {
 <style>
 /* 你可以根据需要自定义样式 */
 .hljs {
-  border-radius: 5px; /* 圆角边框 */
-  border: 2px solid black; /* 黑框 */
+  border-radius: 5px;
+  /* 圆角边框 */
+  border: 2px solid black;
+  /* 黑框 */
 }
 
 /* 确保代码文本颜色高亮 */
@@ -1265,10 +1440,11 @@ export default {
 .hljs-literal,
 .hljs-section,
 .hljs-link {
-  color: #333; /* 设置文本颜色 */
+  color: #333;
+  /* 设置文本颜色 */
 }
 
-#Total{
+#Total {
   display: flex;
   justify-content: center;
   text-align: center;
@@ -1277,11 +1453,11 @@ export default {
   margin-bottom: 0;
 }
 
-#SlideButtonDiv{
+#SlideButtonDiv {
   display: inline-block;
   padding: 0;
   margin-top: 1%;
-  width:1.7%;
+  width: 1.7%;
   height: 98%;
   margin-top: 1%;
   margin-bottom: 1%;
@@ -1290,33 +1466,38 @@ export default {
   justify-content: center;
 }
 
-#slideBarButton{
+#slideBarButton {
   padding: 0;
   width: 100%;
   padding-top: 100%;
   border-radius: 50%;
-  border:none;
+  border: none;
   cursor: pointer;
-  background-image: url("../assets/green_icon.svg"); /* 替换为点击后 SVG 图片路径 */
+  background-image: url("../assets/green_icon.svg");
+  /* 替换为点击后 SVG 图片路径 */
   background-size: 99% 99%;
   background-position: center;
   background-repeat: no-repeat;
   background-color: transparent;
 }
+
 /* 切换后的背景图片 */
 #slideBarButton.active {
-  background-image: url("../assets/red_x.svg"); /* 替换为点击后 SVG 图片路径 */
+  background-image: url("../assets/red_x.svg");
+  /* 替换为点击后 SVG 图片路径 */
 }
+
 #slideBarButton:hover {
   background-color: green;
 }
+
 #slideBarButton.active:hover {
   background-color: red;
 }
 
 #BarContainer {
-  justify-content:center; 
-  align-items:center;
+  justify-content: center;
+  align-items: center;
   display: inline-block;
   width: 10%;
   height: 95.5%;
@@ -1325,29 +1506,31 @@ export default {
   margin-right: 0.5%;
   padding: 0;
   text-align: center;
-  background: rgba(255,255,255,0.75);
+  background: rgba(255, 255, 255, 0.75);
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-#BarContainer.active{
-  background: rgba(0,0,0,0.5);
+
+#BarContainer.active {
+  background: rgba(0, 0, 0, 0.5);
 }
-#BarContainer.active >p{
-  color:white;
+
+#BarContainer.active>p {
+  color: white;
 }
 
 #Bar {
-  position:relative;
-  width:100%;
-  height:90%;
+  position: relative;
+  width: 100%;
+  height: 90%;
   text-align: center;
-  justify-content:center; 
-  align-items:center;
+  justify-content: center;
+  align-items: center;
 }
 
-#sideBarOfDB{
-  justify-content:center; 
-  align-items:center;
+#sideBarOfDB {
+  justify-content: center;
+  align-items: center;
   display: inline-block;
   width: 10%;
   height: 95.5%;
@@ -1356,14 +1539,14 @@ export default {
   margin-right: 0.5%;
   padding: 0;
   text-align: center;
-  background: rgba(255,255,255,0.75);
+  background: rgba(255, 255, 255, 0.75);
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 #ChatContainer {
   display: inline-block;
-  width:70%;
+  width: 70%;
   margin-top: 1%;
   margin-bottom: 1%;
   text-align: center;
@@ -1383,42 +1566,46 @@ export default {
   text-align: center;
 }
 
-.Picture{
+.Picture {
   position: absolute;
-  top:200px;
-  left:280px;
+  top: 200px;
+  left: 280px;
 }
 
-#palmLogo{
-  width:60%;
-  aspect-ratio: 1 / 1; /* 设置宽高比为1:1，使宽度等于高度 */
+#palmLogo {
+  width: 60%;
+  aspect-ratio: 1 / 1;
+  /* 设置宽高比为1:1，使宽度等于高度 */
   border-radius: 10px;
   border: none;
-  background-color: rgba(255,255,255,0.8);
+  background-color: rgba(255, 255, 255, 0.8);
   background-image: url("../assets/PALMLogo.png");
   background-size: auto 100%;
   background-position: center;
   background-repeat: no-repeat;
   cursor: pointer;
 }
+
 #palmLogo:hover {
-  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
 
-#KnowledgeDBButton{
-  width:60%;
-  aspect-ratio: 2 / 1; /* 设置宽高比为1:1，使宽度等于高度 */
+#KnowledgeDBButton {
+  width: 60%;
+  aspect-ratio: 2 / 1;
+  /* 设置宽高比为1:1，使宽度等于高度 */
   border-radius: 10px;
   border: none;
-  background-color: rgba(255,255,255,0.8);
+  background-color: rgba(255, 255, 255, 0.8);
   background-image: url("../assets/sharpicons_connection-points.svg");
   background-size: auto 100%;
   background-position: center;
   background-repeat: no-repeat;
   cursor: pointer;
 }
+
 #KnowledgeDBButton:hover {
-  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
 
 #msg {
@@ -1431,14 +1618,16 @@ export default {
   justify-content: center;
   margin-bottom: 0.05%;
 }
-#msg p{
+
+#msg p {
   font-size: 100%;
   text-size-adjust: 100%;
-  margin-top:0.5px;
-  margin-bottom:0.5px;
+  margin-top: 0.5px;
+  margin-bottom: 0.5px;
 }
+
 #msg.active {
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 #chatbox {
@@ -1451,30 +1640,36 @@ export default {
   margin-bottom: 0.05%;
   overflow-y: auto;
   overflow-x: auto;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
 }
-#chatbox.active{
-  background-color: rgba(0,0,0,0.5);
+
+#chatbox.active {
+  background-color: rgba(0, 0, 0, 0.5);
 }
+
 #chatbox::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
+  width: 8px;
+  height: 8px;
 }
+
 ::-webkit-scrollbar-button {
-	display: none;
+  display: none;
 }
+
 ::-webkit-scrollbar-track {
-	background-color: rgba(70, 166, 255, 0.1);
-	display: none;
+  background-color: rgba(70, 166, 255, 0.1);
+  display: none;
 }
+
 ::-webkit-scrollbar-thumb {
-	background-color: rgba(70, 166, 255, 0.4);
-	border: 2px solid transparent;
-	border-radius: 6px;
-	background-clip: padding-box;
+  background-color: rgba(70, 166, 255, 0.4);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background-clip: padding-box;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 #chatlog {
@@ -1497,14 +1692,15 @@ export default {
   width: 100%;
   display: flex;
   align-items: center;
-  background: rgba(255,255,255,1);
+  background: rgba(255, 255, 255, 1);
   box-sizing: border-box;
 }
 
 .custom-file-upload {
   margin-left: 1%;
   height: 80%;
-  aspect-ratio: 1 / 1; /* 设置宽高比为1:1，使宽度等于高度 */
+  aspect-ratio: 1 / 1;
+  /* 设置宽高比为1:1，使宽度等于高度 */
   border: none;
   background-color: transparent;
   background-image: url("../assets/attachment.svg");
@@ -1517,11 +1713,13 @@ export default {
 }
 
 .custom-file-upload:hover {
-  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
+
 .custom-file-upload.active {
   opacity: 0.5;
 }
+
 .custom-file-upload.active:hover {
   cursor: not-allowed;
 }
@@ -1532,45 +1730,54 @@ export default {
 }
 
 .user {
-  margin-left:auto;
+  margin-left: auto;
   padding: 5px;
   text-align: left;
-  background-color: rgb(136, 213, 185,0.9);
+  background-color: rgb(136, 213, 185, 0.9);
 }
 
 .system {
   white-space: pre-wrap;
   text-align: left;
   padding: 5px;
-  background-color: rgb(136, 213, 185,0.9);
+  background-color: rgb(136, 213, 185, 0.9);
 }
 
 #userInput {
-  flex-grow: 1; /* 第二个元素占据剩余的宽度 */
+  flex-grow: 1;
+  /* 第二个元素占据剩余的宽度 */
   margin-right: 1%;
-  height: 100%; /* 设置最小高度 */
-  overflow: hidden; /* 防止溢出显示 */  
-  resize: none; /* 禁止用户手动调整大小 */
+  height: 100%;
+  /* 设置最小高度 */
+  overflow: hidden;
+  /* 防止溢出显示 */
+  resize: none;
+  /* 禁止用户手动调整大小 */
   border: none;
   border-radius: 5px;
   opacity: 0.7;
   background-color: transparent;
 }
+
 #userInput:focus {
   outline: none;
   background-color: transparent;
-  box-shadow: none; /* 防止出现阴影 */
+  box-shadow: none;
+  /* 防止出现阴影 */
 }
-#userInput.active{
-  background-color: rgba(0,0,0,0.5);
+
+#userInput.active {
+  background-color: rgba(0, 0, 0, 0.5);
 }
-#userInput.active::placeholder{
+
+#userInput.active::placeholder {
   color: white;
 }
 
 #sendBtn {
   height: 100%;
-  aspect-ratio: 1 / 1; /* 设置宽高比为1:1，使宽度等于高度 */
+  aspect-ratio: 1 / 1;
+  /* 设置宽高比为1:1，使宽度等于高度 */
   border: none;
   background-color: transparent;
   background-image: url("../assets/button_gray_plane.svg");
@@ -1585,13 +1792,15 @@ export default {
   right: 15px; /* 定位到容器的右侧 */
   /*top: 3px;*/
 }
+
 #sendBtn:hover {
-  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
 
-#sendBtnStop{
+#sendBtnStop {
   height: 100%;
-  aspect-ratio: 1 / 1; /* 设置宽高比为1:1，使宽度等于高度 */
+  aspect-ratio: 1 / 1;
+  /* 设置宽高比为1:1，使宽度等于高度 */
   border: none;
   background-color: transparent;
   background-image: url("../assets/Stop.svg");
@@ -1602,16 +1811,17 @@ export default {
   border-radius: 50%;
   cursor: pointer;
 }
+
 #sendBtnStop:hover {
-  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
 
 /*dark mode*/
-#mode{
-  position:absolute;
+#mode {
+  position: absolute;
   left: 30%;
   right: 30%;
-  bottom:10px;
+  bottom: 10px;
   text-align: center;
   padding: 0;
 }
@@ -1620,7 +1830,7 @@ export default {
   --bg-color: white;
   --text-color: black;
 }
- 
+
 .dark-mode {
   --bg-color: black;
   --text-color: white;
@@ -1632,12 +1842,15 @@ body {
 }
 
 #modeButton {
-  text-align: center; /* 文本居中对齐*/ 
-  font-size: 13px; /* 设置字体大小*/ 
+  text-align: center;
+  /* 文本居中对齐*/
+  font-size: 13px;
+  /* 设置字体大小*/
   width: 40px;
-  height: 40px; 
+  height: 40px;
   cursor: pointer;
-  background-image: url("../assets/white_mode.svg"); /* 替换为默认 SVG 图片路径 */
+  background-image: url("../assets/white_mode.svg");
+  /* 替换为默认 SVG 图片路径 */
   background-size: auto 70%;
   background-position: center;
   background-repeat: no-repeat;
@@ -1646,17 +1859,19 @@ body {
   border: none;
   border-radius: 50%;
 }
+
 /* 切换后的背景图片 */
 #modeButton.active {
-  background-image: url("../assets/dark_mode.svg"); /* 替换为点击后 SVG 图片路径 */
+  background-image: url("../assets/dark_mode.svg");
+  /* 替换为点击后 SVG 图片路径 */
 }
 
-.fileContainer{
+.fileContainer {
   position: relative;
   height: 540px;
 }
 
-.fileView{
+.fileView {
   position: fixed;
   top: 2%;
   left: 15%;
@@ -1669,46 +1884,52 @@ body {
   border-radius: 5px;
 }
 
-#fileViewButtonTwo{
+#fileViewButtonTwo {
   margin-top: 10px;
   margin-left: 10px;
-  width:25px;
-  height:25px;
+  width: 25px;
+  height: 25px;
   border-radius: 50%;
-  border:none;
+  border: none;
   cursor: pointer;
-  background-image: url("../assets/green_icon.svg"); /* 替换为点击后 SVG 图片路径 */
+  background-image: url("../assets/green_icon.svg");
+  /* 替换为点击后 SVG 图片路径 */
   background-size: auto 70%;
   background-position: center;
   background-repeat: no-repeat;
   background-color: transparent;
 }
+
 #fileViewButtonTwo:hover {
   background-color: green;
 }
-#fileViewButton{
-  width:25px;
-  height:25px;
+
+#fileViewButton {
+  width: 25px;
+  height: 25px;
   border-radius: 50%;
-  border:none;
+  border: none;
   cursor: pointer;
-  background-image: url("../assets/red_x.svg"); /* 替换为点击后 SVG 图片路径 */
+  background-image: url("../assets/red_x.svg");
+  /* 替换为点击后 SVG 图片路径 */
   background-size: auto 70%;
   background-position: center;
   background-repeat: no-repeat;
   background-color: transparent;
 }
+
 #fileViewButton:hover {
   background-color: red;
 }
 
-#buttonDiv{
+#buttonDiv {
   position: relative;
-  height:100%;
+  height: 100%;
 }
-#fileViewButton{
+
+#fileViewButton {
   position: absolute;
-  top:0;
+  top: 0;
 }
 
 
@@ -1776,36 +1997,43 @@ body {
 .preview-image {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain; /* 保持长宽比 */
+  object-fit: contain;
+  /* 保持长宽比 */
 }
 
-.txtPage{
+.txtPage {
   width: 100%;
   height: 100%;
   background: white;
   overflow: auto;
-  white-space: pre; /* 保留格式 */
+  white-space: pre;
+  /* 保留格式 */
   text-align: initial;
 }
+
 .txtPage::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
+  width: 8px;
+  height: 8px;
 }
+
 ::-webkit-scrollbar-button {
-	display: none;
+  display: none;
 }
+
 ::-webkit-scrollbar-track {
-	background-color: rgba(70, 166, 255, 0.1);
-	display: none;
+  background-color: rgba(70, 166, 255, 0.1);
+  display: none;
 }
+
 ::-webkit-scrollbar-thumb {
-	background-color: rgba(70, 166, 255, 0.4);
-	border: 2px solid transparent;
-	border-radius: 6px;
-	background-clip: padding-box;
+  background-color: rgba(70, 166, 255, 0.4);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background-clip: padding-box;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .docx-preview {
@@ -1817,51 +2045,56 @@ body {
   overflow-y: auto;
   text-align: initial;
 }
+
 .docx-preview::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
+  width: 8px;
+  height: 8px;
 }
+
 ::-webkit-scrollbar-button {
-	display: none;
+  display: none;
 }
+
 ::-webkit-scrollbar-track {
-	background-color: rgba(70, 166, 255, 0.1);
-	display: none;
+  background-color: rgba(70, 166, 255, 0.1);
+  display: none;
 }
+
 ::-webkit-scrollbar-thumb {
-	background-color: rgba(70, 166, 255, 0.4);
-	border: 2px solid transparent;
-	border-radius: 6px;
-	background-clip: padding-box;
+  background-color: rgba(70, 166, 255, 0.4);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background-clip: padding-box;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .highlight {
   background-color: yellow;
 }
 
-#knowledgeDBdiv{
+#knowledgeDBdiv {
   position: fixed;
   top: 2%;
   left: 15%;
   width: 70%;
   height: 95%;
-  background-color: rgba(255,255,255,0.9);
+  background-color: rgba(255, 255, 255, 0.9);
   display: flex;
   /*align-items: center;
   justify-content: center;*/
   border-radius: 5px;
 }
 
-#knowledgeDBPreviewDiv{
+#knowledgeDBPreviewDiv {
   position: fixed;
   top: 2%;
   left: 7%;
   width: 86%;
   height: 95%;
-  background-color: rgba(255,255,255,0.9);
+  background-color: rgba(255, 255, 255, 0.9);
   display: flex;
   /*align-items: center;
   justify-content: center;*/

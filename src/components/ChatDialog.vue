@@ -1749,7 +1749,7 @@ export default {
 
 .user {
   margin-left: auto;
-  padding: 15px;
+  padding: 20px;
   text-align: left;
   background-color: rgb(136, 213, 185, 0.9);
 }
@@ -1757,7 +1757,7 @@ export default {
 .system {
   white-space: pre-wrap;
   text-align: left;
-  padding: 15px;
+  padding: 20px;
   background-color: rgb(136, 213, 185, 0.9);
 }
 

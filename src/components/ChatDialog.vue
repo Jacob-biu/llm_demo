@@ -86,7 +86,7 @@
       <button @click="toggleFilePreview" id="fileViewButtonTwo"></button>
     </div>
     <!-- 文件预览区 -->
-    <div v-show="isPreviewFile" class="fileView">
+    <div v-if="isPreviewFile" class="fileView">
       <img class="preview-image" v-if="isImageFile" :src="previewUrl" alt="File Preview" />
       <iframe v-else-if="isPdfFile" id="ifm" :src="this.previewUrl" width="100%" height="100%" />
       <div v-else-if="isTxtFile" id="txtFileContent" class="txtPage" v-html="txtFileContentPage"></div>
@@ -216,7 +216,7 @@ export default {
       docxPlainTextContent: "", // 保存docx纯文本内容
       docPlainTextContent: '',// 保存doc纯文本内容
       keywords: [],
-      isHighlighted: false, //是否高亮
+      // isHighlighted: false, //是否高亮
       isKnowledgeDB: false, //是否展示知识库
       selectedOption: '', //知识库内容
       isKnowledgeDBPreview: false, //是否预览所有知识库内容
@@ -377,11 +377,13 @@ export default {
       messContainerUser.style.display = 'flex';
       messContainerUser.style.right = '0';
       messContainerUser.style.paddingLeft = '10%';
+      messContainerUser.style.width = 'auto';
       document.getElementById('chatlog').appendChild(messContainerUser);
 
 
       let messageElementUser = document.createElement('div');
       messageElementUser.className = 'message ' + sender;
+      messageElementUser.style.maxWidth = '70%';
       messageElementUser.textContent = message;
 
       messContainerUser.appendChild(messageElementUser);
@@ -476,7 +478,7 @@ export default {
 
         if (!this.isDisabled) {
           if (this.set != this.fileName) {
-            this.isHighlighted = false;
+            // this.isHighlighted = false;
             this.set = this.fileName;
             if (this.isImageFile) {
               userMessageContent = "问题：" + usermessage;
@@ -546,7 +548,7 @@ export default {
           messageElementSystem.id = usermessage;
           messageElementSystem.innerHTML = '';
           messageElementSystem.className = 'message system';
-          messageElementSystem.style.maxWidth = '530px';
+          messageElementSystem.style.maxWidth = '75%';
           messContainerSystem.appendChild(messageElementSystem);
           document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
 
@@ -798,30 +800,43 @@ export default {
             }
 
 
-            if (!this.isHighlighted) {
-              this.isHighlighted = true;
+           // if (!this.isHighlighted) {
+              // this.isHighlighted = true;
               //返回消息在预览文档中高亮文字
               if (this.isTxtFile) {
                 this.isPreviewFile = true;
                 this.isPreview = false;
+                ElMessage.info('查询文档中！');
+                const temp = this.txtFileContentPage;
+                this.txtFileContentPage = null;
+                this.txtFileContentPage = temp.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
                 await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage, usermessage);
                 this.txtFileContentPage = this.highlightedContent(this.txtFileContent);
+                ElMessage.success('相关文字高亮完毕！');
               } else if (this.isPdfFile) {
                 if (!this.pdfDocumentContent) {
                   console.log("pdfDocumentContent Null!");
+                  ElMessage.error("pdfDocumentContent Null!");
                   return;
                 }
                 this.isPreviewFile = true;
                 this.isPreview = false;
+                ElMessage.info('查询文档中！');
                 await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage, usermessage);
                 this.searchFile();
+                ElMessage.success('相关文字高亮完毕！');
               } else if (this.isDocxFile) {
                 this.isPreviewFile = true;
                 this.isPreview = false;
+                ElMessage.info('查询文档中！');
+                const tempDocx = this.docxContent;
+                this.docxContent = null;
+                this.docxContent = tempDocx.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
                 await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage, usermessage);
                 this.docxContent = this.highlightKeySentences(this.docxContent);
+                ElMessage.success('相关文字高亮完毕！');
               }
-            }
+            //}
             // this.history.push({'role': 'assistant', 'content': this.wholeMessage});
             this.loading = false;
             // this.returnMessage = '';
@@ -1742,7 +1757,7 @@ export default {
 .system {
   white-space: pre-wrap;
   text-align: left;
-  padding: 5px;
+  padding: 10px;
   background-color: rgb(136, 213, 185, 0.9);
 }
 

@@ -688,7 +688,7 @@ export default {
 
                 // Format the sorted entries into HTML
                 for (const [file, values] of sortedEntries) {
-                  console.log(values.fileScore);
+                  // console.log(values.fileScore);
                   content += `<strong style="color: blue;">${file}:</strong> <br> Content: <pre>${values.content.join('\n\n')}</pre> <br>`;
                 }
                 return content;

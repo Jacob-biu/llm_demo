@@ -267,7 +267,7 @@ export default {
           const filePath = key;
           const fileName = key.split('/').pop(); // Extract the file name
           const content = value.content;
-          const fileScore = value["file score"];
+          const fileScore = value.file_score;
 
           this.parameters[fileName] = { 'content': content, 'fileScore': fileScore };
         }
@@ -675,7 +675,7 @@ export default {
                 const filePath = key;
                 const fileName = key.split('/').pop(); // Extract the file name
                 const content = value.content;
-                const fileScore = value["file score"];
+                const fileScore = value.fileScore;
 
                 parameters[fileName] = { 'path': filePath, 'content': content, 'fileScore': fileScore };
               }
@@ -688,6 +688,7 @@ export default {
 
                 // Format the sorted entries into HTML
                 for (const [file, values] of sortedEntries) {
+                  console.log(values.fileScore);
                   content += `<strong style="color: blue;">${file}:</strong> <br> Content: ${values.content.join('<br> ')} <br>`;
                 }
                 return content;

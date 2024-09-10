@@ -689,10 +689,12 @@ export default {
                 // Format the sorted entries into HTML
                 for (const [file, values] of sortedEntries) {
                   console.log(values.fileScore);
-                  content += `<strong style="color: blue;">${file}:</strong> <br> Content: ${values.content.join('<br> ')} <br>`;
+                  content += `<strong style="color: blue;">${file}:</strong> <br> Content: <pre>${values.content.join('\n\n')}</pre> <br>`;
                 }
                 return content;
               };
+
+              console.log("tooltip content: " + formatParameters(parameters));
 
               // 设置 tooltip 内容
               toolTip.innerHTML = formatParameters(parameters);

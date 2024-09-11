@@ -386,7 +386,19 @@ export default {
       messageElementUser.style.maxWidth = '70%';
       messageElementUser.textContent = message;
 
+      let userProfileImage = document.createElement('div');
+      userProfileImage.style.borderRadius = '50%';
+      userProfileImage.style.width = '25px';
+      userProfileImage.style.height = '25px';
+      userProfileImage.style.marginLeft = '10px';
+      userProfileImage.style.marginTop = '13px';
+      userProfileImage.style.backgroundImage = "url('/assets/profile_user.svg')";
+      userProfileImage.style.backgroundSize = 'contain'; // 使用 contain 以保持长宽比
+      userProfileImage.style.backgroundPosition = 'center';
+      userProfileImage.style.backgroundRepeat = 'no-repeat'; // 防止图片重复
+
       messContainerUser.appendChild(messageElementUser);
+      messContainerUser.appendChild(userProfileImage);
       document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
     },
 
@@ -470,7 +482,7 @@ export default {
         document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
 
         if (!this.history) {
-          this.history.push({ role: "system", content: "you are a helpful assistant" });
+          this.history.push({ "role": "system", "content": "you are a helpful assistant" });
         }
 
         //合成用户发送的信息
@@ -536,7 +548,7 @@ export default {
           console.log(response.ok);
 
           let messContainerSystem = document.createElement('div');
-          messContainerSystem.style.textAlign = 'right';
+          messContainerSystem.style.textAlign = 'left';
           messContainerSystem.style.width = 'auto';
           // messContainerSystem.style.display = 'flex';
           messContainerSystem.style.left = '0';
@@ -544,12 +556,33 @@ export default {
           messContainerSystem.style.height = 'fit-content';
           document.getElementById('chatlog').appendChild(messContainerSystem);
 
+          let systemMessageContainer = document.createElement('div');
+          systemMessageContainer.style.width = '100%';
+          systemMessageContainer.style.border = 'none';
+          systemMessageContainer.style.display = 'flex';
+
+          let systemProfileImage = document.createElement('div');
+          systemProfileImage.style.borderRadius = '50%';
+          systemProfileImage.style.width = '25px';
+          systemProfileImage.style.height = '25px';
+          systemProfileImage.style.marginRight = '10px';
+          systemProfileImage.style.marginTop = '13px';
+          systemProfileImage.style.backgroundImage = "url('/assets/LLMs.svg')";
+          systemProfileImage.style.backgroundSize = 'contain'; // 使用 contain 以保持长宽比
+          systemProfileImage.style.backgroundPosition = 'center';
+          systemProfileImage.style.backgroundRepeat = 'no-repeat'; // 防止图片重复
+          systemMessageContainer.appendChild(systemProfileImage);
+
           let messageElementSystem = document.createElement('div');
           messageElementSystem.id = usermessage;
           messageElementSystem.innerHTML = '';
           messageElementSystem.className = 'message system';
+          messageElementSystem.style.display = 'inline-block'; // 关键部分
+          messageElementSystem.width = "auto";
           messageElementSystem.style.maxWidth = '75%';
-          messContainerSystem.appendChild(messageElementSystem);
+          systemMessageContainer.appendChild(messageElementSystem);
+          
+          messContainerSystem.appendChild(systemMessageContainer);
           document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
 
           if (response.ok) {
@@ -785,7 +818,7 @@ export default {
                   if (fileExtension === 'docx') {
                     this.$refs.knowledgeDBPreview.isDocxShow = true;
                     this.$refs.knowledgeDBPreview.isShow = false;
-                  }else{
+                  } else {
                     this.$refs.knowledgeDBPreview.isShow = true;
                     this.$refs.knowledgeDBPreview.isDocxShow = false;
                   }
@@ -800,42 +833,42 @@ export default {
             }
 
 
-           // if (!this.isHighlighted) {
-              // this.isHighlighted = true;
-              //返回消息在预览文档中高亮文字
-              if (this.isTxtFile) {
-                this.isPreviewFile = true;
-                this.isPreview = false;
-                ElMessage.info('查询文档中！');
-                const temp = this.txtFileContentPage;
-                this.txtFileContentPage = null;
-                this.txtFileContentPage = temp.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
-                await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage, usermessage);
-                this.txtFileContentPage = this.highlightedContent(this.txtFileContent);
-                ElMessage.success('相关文字高亮完毕！');
-              } else if (this.isPdfFile) {
-                if (!this.pdfDocumentContent) {
-                  console.log("pdfDocumentContent Null!");
-                  ElMessage.error("pdfDocumentContent Null!");
-                  return;
-                }
-                this.isPreviewFile = true;
-                this.isPreview = false;
-                ElMessage.info('查询文档中！');
-                await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage, usermessage);
-                this.searchFile();
-                ElMessage.success('相关文字高亮完毕！');
-              } else if (this.isDocxFile) {
-                this.isPreviewFile = true;
-                this.isPreview = false;
-                ElMessage.info('查询文档中！');
-                const tempDocx = this.docxContent;
-                this.docxContent = null;
-                this.docxContent = tempDocx.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
-                await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage, usermessage);
-                this.docxContent = this.highlightKeySentences(this.docxContent);
-                ElMessage.success('相关文字高亮完毕！');
+            // if (!this.isHighlighted) {
+            // this.isHighlighted = true;
+            //返回消息在预览文档中高亮文字
+            if (this.isTxtFile) {
+              this.isPreviewFile = true;
+              this.isPreview = false;
+              ElMessage.info('查询文档中！');
+              const temp = this.txtFileContentPage;
+              this.txtFileContentPage = null;
+              this.txtFileContentPage = temp.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
+              await this.sendDataToBackendForKeys(this.txtFileContent, this.wholeMessage, usermessage);
+              this.txtFileContentPage = this.highlightedContent(this.txtFileContent);
+              ElMessage.success('相关文字高亮完毕！');
+            } else if (this.isPdfFile) {
+              if (!this.pdfDocumentContent) {
+                console.log("pdfDocumentContent Null!");
+                ElMessage.error("pdfDocumentContent Null!");
+                return;
               }
+              this.isPreviewFile = true;
+              this.isPreview = false;
+              ElMessage.info('查询文档中！');
+              await this.sendDataToBackendForKeys(this.cleanPdfText(this.pdfDocumentContent), this.wholeMessage, usermessage);
+              this.searchFile();
+              ElMessage.success('相关文字高亮完毕！');
+            } else if (this.isDocxFile) {
+              this.isPreviewFile = true;
+              this.isPreview = false;
+              ElMessage.info('查询文档中！');
+              const tempDocx = this.docxContent;
+              this.docxContent = null;
+              this.docxContent = tempDocx.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
+              await this.sendDataToBackendForKeys(this.docxPlainTextContent, this.wholeMessage, usermessage);
+              this.docxContent = this.highlightKeySentences(this.docxContent);
+              ElMessage.success('相关文字高亮完毕！');
+            }
             //}
             // this.history.push({'role': 'assistant', 'content': this.wholeMessage});
             this.loading = false;
@@ -1749,7 +1782,7 @@ export default {
 
 .user {
   margin-left: auto;
-  padding: 20px;
+  padding: 17px;
   text-align: left;
   background-color: rgb(136, 213, 185, 0.9);
 }
@@ -1757,7 +1790,7 @@ export default {
 .system {
   white-space: pre-wrap;
   text-align: left;
-  padding: 20px;
+  padding: 17px;
   background-color: rgb(136, 213, 185, 0.9);
 }
 

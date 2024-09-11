@@ -37,7 +37,8 @@
       <span>（默认不使用）</span>
     </el-card> -->
     <el-card id="topBar">
-      <span>当前知识库：{{ options.find(option => option.value === selectedOption) ? options.find(option => option.value === selectedOption).label : '未找到匹配的选项' }}</span>
+      <span>当前知识库：{{ options.find(option => option.value === selectedOption) ? options.find(option => option.value ===
+        selectedOption).label : '未找到匹配的选项' }}</span>
     </el-card>
     <div id="majorBar">
       <div id="leftBar">
@@ -52,7 +53,8 @@
       </div>
       <div id="rightBox">
         <!-- 右侧表单内容 -->
-        <div  v-show="isRightBox" style="position:relative; width: 99%; height:98%; margin:0.5%; border-radius:10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); ">
+        <div v-show="isRightBox"
+          style="position:relative; width: 99%; height:98%; margin:0.5%; border-radius:10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); ">
           <div style="position: absolute; top: 0; left: 0; z-index: 10; height: 5%;">
             <button class="custom-btn btn-8" @click="changeCardStateOne">
               <span>知识库</span>
@@ -63,30 +65,34 @@
           </div>
           <el-card class="box-card" style="height:100%; width:100%;" v-show="isCardOne">
             <div style="border-top: 1px solid #ccc; margin-top:1.5%"></div>
-            <div slot="header" class="clearfix" style="text-align:left; margin-bottom: 5%; display:flex;flex-direction: column; /* 设置主轴为垂直方向 */">
-              <h3 style="margin-bottom:1%; margin-top: 1%;">知识库 {{dataset.label}}</h3>
+            <div slot="header" class="clearfix"
+              style="text-align:left; margin-bottom: 5%; display:flex;flex-direction: column; /* 设置主轴为垂直方向 */">
+              <h3 style="margin-bottom:1%; margin-top: 1%;">知识库 {{ dataset.label }}</h3>
               <el-tooltip class="item" effect="dark" content="解析成功后才能问答哦。" placement="top">
                 <span style="font-size:15px">😊解析成功后才能问答哦。</span>
               </el-tooltip>
             </div>
-  
+
             <el-row :gutter="20" style="margin-bottom: 8%;">
               <el-col :span="12" style="position: absolute; left:0;">
                 <!-- 使用 el-dropdown 实现下拉菜单 -->
                 <el-dropdown :disabled="isDisabled">
-                  <el-button type="primary"  style="z-index:10;" :disabled="isDisabled">
+                  <el-button type="primary" style="z-index:10;" :disabled="isDisabled">
                     批量<i class="el-icon-arrow-down el-icon--right"></i>
                   </el-button>
                   <!-- 下拉菜单 -->
                   <template #dropdown>
                     <el-dropdown-menu slot="dropdown" :disabled="isDisabled">
-                      <el-dropdown-item @click.native="handleEnable" style="display: flex; align-items: center;" :disabled="isDisabled">
+                      <el-dropdown-item @click.native="handleEnable" style="display: flex; align-items: center;"
+                        :disabled="isDisabled">
                         <i class="el-icon-check" style="color: green; margin-right: 8px;">启用</i>
                       </el-dropdown-item>
-                      <el-dropdown-item @click.native="handleCancelEnable" style="display: flex; align-items: center;" :disabled="isDisabled">
+                      <el-dropdown-item @click.native="handleCancelEnable" style="display: flex; align-items: center;"
+                        :disabled="isDisabled">
                         <i class="el-icon-close" style="color: red; margin-right: 8px;">取消</i>
                       </el-dropdown-item>
-                      <el-dropdown-item @click.native="handleDeleteDataset" style="display: flex; align-items: center;" :disabled="isDisabled">
+                      <el-dropdown-item @click.native="handleDeleteDataset" style="display: flex; align-items: center;"
+                        :disabled="isDisabled">
                         <i class="el-icon-delete" style="margin-right: 8px;">删除</i>
                       </el-dropdown-item>
                     </el-dropdown-menu>
@@ -94,22 +100,19 @@
                 </el-dropdown>
               </el-col>
               <el-col :span="12" style="text-align: right;position: absolute;right:0;">
-                <el-input v-model="searchQuery" placeholder="搜索文件" suffix-icon="el-icon-search" style="width: 70%;margin-right:0.5%;"></el-input>
+                <el-input v-model="searchQuery" placeholder="搜索文件" suffix-icon="el-icon-search"
+                  style="width: 70%;margin-right:0.5%;"></el-input>
                 <el-button type="primary" @click="triggerFileSelect">新增文件</el-button>
-                  <!-- 隐藏的文件选择框 -->
-                <input
-                  type="file"
-                  ref="fileInput"
-                  style="display: none"
-                  @change="handleFileChange"
-                  accept=".jpg,.png,.txt,.pdf,.docx"
-                />
+                <!-- 隐藏的文件选择框 -->
+                <input type="file" ref="fileInput" style="display: none" @change="handleFileChange"
+                  accept=".jpg,.png,.txt,.pdf,.docx" />
               </el-col>
             </el-row>
             <div style="border-top: 1px solid #ccc; margin: 10px 0;"></div>
-  
+
             <!-- 绑定 v-loading，当 isLoading 为 true 时显示加载状态 -->
-            <el-table :data="filteredDatasets" v-loading="isLoading" style="width: 100%;" ref="table"  @selection-change="handleSelectionChange">
+            <el-table :data="filteredDatasets" v-loading="isLoading" style="width: 100%;" ref="table"
+              @selection-change="handleSelectionChange" max-height="45vh">
               <el-table-column type="selection" width="55"></el-table-column>
               <el-table-column prop="name" label="名称" width="180"></el-table-column>
               <!-- <el-table-column prop="chunks" label="分块数" width="100"></el-table-column> -->
@@ -117,16 +120,31 @@
               <!-- <el-table-column prop="parseMethod" label="解析方法" width="150"></el-table-column> -->
               <el-table-column prop="enabled" label="启用" width="100">
                 <template v-slot="scope">
-                  <el-switch v-model="scope.row.enabled"></el-switch>
+                  <el-switch v-model="scope.row.enabled" @change="handleEnabledChange(scope.row)"></el-switch>
                 </template>
               </el-table-column>
-              <el-table-column prop="parseStatus" label="解析状态" width="180"></el-table-column>
-              <el-table-column label="动作" width="240"  style="display: flex;">
+              <el-table-column prop="parseStatus" label="解析状态" width="180">
+                <template v-slot="scope">
+                  <div v-if="!scope.row.enabled">
+                    未解析
+                  </div>
+                  <div v-else>
+                    <div v-if="scope.row.progress < 100">
+                      <el-progress :percentage="scope.row.progress"></el-progress>
+                    </div>
+                    <div v-else>
+                      已解析
+                    </div>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="动作" width="240" style="display: flex;">
                 <!-- 自定义动作列 -->
                 <template v-slot="scope">
                   <el-button @click="deleteAction(scope.row)" style="width:15px; border:none;">删除</el-button>
                   <!--<el-button @click="changeNameAction(scope.row)" style="border:none; ">更改文件名</el-button>-->
-                  <el-button @click="downloadAction(scope.row)" style="width: 15px; size:10; border:none;">下载</el-button>
+                  <el-button @click="downloadAction(scope.row)"
+                    style="width: 15px; size:10; border:none;">下载</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -134,14 +152,15 @@
 
           <el-card class="box-card" style="height:100%; width:100%;" v-show="isCardTwo">
             <div style="border-top: 1px solid #ccc; margin-top:1.5%"></div>
-            <div slot="header" class="clearfix" style="text-align:left; margin-top: 2.5%; margin-bottom: 2.5%; display:flex;flex-direction: column; /* 设置主轴为垂直方向 */">
+            <div slot="header" class="clearfix"
+              style="text-align:left; margin-top: 2.5%; margin-bottom: 2.5%; display:flex;flex-direction: column; /* 设置主轴为垂直方向 */">
               <h3 style="margin-bottom:1%;">配置</h3>
               <el-tooltip class="item" effect="dark" content="在这里更新您的知识库详细信息。" placement="top">
                 <span style="font-size:15px">😊在这里更新您的知识库详细信息</span>
               </el-tooltip>
             </div>
             <div style="border-top: 1px solid #ccc; margin-top:1.5%; margin-bottom: 2.5%;"></div>
-            
+
             <el-card class="box-card" style="height:50%; width:50%;">
               <el-form :model="form" :rules="rules" ref="formRef">
                 <el-form-item label="名称" prop="name">
@@ -167,7 +186,7 @@
 </template>
 
 <script>
-import { ElButton, ElDialog , ElForm , ElFormItem , ElInput , ElSelect, ElOption , ElUpload , ElTable , ElTableColumn , ElMessage , ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus';
+import { ElButton, ElDialog, ElForm, ElFormItem, ElInput, ElSelect, ElOption, ElUpload, ElTable, ElTableColumn, ElMessage, ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus';
 import { ref } from 'vue';
 import axios from 'axios';
 import moment from 'moment'; // 用于格式化日期
@@ -194,7 +213,7 @@ export default {
       isCardTwo: false,
       selectedOption: 'null', // 用于接口调用的实际值
       options: [ // 下拉框的选项，模拟接口返回的值，包含显示的标签和实际的值
-        { label: '不使用知识库', value: 'null' , description: ''},
+        { label: '不使用知识库', value: 'null', description: '' },
         // { label: 'DB', value: 'DB' , description: 'DB'},
         // { label: 'DB2', value: 'DB2' , description: 'DB2'},
         // { label: 'DB3', value: 'DB3' , description: 'DB3'},
@@ -223,7 +242,7 @@ export default {
       },
       searchQuery: '', // 搜索框内容
       selectedFiles: [], // 选择的文件，用于批量操作
-      dataset: { label: '不使用知识库', value: 'null' , description: ''} ,  //当前数据集信息（和button绑定）
+      dataset: { label: '不使用知识库', value: 'null', description: '' },  //当前数据集信息（和button绑定）
       datasetsFile: [],  // 数据集文件列表
       isLoading: false, // 加载状态
       selectedRows: [],
@@ -250,7 +269,7 @@ export default {
     Delete // 删除图标
   },
 
-  created(){
+  created() {
   },
 
   methods: {
@@ -258,13 +277,13 @@ export default {
     fetchKnowledgeBases() {
       this.options = [];
       axios.post('http://localhost:8999/es/indeces', {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
         .then(response => {
           const data = response.data;
-          this.options.push({ label: '不使用知识库', value: 'null' , description: ''});
+          this.options.push({ label: '不使用知识库', value: 'null', description: '' });
 
           for (const [key, value] of Object.entries(data)) {
             this.options.push({ label: key, value: key, description: value });
@@ -274,8 +293,8 @@ export default {
         .catch(error => {
           console.error('Error fetching knowledge bases:', error);
         });
-        // this.initButtonList();
-        this.sendOptions();
+      // this.initButtonList();
+      this.sendOptions();
     },
 
     // 你可以在这里添加一个方法来处理选项选择后的操作，例如调用接口
@@ -291,8 +310,8 @@ export default {
         if (valid) {
           // 验证通过，执行提交逻辑
           console.log('Form submitted:', this.form);
-          
-          var option = { label: this.form.name, value: this.form.name , description: this.form.description };
+
+          var option = { label: this.form.name, value: this.form.name, description: this.form.description };
           this.options.push(option);
           this.initButtonList();
           // 提交表单逻辑
@@ -335,7 +354,7 @@ export default {
         // 其他字段
       };
     },
-    initButtonList(){
+    initButtonList() {
       this.buttonList = this.options
         .filter(option => option.value !== 'null')
         .map(option => ({
@@ -354,7 +373,7 @@ export default {
       this.formTwo.description = item.description;
       this.formTwo.value = item.value;
       console.log(`Clicked on ${item.label}`);
-      this.datasetsFile=[];
+      this.datasetsFile = [];
       this.fetchFiles();
       // 在这里执行与button相关的通用操作
     },
@@ -368,7 +387,7 @@ export default {
       this.isCardTwo = true;
     },
 
-    submitChange(){
+    submitChange() {
       console.log('Form submitted:', this.formTwo);
       // 提交表单逻辑
 
@@ -388,7 +407,7 @@ export default {
       this.initButtonList();
     },
 
-    deleteKnowledgeDB(){
+    deleteKnowledgeDB() {
       this.isRightBox = false;
       //删除options中label为this.dataset.label的项
       this.options = this.options.filter(option => option.label !== this.dataset.label);
@@ -399,7 +418,7 @@ export default {
 
 
 
-    
+
     //以下实现文件上传逻辑
     // 触发文件选择框
     triggerFileSelect() {
@@ -412,7 +431,7 @@ export default {
         // 校验文件类型
         const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
         if (!allowedTypes.includes(file.type)) {
-          ElMessage.error( '不支持的文件类型，请上传 JPG、PNG、PDF、TXT 或 DOCX 格式的文件');
+          ElMessage.error('不支持的文件类型，请上传 JPG、PNG、PDF、TXT 或 DOCX 格式的文件');
           // 清除文件选择框中的文件
           this.$refs.fileInput.value = '';
           return;
@@ -434,16 +453,16 @@ export default {
         });
         console.log("文件上传成功", response);
         console.log(response.data.file_path); // 文件路径
-        this.uploadFileToDataBase(this.dataset.label,response.data.file_path);
-        ElMessage.success( '文件上传成功！');
+        this.uploadFileToDataBase(this.dataset.label, response.data.file_path);
+        ElMessage.success('文件上传成功！');
         this.fetchFiles();
       } catch (error) {
         console.error("文件上传失败", error);
-        ElMessage.error( '文件上传失败！');
+        ElMessage.error('文件上传失败！');
       }
     },
     //向数据库发出新增索引要求
-    async uploadFileToDataBase(name,path) {
+    async uploadFileToDataBase(name, path) {
       try {
         const response = await axios.post('http://localhost:8999/es/uploadfile', {
           datasetName: name,
@@ -467,26 +486,52 @@ export default {
       this.isLoading = true; // 开始加载状态
 
       try {
-        const response = await axios.get('http://localhost:5000/files',{
+        const response = await axios.get('http://localhost:5000/files', {
           params: {
             datasetName: this.dataset.label,
           },
         });
         // 处理文件数据，例如格式化日期
-        this.datasetsFile = response.data.map(file => ({
+        // this.datasetsFile = response.data.map(file => ({
+        //   ...file,
+        //   name: file.name,
+        //   uploadDate: moment(file.uploadDate * 1000).format('YYYY-MM-DD HH:mm:ss'),
+        //   enabled: file.enabled,
+        //   progress: 0, // 初始化进度
+        //   parseStatus: '准备解析', // 初始化解析状态
+        // }));
+        // 合并新数据和现有数据，保留已解析文件的状态
+        // 获取后端返回的新文件列表
+        const newFiles = response.data.map(file => ({
           ...file,
           name: file.name,
           uploadDate: moment(file.uploadDate * 1000).format('YYYY-MM-DD HH:mm:ss'),
           enabled: file.enabled,
-          parseStatus: file.parseStatus,
+          progress: 0, // 初始化进度
+          parseStatus: '准备解析', // 初始化解析状态
         }));
+
+        // 保留前端现有文件的状态，并添加缺失的文件
+        const updatedFiles = [...this.datasetsFile];
+
+        newFiles.forEach(newFile => {
+          const existingFile = updatedFiles.find(file => file.name === newFile.name);
+          if (!existingFile) {
+            // 添加缺失的文件
+            updatedFiles.push(newFile);
+          }
+        });
+
+        // 删除 newFiles 中不存在的文件
+        this.datasetsFile = updatedFiles.filter(file => newFiles.some(newFile => newFile.name === file.name));
       } catch (error) {
         console.error('获取文件列表失败:', error);
         // ElMessage.error( 'PDF上传成功！');
       }
-      finally{
-        ElMessage.success( '文件列表刷新成功');
+      finally {
+        ElMessage.success('文件列表刷新成功');
         this.isLoading = false; // 加载完毕后关闭加载状态
+        this.startProgress(); // 启动进度条更新
       }
     },
 
@@ -500,16 +545,16 @@ export default {
         console.log(response.data.message);
         console.log(response.data.file_path);
 
-        this.deleteFileFromDataBase(this.dataset.label,response.data.file_path);
-        ElMessage.success( '删除文件成功');
+        this.deleteFileFromDataBase(this.dataset.label, response.data.file_path);
+        ElMessage.success('删除文件成功');
         this.fetchFiles(); // 刷新文件列表
       } catch (error) {
         console.error('删除文件失败:', error);
-        ElMessage.error( '删除文件失败');
+        ElMessage.error('删除文件失败');
       }
     },
     //向数据库发出新增索引要求
-    async deleteFileFromDataBase(name,path) {
+    async deleteFileFromDataBase(name, path) {
       try {
         const response = await axios.post('http://localhost:8999/es/deletefile', {
           datasetName: name,
@@ -542,7 +587,7 @@ export default {
           this.fetchFiles(); // 刷新文件列表
         } catch (error) {
           console.error('更改文件名失败:', error);
-          ElMessage.error( '文件名更改失败');
+          ElMessage.error('文件名更改失败');
         }
       }
     },
@@ -559,7 +604,7 @@ export default {
         const response = await axios.delete(`http://localhost:5000/delete_dataset/${this.dataset.label}`);
         console.log(response.data.message);
         this.datasetsFile = []; // 清空当前文件列表
-        ElMessage.success( '文件名更改成功');
+        ElMessage.success('文件名更改成功');
       } catch (error) {
         console.error('删除数据集失败:', error);
       }
@@ -575,14 +620,14 @@ export default {
           }
         });
         console.log(response.data); // { code: 1 }
-        ElMessage.success( '知识库删除成功！');
+        ElMessage.success('知识库删除成功！');
       } catch (error) {
         console.error('Error deleting index:', error);
       }
     },
 
 
-    
+
     handleSelectionChange(selected) {
       this.selectedRows = selected;
     },
@@ -609,6 +654,51 @@ export default {
       EventBusOne.setOptions(this.options);
       console.log('Options sent:', this.options);
     },
+
+    handleEnabledChange(row) {
+      if (row.enabled) {
+        row.progress = 0;
+        row.parseStatus = '准备解析';
+        const interval = setInterval(() => {
+          if (row.progress < 100) {
+            row.progress += Math.floor(Math.random() * 10) + 1;
+          } else {
+            clearInterval(interval);
+            row.parseStatus = '已解析';
+          }
+        }, 500);
+      } else {
+        row.parseStatus = '未解析';
+        row.progress = 0;
+      }
+    },
+
+    // startProgress() {
+    //   this.datasetsFile.forEach(file => {
+    //     const interval = setInterval(() => {
+    //       if (file.progress < 100) {
+    //         file.progress += Math.floor(Math.random() * 10) + 1;
+    //       } else {
+    //         clearInterval(interval);
+    //         file.parseStatus = '已解析';
+    //       }
+    //     }, 500);
+    //   });
+    // },
+    startProgress() {
+      this.datasetsFile.forEach(file => {
+        if (file.progress < 100) {
+          const interval = setInterval(() => {
+            if (file.progress < 100) {
+              file.progress += Math.floor(Math.random() * 10) + 1;
+            } else {
+              clearInterval(interval);
+              file.parseStatus = '已解析';
+            }
+          }, 500);
+        }
+      });
+    },
   },
 
   mounted() {
@@ -622,7 +712,7 @@ export default {
       if (!this.searchQuery) {
         return this.datasetsFile;
       }
-      
+
       // 根据 name 字段进行过滤，判断是否包含搜索框输入的内容
       return this.datasetsFile.filter(item => {
         return item.name.toLowerCase().includes(this.searchQuery.toLowerCase());
@@ -640,43 +730,46 @@ export default {
 </script>
 
 <style>
-#topBar{
-  width:99.5%;
-  height:10%;
-  border-radius:10px;
+#topBar {
+  width: 99.5%;
+  height: 10%;
+  border-radius: 10px;
   margin-top: 1%;
   margin-bottom: 0.5%;
   padding: 0;
 }
-#majorBar{
-  width:100%;
-  height:87%;
+
+#majorBar {
+  width: 100%;
+  height: 87%;
   background: transparent;
-  border-radius:10px;
+  border-radius: 10px;
   margin-bottom: 1%;
   display: flex;
 }
-#leftBar{
-  width:20%;
-  height:99%;
+
+#leftBar {
+  width: 20%;
+  height: 99%;
   background-color: #f0f0f0;
-  border-radius:10px;
+  border-radius: 10px;
   margin-bottom: 0.5%;
   margin-right: 0.5%;
 }
-#rightBox{
-  width:79%;
-  height:99%;
+
+#rightBox {
+  width: 79%;
+  height: 99%;
   background-color: #f0f0f0;
-  border-radius:10px;
+  border-radius: 10px;
   margin-bottom: 0.5%;
 }
 
-#createKnowledgeDB{
+#createKnowledgeDB {
   width: 90%;
   height: 10%;
-  background-color:white;
-  border-radius:10px;
+  background-color: white;
+  border-radius: 10px;
   margin-top: 3%;
   margin-bottom: 1%;
   margin-left: 5%;
@@ -689,14 +782,16 @@ export default {
   outline: none;
   transition: all 0.3s;
 }
+
 #createKnowledgeDB:hover {
-  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
-#knowledgeDBHistory{
+
+#knowledgeDBHistory {
   width: 90%;
   height: 87%;
-  background-color:transparent;
-  border-radius:10px;
+  background-color: transparent;
+  border-radius: 10px;
   margin-top: 1%;
   margin-bottom: 1%;
   margin-left: 5%;
@@ -707,45 +802,55 @@ export default {
   border: 0px;
   outline: none;
   transition: all 0.3s;
-  padding:0.1%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影效果增加立体感 */
+  padding: 0.1%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* 阴影效果增加立体感 */
   overflow-y: auto;
 }
+
 ::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
+  width: 8px;
+  height: 8px;
 }
+
 ::-webkit-scrollbar-button {
-	display: none;
+  display: none;
 }
+
 ::-webkit-scrollbar-track {
-	background-color: rgba(70, 166, 255, 0.1);
-	display: none;
+  background-color: rgba(70, 166, 255, 0.1);
+  display: none;
 }
+
 ::-webkit-scrollbar-thumb {
-	background-color: rgba(70, 166, 255, 0.4);
-	border: 2px solid transparent;
-	border-radius: 6px;
-	background-clip: padding-box;
+  background-color: rgba(70, 166, 255, 0.4);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background-clip: padding-box;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
 }
-.DB_ListButton{
-  width:80%;
+
+.DB_ListButton {
+  width: 80%;
   height: 40px;
-  background-color:white;
+  background-color: white;
   border-radius: 10px;
   border: none;
 }
+
 .DB_ListButton:hover {
-  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
-.DB_ListButton.active{
-  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+
+.DB_ListButton.active {
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
-.DB_List{
-  width:95%;
+
+.DB_List {
+  width: 95%;
   margin-left: 2.5%;
   margin-right: 2.5%;
   margin-top: 10px;
@@ -757,7 +862,7 @@ export default {
   color: #fff;
   border-radius: 5px;
   padding: 10px 25px;
-  font-family: Lato,sans-serif;
+  font-family: Lato, sans-serif;
   font-weight: 500;
   margin: 0 3px;
   background: transparent;
@@ -765,14 +870,14 @@ export default {
   transition: all .3s ease;
   position: relative;
   display: inline-block;
-  box-shadow: inset 2px 2px 2px 0 hsla(0,0%,100%,.5),7px 7px 20px 0 rgba(0,0,0,.1),4px 4px 5px 0 rgba(0,0,0,.1);
+  box-shadow: inset 2px 2px 2px 0 hsla(0, 0%, 100%, .5), 7px 7px 20px 0 rgba(0, 0, 0, .1), 4px 4px 5px 0 rgba(0, 0, 0, .1);
   outline: none;
   margin-bottom: 50px;
 }
 
 .custom-btn.btn-8 {
   background-color: #f0ecfc;
-  background-image: linear-gradient(315deg,#f0ecfc,#c797eb 74%);
+  background-image: linear-gradient(315deg, #f0ecfc, #c797eb 74%);
   line-height: 20px;
   padding: 0;
   border: none
@@ -785,7 +890,8 @@ export default {
   height: 100%
 }
 
-.custom-btn.btn-8:after,.custom-btn.btn-8:before {
+.custom-btn.btn-8:after,
+.custom-btn.btn-8:before {
   position: absolute;
   content: "";
   right: 0;
@@ -820,7 +926,8 @@ export default {
   color: #c797eb
 }
 
-.custom-btn.btn-8 span:after,.custom-btn.btn-8 span:before {
+.custom-btn.btn-8 span:after,
+.custom-btn.btn-8 span:before {
   position: absolute;
   content: "";
   left: 0;
@@ -847,4 +954,7 @@ export default {
   width: 100%
 }
 
+.el-table__body-wrapper {
+  overflow-y: auto;
+}
 </style>

@@ -88,7 +88,7 @@ def list_files():
                 'name': file_name,
                 'uploadDate': os.path.getctime(file_path),
                 'enabled': True,
-                'parseStatus': '已解析'
+                'parseStatus': '未解析'
             }
             files.append(file_info)
 

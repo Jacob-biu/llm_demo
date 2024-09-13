@@ -192,6 +192,7 @@ import axios from 'axios';
 import moment from 'moment'; // 用于格式化日期
 import { Check, Close, Delete } from '@element-plus/icons-vue'; // 引入图标
 import { EventBusOne } from '../event-bus.js';
+import { eventBus } from '../eventBus.js';
 
 
 export default {
@@ -243,6 +244,7 @@ export default {
       searchQuery: '', // 搜索框内容
       selectedFiles: [], // 选择的文件，用于批量操作
       dataset: { label: '不使用知识库', value: 'null', description: '' },  //当前数据集信息（和button绑定）
+      datasetTemp: { label: '不使用知识库', value: 'null', description: '' },
       datasetsFile: [],  // 数据集文件列表
       isLoading: false, // 加载状态
       selectedRows: [],
@@ -291,6 +293,7 @@ export default {
           }
         })
         .catch(error => {
+          ElMessage.error('获取索引失败：' + error.message);
           console.error('Error fetching knowledge bases:', error);
         });
       // this.initButtonList();
@@ -369,6 +372,9 @@ export default {
       this.activeButton = item.value;
       this.isRightBox = true;
       this.dataset = item;
+      this.datasetTemp.label = item.label;
+      this.datasetTemp.value = item.value;
+      this.datasetTemp.description = item.description;
       this.formTwo.name = item.label;
       this.formTwo.description = item.description;
       this.formTwo.value = item.value;
@@ -413,6 +419,11 @@ export default {
       this.options = this.options.filter(option => option.label !== this.dataset.label);
       this.initButtonList();
       this.deleteDataset();
+      if(this.dataset.value === this.selectedOption){
+        this.selectedOption = 'null';
+        // 触发事件，通知兄弟组件更新 selectedDB 的值
+        eventBus.emit('updateSelectedDB', { label: '不使用知识库', value: 'null', description: '' });
+      }
       this.dataset = null;
     },
 
@@ -524,12 +535,13 @@ export default {
 
         // 删除 newFiles 中不存在的文件
         this.datasetsFile = updatedFiles.filter(file => newFiles.some(newFile => newFile.name === file.name));
+        ElMessage.success('文件列表刷新成功');
       } catch (error) {
         console.error('获取文件列表失败:', error);
+        ElMessage.error('文件列表刷新失败: ' + error.message);
         // ElMessage.error( 'PDF上传成功！');
       }
       finally {
-        ElMessage.success('文件列表刷新成功');
         this.isLoading = false; // 加载完毕后关闭加载状态
         this.startProgress(); // 启动进度条更新
       }
@@ -598,17 +610,64 @@ export default {
 
 
     // 删除数据集
+    // async deleteDataset() {
+    //   try {
+    //     // this.deleteIndex(this.dataset.label);
+    //     // const response = await axios.delete(`http://localhost:5000/delete_dataset/${this.dataset.label}`);
+    //     // console.log(response.data.message);
+
+    //     // 使用 Promise.allSettled 确保所有操作都尝试执行
+    //     const results = await Promise.allSettled([
+    //       this.deleteIndex(this.dataset.label),
+    //       axios.delete(`http://localhost:5000/delete_dataset/${this.dataset.label}`)
+    //     ]);
+
+    //     results.forEach(result => {
+    //       if (result.status === 'fulfilled') {
+    //         console.log(result.value.data); // 处理成功的响应
+    //       } else {
+    //         throw new Error(result.reason); // 抛出错误以便在 catch 中捕获
+    //       }
+    //     });
+
+    //     this.datasetsFile = []; // 清空当前文件列表
+    //     ElMessage.success('知识库删除成功！');
+    //   } catch (error) {
+    //     ElMessage.error(`删除数据集失败: ${error.message}`);
+    //     console.error('删除知识库失败:', error);
+    //   }
+    // },
     async deleteDataset() {
       try {
-        this.deleteIndex(this.dataset.label);
-        const response = await axios.delete(`http://localhost:5000/delete_dataset/${this.dataset.label}`);
-        console.log(response.data.message);
-        this.datasetsFile = []; // 清空当前文件列表
-        ElMessage.success('文件名更改成功');
-      } catch (error) {
-        console.error('删除数据集失败:', error);
+        console.log('this.dataset.label loged: ' + this.dataset.label);
+        const label = this.dataset.label;
+        // 先执行 deleteIndex 操作
+        const deleteIndexResponse = await this.deleteIndex(label);
+        console.log(deleteIndexResponse.data); // { code: 1 }
+
+        try {
+          // 如果 deleteIndex 成功，再执行 delete_dataset 操作
+          const deleteDatasetResponse = await axios.delete(`http://localhost:5000/delete_dataset/${label}`);
+          console.log(deleteDatasetResponse.data.message);
+
+          this.datasetsFile = []; // 清空当前文件列表
+          ElMessage.success('知识库删除成功！');
+        } catch (deleteDatasetError) {
+          // 如果 delete_dataset 失败，回滚 deleteIndex 操作
+          this.dataset = this.datasetTemp;
+          await this.rollbackDeleteIndex(this.dataset.label);
+          this.fetchKnowledgeBases();
+          this.initButtonList();
+          this.isRightBox = true;
+          ElMessage.error('删除知识库失败，已回滚索引删除操作');
+          console.error('删除知识库失败:', deleteDatasetError);
+        }
+      } catch (deleteIndexError) {
+        ElMessage.error('删除知识库失败：删除索引失败');
+        console.error('删除索引失败:', deleteIndexError);
       }
     },
+
     //向数据库发出新增索引要求
     async deleteIndex(name) {
       try {
@@ -619,10 +678,27 @@ export default {
             'Content-Type': 'application/json'
           }
         });
-        console.log(response.data); // { code: 1 }
-        ElMessage.success('知识库删除成功！');
+        // console.log(response.data); // { code: 1 }
+        // ElMessage.success('知识库删除成功！');
+        return response; // 返回响应以便在 Promise.allSettled 中使用
       } catch (error) {
         console.error('Error deleting index:', error);
+        throw error; // 抛出错误以便在 deleteDataset 中捕获
+      }
+    },
+
+    async rollbackDeleteIndex(name) {
+      try {
+        const response = await axios.post('http://localhost:8999/es/create_index', {
+          datasetName: name
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log('回滚索引删除操作成功:', response.data);
+      } catch (error) {
+        console.error('回滚索引删除操作失败:', error);
       }
     },
 

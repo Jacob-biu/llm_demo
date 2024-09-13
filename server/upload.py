@@ -76,10 +76,12 @@ def list_files():
 
     dataset_folder = os.path.join(UPLOAD_FOLDER, dataset_name)
 
-    if not os.path.exists(dataset_folder):
-        return jsonify({'error': 'Dataset does not exist'}), 404
-
     files = []
+
+    if not os.path.exists(dataset_folder):
+        os.makedirs(dataset_folder)  # 创建文件夹
+
+
     try:
         # 获取指定文件夹下的文件信息
         for file_name in os.listdir(dataset_folder):

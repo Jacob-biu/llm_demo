@@ -23,6 +23,7 @@
 
 <script>
 import { EventBusOne } from '../event-bus.js';
+import { eventBus } from '../eventBus.js';
 import axios from 'axios';
 
 export default{
@@ -84,6 +85,13 @@ export default{
     this.updateOptions(EventBusOne.getOptions()); // 主动获取当前状态
     EventBusOne.on('options-sent', this.updateOptions);
     this.initButtonList(); // 在组件挂载后初始化 buttonList
+  },
+
+  created() {
+    eventBus.on('updateSelectedDB', (newValue) => {
+      this.selectedDB.value = newValue;
+      this.handleClick(newValue);
+    });
   },
 }
 </script>

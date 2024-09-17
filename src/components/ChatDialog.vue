@@ -250,6 +250,7 @@ export default {
           datasetName: this.selectedButton.value,
           question: this.inputData,
           file_abs_paths: this.filePaths,
+          history: this.history,
         };
         const res = await axios.post('http://localhost:8999/es/rag_prompt', requestBody, {
           headers: {
@@ -507,7 +508,8 @@ export default {
             userMessageContent = "问题：" + usermessage;
           }
         } else {
-          userMessageContent = this.RAG + '\n\n' + "问题：" + usermessage;
+          //userMessageContent = this.RAG + '\n\n' + "问题：" + usermessage;
+          userMessageContent = this.RAG;
         }
 
         if (this.history.length >= 10) {

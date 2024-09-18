@@ -23,6 +23,7 @@ module.exports = defineConfig({
   assetsDir: "static",
   devServer: {
     port: "8080",
+    webSocketServer:false, 
     proxy: {
       '/api': {
         target: 'http://localhost:5000',

@@ -1,0 +1,80 @@
+2024-10-14 17:09:08,567 - ERROR - Uncaught exception
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/bert_t5.py", line 32, in <module>
+    t5_tokenizer = T5Tokenizer.from_pretrained('t5-base-chinese')
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 709, in from_pretrained
+    tokenizer, tokenizer_config_file_dir = super().from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 1515, in from_pretrained
+    assert len(tokenizer_config_file_dir_list) > 0, "All tokenizer files should be in the same directory."
+AssertionError: All tokenizer files should be in the same directory.
+2024-10-14 17:17:47,952 - ERROR - Uncaught exception
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/bert_t5.py", line 32, in <module>
+    t5_tokenizer = T5Tokenizer.from_pretrained('t5-base-chinese')
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 709, in from_pretrained
+    tokenizer, tokenizer_config_file_dir = super().from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 1515, in from_pretrained
+    assert len(tokenizer_config_file_dir_list) > 0, "All tokenizer files should be in the same directory."
+AssertionError: All tokenizer files should be in the same directory.
+2024-10-14 17:20:46,845 - ERROR - Uncaught exception
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/bert_t5.py", line 32, in <module>
+    t5_tokenizer = T5Tokenizer.from_pretrained('t5-base-chinese')
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 709, in from_pretrained
+    tokenizer, tokenizer_config_file_dir = super().from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 1515, in from_pretrained
+    assert len(tokenizer_config_file_dir_list) > 0, "All tokenizer files should be in the same directory."
+AssertionError: All tokenizer files should be in the same directory.
+2024-10-14 17:23:20,093 - ERROR - Uncaught exception
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/bert_t5.py", line 32, in <module>
+    t5_tokenizer = T5Tokenizer.from_pretrained('t5-base-chinese')
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 709, in from_pretrained
+    tokenizer, tokenizer_config_file_dir = super().from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 1515, in from_pretrained
+    assert len(tokenizer_config_file_dir_list) > 0, "All tokenizer files should be in the same directory."
+AssertionError: All tokenizer files should be in the same directory.
+2024-10-14 17:23:44,602 - ERROR - Uncaught exception
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/bert_t5.py", line 32, in <module>
+    t5_tokenizer = T5Tokenizer.from_pretrained('t5-base-chinese')
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 709, in from_pretrained
+    tokenizer, tokenizer_config_file_dir = super().from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 1515, in from_pretrained
+    assert len(tokenizer_config_file_dir_list) > 0, "All tokenizer files should be in the same directory."
+AssertionError: All tokenizer files should be in the same directory.
+2024-10-14 17:27:55,527 - ERROR - Uncaught exception
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/bert_t5.py", line 68, in <module>
+    answer = t5_tokenizer.decode(outputs[0], skip_special_tokens=True)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 3235, in decode
+    return self._decode(
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 1691, in _decode
+    filtered_tokens = self.convert_ids_to_tokens(token_ids, skip_special_tokens=skip_special_tokens)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 1072, in convert_ids_to_tokens
+    index = int(index)
+TypeError: int() argument must be a string, a bytes-like object or a number, not 'list'
+2024-10-14 17:30:05,854 - ERROR - Uncaught exception
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/bert_t5.py", line 73, in <module>
+    answer = t5_tokenizer.decode(output_ids, skip_special_tokens=True)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 3235, in decode
+    return self._decode(
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 1691, in _decode
+    filtered_tokens = self.convert_ids_to_tokens(token_ids, skip_special_tokens=skip_special_tokens)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 1072, in convert_ids_to_tokens
+    index = int(index)
+TypeError: int() argument must be a string, a bytes-like object or a number, not 'list'
+2024-10-14 17:31:25,616 - INFO - 问题: 这是你的问题
+2024-10-14 17:31:25,616 - INFO - 最相似的参考文本: 这是第一个参考文本。
+2024-10-14 17:31:25,616 - INFO - 生成的回答: : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : :
+
+
+2024-10-14 18:36:54,724 - INFO - 问题: 这是你的问题
+2024-10-14 18:36:54,724 - INFO - 最相似的参考文本: 这是一个不同的参考文本。
+2024-10-14 18:36:54,724 - INFO - 
+
+2024-10-14 18:42:20,062 - INFO - 问题: 请简单介绍一下长征
+2024-10-14 18:42:20,063 - INFO - 最相似的参考文本: 至此，中共中央及红一方面军主力历时一年、转战11个省、行程二万五千里的长征胜利结束。
+2024-10-14 18:42:20,063 - INFO - 
+

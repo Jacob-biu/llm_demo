@@ -1,0 +1,368 @@
+2024-10-11 11:18:08,432 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-11 11:18:08,432 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-11 11:19:12,790 - ERROR - Exception on /calculate_similarity [POST]
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_bert_server.py", line 106, in calculate_similarity
+    tokenizer = PDFTokenizer()
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_bert_server.py", line 29, in __init__
+    self.tokenizer = BertTokenizer.from_pretrained('hit/bert-base-chinese')  # 更换为 HIT-BERT 的 tokenizer
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 709, in from_pretrained
+    tokenizer, tokenizer_config_file_dir = super().from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 1515, in from_pretrained
+    assert len(tokenizer_config_file_dir_list) > 0, "All tokenizer files should be in the same directory."
+AssertionError: All tokenizer files should be in the same directory.
+2024-10-11 11:19:12,793 - INFO - 127.0.0.1 - - [11/Oct/2024 11:19:12] "[35m[1mPOST /calculate_similarity HTTP/1.1[0m" 500 -
+2024-10-11 11:20:40,550 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-11 11:20:40,550 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-11 11:20:59,506 - ERROR - Exception on /calculate_similarity [POST]
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 106, in calculate_similarity
+    tokenizer = PDFTokenizer()
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 29, in __init__
+    self.tokenizer = BertTokenizer.from_pretrained('hit/bert-base-chinese')  # 更换为 HIT-BERT 的 tokenizer
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 709, in from_pretrained
+    tokenizer, tokenizer_config_file_dir = super().from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 1515, in from_pretrained
+    assert len(tokenizer_config_file_dir_list) > 0, "All tokenizer files should be in the same directory."
+AssertionError: All tokenizer files should be in the same directory.
+2024-10-11 11:20:59,508 - INFO - 127.0.0.1 - - [11/Oct/2024 11:20:59] "[35m[1mPOST /calculate_similarity HTTP/1.1[0m" 500 -
+2024-10-11 11:23:09,799 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-11 11:23:09,800 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-11 11:23:16,127 - ERROR - Exception on /calculate_similarity [POST]
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 106, in calculate_similarity
+    tokenizer = PDFTokenizer()
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 29, in __init__
+    self.tokenizer = BertTokenizer.from_pretrained('hit/bert-base-chinese')  # 更换为 HIT-BERT 的 tokenizer
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 709, in from_pretrained
+    tokenizer, tokenizer_config_file_dir = super().from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 1515, in from_pretrained
+    assert len(tokenizer_config_file_dir_list) > 0, "All tokenizer files should be in the same directory."
+AssertionError: All tokenizer files should be in the same directory.
+2024-10-11 11:23:16,129 - INFO - 127.0.0.1 - - [11/Oct/2024 11:23:16] "[35m[1mPOST /calculate_similarity HTTP/1.1[0m" 500 -
+2024-10-11 11:24:43,809 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-11 11:24:43,809 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-11 11:24:50,321 - ERROR - Exception on /calculate_similarity [POST]
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 106, in calculate_similarity
+    tokenizer = PDFTokenizer()
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 29, in __init__
+    self.tokenizer = BertTokenizer.from_pretrained('hit/bert-base-chinese')  # 更换为 HIT-BERT 的 tokenizer
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 709, in from_pretrained
+    tokenizer, tokenizer_config_file_dir = super().from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 1515, in from_pretrained
+    assert len(tokenizer_config_file_dir_list) > 0, "All tokenizer files should be in the same directory."
+AssertionError: All tokenizer files should be in the same directory.
+2024-10-11 11:24:50,326 - INFO - 127.0.0.1 - - [11/Oct/2024 11:24:50] "[35m[1mPOST /calculate_similarity HTTP/1.1[0m" 500 -
+2024-10-11 11:25:19,196 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-11 11:25:19,196 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-11 11:25:25,611 - ERROR - Exception on /calculate_similarity [POST]
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 106, in calculate_similarity
+    tokenizer = PDFTokenizer()
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 29, in __init__
+    self.tokenizer = BertTokenizer.from_pretrained('hit/bert-base-chinese')  # 更换为 HIT-BERT 的 tokenizer
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils.py", line 709, in from_pretrained
+    tokenizer, tokenizer_config_file_dir = super().from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/paddlenlp/transformers/tokenizer_utils_base.py", line 1515, in from_pretrained
+    assert len(tokenizer_config_file_dir_list) > 0, "All tokenizer files should be in the same directory."
+AssertionError: All tokenizer files should be in the same directory.
+2024-10-11 11:25:25,615 - INFO - 127.0.0.1 - - [11/Oct/2024 11:25:25] "[35m[1mPOST /calculate_similarity HTTP/1.1[0m" 500 -
+2024-10-11 11:27:17,402 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-11 11:27:17,402 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-11 11:27:27,128 - INFO - downloading https://bj.bcebos.com/paddle-hapi/models/bert/bert-base-chinese-vocab.txt to /home/bxliu/.paddlenlp/models/tmpid81u1_9
+2024-10-11 11:27:27,443 - INFO - storing https://bj.bcebos.com/paddle-hapi/models/bert/bert-base-chinese-vocab.txt in cache at /home/bxliu/.paddlenlp/models/bert-base-chinese/bert-base-chinese-vocab.txt
+2024-10-11 11:27:27,457 - INFO - downloading http://bj.bcebos.com/paddlenlp/models/transformers/bert/bert-base-chinese.pdparams to /home/bxliu/.paddlenlp/models/tmp_7bhuveq
+2024-10-11 11:29:33,117 - INFO - storing http://bj.bcebos.com/paddlenlp/models/transformers/bert/bert-base-chinese.pdparams in cache at /home/bxliu/.paddlenlp/models/bert-base-chinese/model_state.pdparams
+2024-10-11 11:29:39,352 - INFO - 来自 hitbert_server 的计算结果:
++----+--------------------------+----------------------------------------------+----------------------------------------+----------------------------+----------------------------+----------------------------+
+|    | 用户问题                 | 参考句子                                     | 系统回答                               |   用户问题与参考文字相似度 |   系统回答与参考文字相似度 |   用户问题与系统回答相似度 |
++====+==========================+==============================================+========================================+============================+============================+============================+
+|  0 | 你能介绍一下机器学习吗？ | 机器 学习 是 一 门 研究 计算机 算法 如何 ... | 机器学习是一种通过数据进行预测的算法。 |                   0.889526 |                   0.958958 |                 nan        |
++----+--------------------------+----------------------------------------------+----------------------------------------+----------------------------+----------------------------+----------------------------+
+|  1 | 你能介绍一下机器学习吗？ | 机器 学习 可以 通过 数据 预测 未 来 。       | 机器学习是一种通过数据进行预测的算法。 |                   0.869918 |                   0.921829 |                 nan        |
++----+--------------------------+----------------------------------------------+----------------------------------------+----------------------------+----------------------------+----------------------------+
+|  2 | 你能介绍一下机器学习吗？ | 机器 学习 应用 于 许多 领域 ， 例如 图像 ... | 机器学习是一种通过数据进行预测的算法。 |                   0.761383 |                   0.882857 |                 nan        |
++----+--------------------------+----------------------------------------------+----------------------------------------+----------------------------+----------------------------+----------------------------+
+|  3 | 你能介绍一下机器学习吗？ | nan                                          | 机器学习是一种通过数据进行预测的算法。 |                 nan        |                 nan        |                   0.897878 |
++----+--------------------------+----------------------------------------------+----------------------------------------+----------------------------+----------------------------+----------------------------+
+
+2024-10-11 11:29:40,115 - INFO - 127.0.0.1 - - [11/Oct/2024 11:29:40] "POST /calculate_similarity HTTP/1.1" 200 -
+2024-10-11 11:31:27,895 - INFO - 来自 hitbert_server 的计算结果:
++----+----------------------+----------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+|    | 用户问题             | 参考句子                                     | 系统回答                                      |   用户问题与参考文字相似度 |   系统回答与参考文字相似度 |   用户问题与系统回答相似度 |
++====+======================+==============================================+===============================================+============================+============================+============================+
+|  0 | 请简单介绍一下长征。 | 7月 16日 ， 红 25 军 为 配合 红一 、...      | 长征是中国工农红军在1934年至1936年间进行的... |                   0.717399 |                   0.798668 |                 nan        |
++----+----------------------+----------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+|  1 | 请简单介绍一下长征。 | 红军 长征 的 胜利 ， 为 开展 抗日战争 的 ... | 长征是中国工农红军在1934年至1936年间进行的... |                   0.795031 |                   0.846982 |                 nan        |
++----+----------------------+----------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+|  2 | 请简单介绍一下长征。 | nan                                          | 长征是中国工农红军在1934年至1936年间进行的... |                 nan        |                 nan        |                   0.838502 |
++----+----------------------+----------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+
+2024-10-11 11:31:28,715 - INFO - 127.0.0.1 - - [11/Oct/2024 11:31:28] "POST /calculate_similarity HTTP/1.1" 200 -
+2024-10-13 10:38:50,247 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-13 10:38:50,247 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-13 10:39:20,299 - INFO - downloading https://bj.bcebos.com/paddle-hapi/models/bert/bert-base-uncased-vocab.txt to /home/bxliu/.paddlenlp/models/tmp1riz1n3u
+2024-10-13 10:39:20,609 - INFO - storing https://bj.bcebos.com/paddle-hapi/models/bert/bert-base-uncased-vocab.txt in cache at /home/bxliu/.paddlenlp/models/bert-base-uncased/bert-base-uncased-vocab.txt
+2024-10-13 10:39:20,661 - INFO - downloading https://bj.bcebos.com/paddlenlp/models/transformers/bert-base-uncased.pdparams to /home/bxliu/.paddlenlp/models/tmpx7htm3pf
+2024-10-13 10:42:55,693 - INFO - storing https://bj.bcebos.com/paddlenlp/models/transformers/bert-base-uncased.pdparams in cache at /home/bxliu/.paddlenlp/models/bert-base-uncased/model_state.pdparams
+2024-10-13 10:43:03,834 - INFO - 来自 hitbert_server_en 的计算结果:
++----+------------------------------+------------------------------+------------------------------+----------------------------+----------------------------+----------------------------+
+|    | 用户问题                     | 参考句子                     | 系统回答                     |   用户问题与参考文字相似度 |   系统回答与参考文字相似度 |   用户问题与系统回答相似度 |
++====+==============================+==============================+==============================+============================+============================+============================+
+|  0 | What is the capital of Fr... | Paris is the capital and ... | The capital of France is ... |                   0.645805 |                   0.972862 |                 nan        |
++----+------------------------------+------------------------------+------------------------------+----------------------------+----------------------------+----------------------------+
+|  1 | What is the capital of Fr... | France has many beautiful... | The capital of France is ... |                   0.507491 |                   0.963342 |                 nan        |
++----+------------------------------+------------------------------+------------------------------+----------------------------+----------------------------+----------------------------+
+|  2 | What is the capital of Fr... | The capital city of Germa... | The capital of France is ... |                   0.804495 |                   0.950904 |                 nan        |
++----+------------------------------+------------------------------+------------------------------+----------------------------+----------------------------+----------------------------+
+|  3 | What is the capital of Fr... | nan                          | The capital of France is ... |                 nan        |                 nan        |                   0.659607 |
++----+------------------------------+------------------------------+------------------------------+----------------------------+----------------------------+----------------------------+
+
+2024-10-13 10:43:03,848 - INFO - 127.0.0.1 - - [13/Oct/2024 10:43:03] "POST /calculate_similarity HTTP/1.1" 200 -
+2024-10-13 10:51:22,967 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-13 10:51:22,967 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-13 10:51:43,899 - ERROR - Exception on /calculate_similarity [POST]
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 126, in calculate_similarity
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 126, in <listcomp>
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 37, in tokenize
+    if self.tokenizer._model_name == 'bert-base-chinese':
+AttributeError: 'BertTokenizer' object has no attribute '_model_name'
+2024-10-13 10:51:43,903 - INFO - 127.0.0.1 - - [13/Oct/2024 10:51:43] "[35m[1mPOST /calculate_similarity HTTP/1.1[0m" 500 -
+2024-10-13 10:52:12,612 - ERROR - Exception on /calculate_similarity [POST]
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 126, in calculate_similarity
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 126, in <listcomp>
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 37, in tokenize
+    if self.tokenizer._model_name == 'bert-base-chinese':
+AttributeError: 'BertTokenizer' object has no attribute '_model_name'
+2024-10-13 10:52:12,614 - INFO - 127.0.0.1 - - [13/Oct/2024 10:52:12] "[35m[1mPOST /calculate_similarity HTTP/1.1[0m" 500 -
+2024-10-13 10:53:49,421 - ERROR - Exception on /calculate_similarity [POST]
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 126, in calculate_similarity
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 126, in <listcomp>
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 37, in tokenize
+    if self.tokenizer._model_name == 'bert-base-chinese':
+AttributeError: 'BertTokenizer' object has no attribute '_model_name'
+2024-10-13 10:53:49,422 - INFO - 127.0.0.1 - - [13/Oct/2024 10:53:49] "[35m[1mPOST /calculate_similarity HTTP/1.1[0m" 500 -
+2024-10-13 10:54:29,504 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-13 10:54:29,504 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-13 10:54:51,522 - ERROR - Exception on /calculate_similarity [POST]
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 126, in calculate_similarity
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 126, in <listcomp>
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 37, in tokenize
+    if self.tokenizer._model_name == 'bert-base-chinese':
+AttributeError: 'BertTokenizer' object has no attribute '_model_name'
+2024-10-13 10:54:51,523 - INFO - 127.0.0.1 - - [13/Oct/2024 10:54:51] "[35m[1mPOST /calculate_similarity HTTP/1.1[0m" 500 -
+2024-10-13 10:55:36,458 - ERROR - Exception on /calculate_similarity [POST]
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 126, in calculate_similarity
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 126, in <listcomp>
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 37, in tokenize
+    if self.tokenizer._model_name == 'bert-base-chinese':
+AttributeError: 'BertTokenizer' object has no attribute '_model_name'
+2024-10-13 10:55:36,461 - INFO - 127.0.0.1 - - [13/Oct/2024 10:55:36] "[35m[1mPOST /calculate_similarity HTTP/1.1[0m" 500 -
+2024-10-13 11:00:35,070 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-13 11:00:35,070 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-13 11:00:47,339 - ERROR - Exception on /calculate_similarity [POST]
+Traceback (most recent call last):
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/bxliu/miniconda3/envs/py38tc2/lib/python3.8/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 128, in calculate_similarity
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 128, in <listcomp>
+    reference_sentences = [tokenizer.tokenize(ref) for ref in reference_texts]
+  File "/home/bxliu/miniconda/LLM/llm_demo_0_2_1/llm_demo/server/algorithm/RAGassessment_hitbert_server.py", line 39, in tokenize
+    if self.language == 'ch':
+AttributeError: 'PDFTokenizer' object has no attribute 'language'
+2024-10-13 11:00:47,340 - INFO - 127.0.0.1 - - [13/Oct/2024 11:00:47] "[35m[1mPOST /calculate_similarity HTTP/1.1[0m" 500 -
+2024-10-13 11:02:45,085 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-13 11:02:45,086 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-13 11:02:55,709 - INFO - 来自 hitbert_server 的计算结果:
++----+--------------+------------------------------+------------------------------+----------------------------+----------------------------+----------------------------+
+|    | 用户问题     | 参考句子                     | 系统回答                     |   用户问题与参考文字相似度 |   系统回答与参考文字相似度 |   用户问题与系统回答相似度 |
++====+==============+==============================+==============================+============================+============================+============================+
+|  0 | How are you? | How was your day?            | I am doing well, thank yo... |                   0.862428 |                   0.964255 |                 nan        |
++----+--------------+------------------------------+------------------------------+----------------------------+----------------------------+----------------------------+
+|  1 | How are you? | I am fine, thank you!        | I am doing well, thank yo... |                   0.854694 |                   0.960036 |                 nan        |
++----+--------------+------------------------------+------------------------------+----------------------------+----------------------------+----------------------------+
+|  2 | How are you? | What have you been up to ... | I am doing well, thank yo... |                   0.754612 |                   0.978    |                 nan        |
++----+--------------+------------------------------+------------------------------+----------------------------+----------------------------+----------------------------+
+|  3 | How are you? | nan                          | I am doing well, thank yo... |                 nan        |                 nan        |                   0.769496 |
++----+--------------+------------------------------+------------------------------+----------------------------+----------------------------+----------------------------+
+
+2024-10-13 11:02:55,726 - INFO - 127.0.0.1 - - [13/Oct/2024 11:02:55] "POST /calculate_similarity HTTP/1.1" 200 -
+2024-10-13 11:12:19,501 - INFO - 来自 hitbert_server 的计算结果:
++----+------------+--------------------+----------------+----------------------------+----------------------------+----------------------------+
+|    | 用户问题   | 参考句子           | 系统回答       |   用户问题与参考文字相似度 |   系统回答与参考文字相似度 |   用户问题与系统回答相似度 |
++====+============+====================+================+============================+============================+============================+
+|  0 | 你好吗？   | 你今天过得怎么样？ | 我很好，谢谢！ |                   0.974506 |                   0.957269 |                 nan        |
++----+------------+--------------------+----------------+----------------------------+----------------------------+----------------------------+
+|  1 | 你好吗？   | 我很好，谢谢你！   | 我很好，谢谢！ |                   0.988075 |                   0.973549 |                 nan        |
++----+------------+--------------------+----------------+----------------------------+----------------------------+----------------------------+
+|  2 | 你好吗？   | 你最近忙什么？     | 我很好，谢谢！ |                   0.947054 |                   0.900667 |                 nan        |
++----+------------+--------------------+----------------+----------------------------+----------------------------+----------------------------+
+|  3 | 你好吗？   | nan                | 我很好，谢谢！ |                 nan        |                 nan        |                   0.950753 |
++----+------------+--------------------+----------------+----------------------------+----------------------------+----------------------------+
+
+2024-10-13 11:12:19,860 - INFO - 127.0.0.1 - - [13/Oct/2024 11:12:19] "POST /calculate_similarity HTTP/1.1" 200 -
+2024-10-13 11:14:04,984 - INFO - 来自 hitbert_server 的计算结果:
++----+----------------------+-------------------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+|    | 用户问题             | 参考句子                                              | 系统回答                                      |   用户问题与参考文字相似度 |   系统回答与参考文字相似度 |   用户问题与系统回答相似度 |
++====+======================+=======================================================+===============================================+============================+============================+============================+
+|  0 | 请简单介绍一下长征。 | 7月16日，红25军为配合红一、红四方面军的行动，...      | 长征是中国工农红军在1934年至1936年间进行的... |                   0.671083 |                   0.707591 |                 nan        |
++----+----------------------+-------------------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+|  1 | 请简单介绍一下长征。 | 红军长征的胜利，为开展抗日战争的新局面创造了重要条... | 长征是中国工农红军在1934年至1936年间进行的... |                   0.764809 |                   0.885286 |                 nan        |
++----+----------------------+-------------------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+|  2 | 请简单介绍一下长征。 | nan                                                   | 长征是中国工农红军在1934年至1936年间进行的... |                 nan        |                 nan        |                   0.758399 |
++----+----------------------+-------------------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+
+2024-10-13 11:14:05,555 - INFO - 127.0.0.1 - - [13/Oct/2024 11:14:05] "POST /calculate_similarity HTTP/1.1" 200 -
+2024-10-14 17:01:25,527 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.250:5000
+2024-10-14 17:01:25,528 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-14 17:01:49,084 - INFO - 来自 hitbert_server 的计算结果:
++----+----------------------+-------------------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+|    | 用户问题             | 参考句子                                              | 系统回答                                      |   用户问题与参考文字相似度 |   系统回答与参考文字相似度 |   用户问题与系统回答相似度 |
++====+======================+=======================================================+===============================================+============================+============================+============================+
+|  0 | 请简单介绍一下长征。 | 7月16日，红25军为配合红一、红四方面军的行动，...      | 长征是中国工农红军在1934年至1936年间进行的... |                   0.641677 |                   0.767961 |                 nan        |
++----+----------------------+-------------------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+|  1 | 请简单介绍一下长征。 | 红军长征的胜利，为开展抗日战争的新局面创造了重要条... | 长征是中国工农红军在1934年至1936年间进行的... |                   0.72925  |                   0.831194 |                 nan        |
++----+----------------------+-------------------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+|  2 | 请简单介绍一下长征。 | nan                                                   | 长征是中国工农红军在1934年至1936年间进行的... |                 nan        |                 nan        |                   0.864013 |
++----+----------------------+-------------------------------------------------------+-----------------------------------------------+----------------------------+----------------------------+----------------------------+
+
+2024-10-14 17:01:49,832 - INFO - 127.0.0.1 - - [14/Oct/2024 17:01:49] "POST /calculate_similarity HTTP/1.1" 200 -

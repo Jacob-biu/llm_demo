@@ -1,0 +1,58 @@
+2024-10-31 15:40:40,328 - ERROR - Attempt 1 failed: Invalid URL '/sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=deb315fe009c3c22&ie=utf-8&rsv_pq=deb315fe009c3c22&rsv_spt=5&rsv_bp=1&f=8&atn=index': No scheme supplied. Perhaps you meant https:///sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=deb315fe009c3c22&ie=utf-8&rsv_pq=deb315fe009c3c22&rsv_spt=5&rsv_bp=1&f=8&atn=index?
+2024-10-31 15:40:46,161 - ERROR - Attempt 2 failed: Invalid URL '/sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=c182bf70000590b0&ie=utf-8&rsv_pq=c182bf70000590b0&rsv_spt=5&rsv_bp=1&f=8&atn=index': No scheme supplied. Perhaps you meant https:///sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=c182bf70000590b0&ie=utf-8&rsv_pq=c182bf70000590b0&rsv_spt=5&rsv_bp=1&f=8&atn=index?
+2024-10-31 15:44:23,986 - WARNING - 未找到链接，标题: 系列作品
+2024-10-31 15:44:23,987 - ERROR - Attempt 1 failed: Invalid URL '/sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=f140593c009f514e&ie=utf-8&rsv_pq=f140593c009f514e&rsv_spt=5&rsv_bp=1&f=8&atn=index': No scheme supplied. Perhaps you meant https:///sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=f140593c009f514e&ie=utf-8&rsv_pq=f140593c009f514e&rsv_spt=5&rsv_bp=1&f=8&atn=index?
+2024-10-31 15:44:29,923 - WARNING - 未找到链接，标题: 系列作品
+2024-10-31 15:44:29,924 - ERROR - Attempt 2 failed: Invalid URL '/sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=8d83b46d00921e03&ie=utf-8&rsv_pq=8d83b46d00921e03&rsv_spt=5&rsv_bp=1&f=8&atn=index': No scheme supplied. Perhaps you meant https:///sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=8d83b46d00921e03&ie=utf-8&rsv_pq=8d83b46d00921e03&rsv_spt=5&rsv_bp=1&f=8&atn=index?
+2024-10-31 15:44:35,917 - WARNING - 未找到链接，标题: 系列作品
+2024-10-31 15:44:35,918 - ERROR - Attempt 3 failed: Invalid URL '/sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=a6db9a99010455d9&ie=utf-8&rsv_pq=a6db9a99010455d9&rsv_spt=5&rsv_bp=1&f=8&atn=index': No scheme supplied. Perhaps you meant https:///sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=a6db9a99010455d9&ie=utf-8&rsv_pq=a6db9a99010455d9&rsv_spt=5&rsv_bp=1&f=8&atn=index?
+2024-10-31 15:44:59,746 - INFO - 标题: 长征 - 百度百科
+相关度: 0.4313
+内容预览: 长征（历史事件）_百度百科 网页新闻贴吧知道网盘图片视频地图文库资讯采购百科百度首页登录注册进入词条全站搜索帮助首页秒懂百科特色百科知识专题加入百科百科团队权威合作个人中心长征[cháng zhēng]播报上传视频历史事件展开28个同名词条收藏查看我的收藏0有用+10土地革命战争时期，中国工农红军主力撤离长江南北各苏区，转战两年，到达陕甘苏区的战略转移行动。1934年10月，第五次反“围剿”失败后，中央主力红军为摆脱国民党军队的包围追击，被迫实行战略性转移，退出中央根据地，进行长征。长征是人类历史上的伟大奇迹，中央红军共进行了600余次战役战斗，攻占700多座县城，红军牺牲了营以上干部多达430余人，平均年龄不到30岁，共击溃国民党军数百个团，期间共经过14个省，翻越18座大山，跨过24条大河，走过荒草地，翻过雪山，行程约二万五千里，红一方面军于1935年10月到达陕北革命根据地，与陕北红军胜利会师。 [16]1936年10月，红二、四方面军到达甘肃会宁地区，同红一方面军会师。红军三大主力会师，标志着万里长征的胜利结束。 [1] [14]中文名长征外文名The Long March发生...
+
+2024-10-31 15:45:01,447 - INFO - API 响应: {'eb_code': 0, 'error_code': 336103, 'error_msg': 'Prompt tokens too long', 'id': 'as-xi0vr58jnb'}
+2024-10-31 15:45:01,447 - ERROR - 返回结果为空
+2024-10-31 15:45:01,447 - INFO - 过滤后的内容: 无过滤内容...
+
+2024-10-31 15:45:01,447 - INFO - 标题: 长征 - 百度百科
+相关度: 0.4308
+内容预览: 长征（历史事件）_百度百科 网页新闻贴吧知道网盘图片视频地图文库资讯采购百科百度首页登录注册进入词条全站搜索帮助首页秒懂百科特色百科知识专题加入百科百科团队权威合作个人中心长征[cháng zhēng]播报上传视频历史事件展开28个同名词条收藏查看我的收藏0有用+10土地革命战争时期，中国工农红军主力撤离长江南北各苏区，转战两年，到达陕甘苏区的战略转移行动。1934年10月，第五次反“围剿”失败后，中央主力红军为摆脱国民党军队的包围追击，被迫实行战略性转移，退出中央根据地，进行长征。长征是人类历史上的伟大奇迹，中央红军共进行了600余次战役战斗，攻占700多座县城，红军牺牲了营以上干部多达430余人，平均年龄不到30岁，共击溃国民党军数百个团，期间共经过14个省，翻越18座大山，跨过24条大河，走过荒草地，翻过雪山，行程约二万五千里，红一方面军于1935年10月到达陕北革命根据地，与陕北红军胜利会师。 [16]1936年10月，红二、四方面军到达甘肃会宁地区，同红一方面军会师。红军三大主力会师，标志着万里长征的胜利结束。 [1] [14]中文名长征外文名The Long March发生...
+
+2024-10-31 15:45:01,881 - INFO - API 响应: {'eb_code': 0, 'error_code': 336103, 'error_msg': 'Prompt tokens too long', 'id': 'as-ge5gn0tdsv'}
+2024-10-31 15:45:01,882 - ERROR - 返回结果为空
+2024-10-31 15:45:01,882 - INFO - 过滤后的内容: 无过滤内容...
+
+2024-10-31 15:45:01,882 - INFO - 标题: 长征 - 百度百科
+相关度: 0.4303
+内容预览: 长征（历史事件）_百度百科 网页新闻贴吧知道网盘图片视频地图文库资讯采购百科百度首页登录注册进入词条全站搜索帮助首页秒懂百科特色百科知识专题加入百科百科团队权威合作个人中心长征[cháng zhēng]播报上传视频历史事件展开28个同名词条收藏查看我的收藏0有用+10土地革命战争时期，中国工农红军主力撤离长江南北各苏区，转战两年，到达陕甘苏区的战略转移行动。1934年10月，第五次反“围剿”失败后，中央主力红军为摆脱国民党军队的包围追击，被迫实行战略性转移，退出中央根据地，进行长征。长征是人类历史上的伟大奇迹，中央红军共进行了600余次战役战斗，攻占700多座县城，红军牺牲了营以上干部多达430余人，平均年龄不到30岁，共击溃国民党军数百个团，期间共经过14个省，翻越18座大山，跨过24条大河，走过荒草地，翻过雪山，行程约二万五千里，红一方面军于1935年10月到达陕北革命根据地，与陕北红军胜利会师。 [16]1936年10月，红二、四方面军到达甘肃会宁地区，同红一方面军会师。红军三大主力会师，标志着万里长征的胜利结束。 [1] [14]中文名长征外文名The Long March发生...
+
+2024-10-31 15:45:02,309 - INFO - API 响应: {'eb_code': 0, 'error_code': 336103, 'error_msg': 'Prompt tokens too long', 'id': 'as-genq3yv2y4'}
+2024-10-31 15:45:02,309 - ERROR - 返回结果为空
+2024-10-31 15:45:02,310 - INFO - 过滤后的内容: 无过滤内容...
+
+2024-10-31 15:45:02,310 - INFO - 标题: 长征-高清视频在线观看
+相关度: 0.3164
+内容预览: é¿å¾ ç¬¬1é                                    è§é¢   ç½é¡µ è§é¢     ç­æ¦       åå²è®°å½æ¸é¤è®°å½  éç§çè§è½ä»åå¥ä¾ ä¼  å±±æå°çäººä¸äººä¹ä¸ ååç¥åå¤§é£è½¦    ç­é¨æç´¢              ç»å½Ã          ç»å½  ä¸æ¬¡èªå¨ç»å½    å¿è®°å¯ç ç«å³æ³¨å  ä½¿ç¨åä½ç½ç«è´¦å·ç»å½             å¸®å©|è¿åå¤®è§ç½           é¦é¡µ ç´æ­ èç®å  é¢éå¤§å¨        æ ç®å¤§å¨  ç»¼åè´¢ç»ç»¼èºä¸­æå½éä½è²çµå½±å½é²åäºçµè§å§çº...
+
+2024-10-31 15:45:02,625 - INFO - API 响应: {'id': 'as-deg4q17ztc', 'object': 'chat.completion', 'created': 1730360702, 'result': '抱歉，这个功能暂未开放上线。您也可以用中文或英文问我一些其他的问题，我会尽力为您解答。', 'is_truncated': False, 'need_clear_history': True, 'ban_round': -1, 'flag': 2, 'usage': {'prompt_tokens': 2121, 'completion_tokens': 39, 'total_tokens': 2160}}
+2024-10-31 15:45:02,626 - INFO - 过滤后的内容: 抱歉，这个功能暂未开放上线。您也可以用中文或英文问我一些其他的问题，我会尽力为您解答。...
+
+2024-10-31 15:45:02,626 - INFO - 标题: 长征-高清视频在线观看
+相关度: 0.3112
+内容预览: é¿å¾ ç¬¬1é                                    è§é¢   ç½é¡µ è§é¢     ç­æ¦       åå²è®°å½æ¸é¤è®°å½  éç§çè§è½ä»åå¥ä¾ ä¼  å±±æå°çäººä¸äººä¹ä¸ ååç¥åå¤§é£è½¦    ç­é¨æç´¢              ç»å½Ã          ç»å½  ä¸æ¬¡èªå¨ç»å½    å¿è®°å¯ç ç«å³æ³¨å  ä½¿ç¨åä½ç½ç«è´¦å·ç»å½             å¸®å©|è¿åå¤®è§ç½           é¦é¡µ ç´æ­ èç®å  é¢éå¤§å¨        æ ç®å¤§å¨  ç»¼åè´¢ç»ç»¼èºä¸­æå½éä½è²çµå½±å½é²åäºçµè§å§çº...
+
+2024-10-31 15:45:03,208 - INFO - API 响应: {'id': 'as-kn8bnxc7g0', 'object': 'chat.completion', 'created': 1730360703, 'result': '抱歉，这个功能暂未开放上线。您也可以用中文或英文问我一些其他的问题，我会尽力为您解答。', 'is_truncated': False, 'need_clear_history': True, 'ban_round': -1, 'flag': 2, 'usage': {'prompt_tokens': 2121, 'completion_tokens': 39, 'total_tokens': 2160}}
+2024-10-31 15:45:03,208 - INFO - 过滤后的内容: 抱歉，这个功能暂未开放上线。您也可以用中文或英文问我一些其他的问题，我会尽力为您解答。...
+
+2024-10-31 16:37:09,345 - ERROR - Attempt 1 failed: Invalid URL '/sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=c0a4afd7000ebb87&ie=utf-8&rsv_pq=c0a4afd7000ebb87&rsv_spt=5&rsv_bp=1&f=8&atn=index': No scheme supplied. Perhaps you meant https:///sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=c0a4afd7000ebb87&ie=utf-8&rsv_pq=c0a4afd7000ebb87&rsv_spt=5&rsv_bp=1&f=8&atn=index?
+2024-10-31 16:37:15,697 - ERROR - Attempt 2 failed: Invalid URL '/sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=a2da2487001e2c20&ie=utf-8&rsv_pq=a2da2487001e2c20&rsv_spt=5&rsv_bp=1&f=8&atn=index': No scheme supplied. Perhaps you meant https:///sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=a2da2487001e2c20&ie=utf-8&rsv_pq=a2da2487001e2c20&rsv_spt=5&rsv_bp=1&f=8&atn=index?
+2024-10-31 16:37:21,563 - ERROR - Attempt 3 failed: Invalid URL '/sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=c7742b31000325e0&ie=utf-8&rsv_pq=c7742b31000325e0&rsv_spt=5&rsv_bp=1&f=8&atn=index': No scheme supplied. Perhaps you meant https:///sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=c7742b31000325e0&ie=utf-8&rsv_pq=c7742b31000325e0&rsv_spt=5&rsv_bp=1&f=8&atn=index?
+2024-10-31 16:37:38,109 - INFO - API 响应: {'eb_code': 0, 'error_code': 336103, 'error_msg': 'Prompt tokens too long', 'id': 'as-5hqn8x94xe'}
+2024-10-31 16:37:38,463 - INFO - API 响应: {'eb_code': 0, 'error_code': 336103, 'error_msg': 'Prompt tokens too long', 'id': 'as-yeqf3v6zm2'}
+2024-10-31 16:37:38,786 - INFO - API 响应: {'eb_code': 0, 'error_code': 336103, 'error_msg': 'Prompt tokens too long', 'id': 'as-rs5ugqzvce'}
+2024-10-31 16:40:11,083 - ERROR - Attempt 1 failed: Invalid URL '/sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=f66b06f900140c22&ie=utf-8&rsv_pq=f66b06f900140c22&rsv_spt=5&rsv_bp=1&f=8&atn=index': No scheme supplied. Perhaps you meant https:///sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=f66b06f900140c22&ie=utf-8&rsv_pq=f66b06f900140c22&rsv_spt=5&rsv_bp=1&f=8&atn=index?
+2024-10-31 16:40:17,053 - ERROR - Attempt 2 failed: Invalid URL '/sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=b85a230b0011659e&ie=utf-8&rsv_pq=b85a230b0011659e&rsv_spt=5&rsv_bp=1&f=8&atn=index': No scheme supplied. Perhaps you meant https:///sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=b85a230b0011659e&ie=utf-8&rsv_pq=b85a230b0011659e&rsv_spt=5&rsv_bp=1&f=8&atn=index?
+2024-10-31 16:40:22,912 - ERROR - Attempt 3 failed: Invalid URL '/sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=c02fea9e0008ed00&ie=utf-8&rsv_pq=c02fea9e0008ed00&rsv_spt=5&rsv_bp=1&f=8&atn=index': No scheme supplied. Perhaps you meant https:///sf/vsearch?pd=video&wd=%E9%95%BF%E5%BE%81&tn=vsearch&lid=c02fea9e0008ed00&ie=utf-8&rsv_pq=c02fea9e0008ed00&rsv_spt=5&rsv_bp=1&f=8&atn=index?
+2024-10-31 16:40:37,944 - INFO - API 响应: {'eb_code': 0, 'error_code': 336103, 'error_msg': 'Prompt tokens too long', 'id': 'as-vs719sfchj'}
+2024-10-31 16:40:38,309 - INFO - API 响应: {'eb_code': 0, 'error_code': 336103, 'error_msg': 'Prompt tokens too long', 'id': 'as-0mpcubhr84'}
+2024-10-31 16:40:38,681 - INFO - API 响应: {'eb_code': 0, 'error_code': 336103, 'error_msg': 'Prompt tokens too long', 'id': 'as-qmsa05u2t0'}

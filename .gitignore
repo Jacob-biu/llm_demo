@@ -4,6 +4,7 @@ node_modules
 /dataBase
 /server/llm_demo
 /server/files
+/server/algorithm
 
 # Ignore package-lock.json
 package-lock.json

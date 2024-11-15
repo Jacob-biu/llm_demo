@@ -419,7 +419,7 @@ export default {
       this.options = this.options.filter(option => option.label !== this.dataset.label);
       this.initButtonList();
       this.deleteDataset();
-      if(this.dataset.value === this.selectedOption){
+      if (this.dataset.value === this.selectedOption) {
         this.selectedOption = 'null';
         // 触发事件，通知兄弟组件更新 selectedDB 的值
         eventBus.emit('updateSelectedDB', { label: '不使用知识库', value: 'null', description: '' });
@@ -465,6 +465,11 @@ export default {
         console.log("文件上传成功", response);
         console.log(response.data.file_path); // 文件路径
         this.uploadFileToDataBase(this.dataset.label, response.data.file_path);
+
+        const filePath = response.data.file_path;
+        const fileName = filePath.split('/').pop(); // 获取文件名
+        this.uploadFileStatusToDataBase(fileName,false);
+
         ElMessage.success('文件上传成功！');
         this.fetchFiles();
       } catch (error) {
@@ -484,6 +489,22 @@ export default {
           }
         });
         console.log(response.data); // { code: 1 }
+      } catch (error) {
+        console.error('Error upload file:', error);
+      }
+    },
+    //向数据库发出新建文件状态索引请求
+    async uploadFileStatusToDataBase(name,status) {
+      try {
+        const response = await axios.post('http://localhost:8999/es/updateFiles', {
+          fileName: name,
+          status: status,
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(response.data); // { message: File status updated successfully }
       } catch (error) {
         console.error('Error upload file:', error);
       }
@@ -513,13 +534,25 @@ export default {
         // }));
         // 合并新数据和现有数据，保留已解析文件的状态
         // 获取后端返回的新文件列表
-        const newFiles = response.data.map(file => ({
-          ...file,
-          name: file.name,
-          uploadDate: moment(file.uploadDate * 1000).format('YYYY-MM-DD HH:mm:ss'),
-          enabled: file.enabled,
-          progress: 0, // 初始化进度
-          parseStatus: '准备解析', // 初始化解析状态
+        // const newFiles = response.data.map(file => ({
+        //   ...file,
+        //   name: file.name,
+        //   uploadDate: moment(file.uploadDate * 1000).format('YYYY-MM-DD HH:mm:ss'),
+        //   enabled: file.enabled,
+        //   progress: 0, // 初始化进度
+        //   parseStatus: '准备解析', // 初始化解析状态
+        // }));
+        // 获取后端返回的新文件列表，并异步获取每个文件的状态
+        const newFiles = await Promise.all(response.data.map(async (file) => {
+          const status = await this.queryFileStatus(file.name);
+          return {
+            ...file,
+            name: file.name,
+            uploadDate: moment(file.uploadDate * 1000).format('YYYY-MM-DD HH:mm:ss'),
+            enabled: status, // 使用 queryFileStatus 返回的值
+            progress: status ? 100 : 0, // 初始化进度
+            parseStatus: status ? '已解析' : '准备解析', // 初始化解析状态
+          };
         }));
 
         // 保留前端现有文件的状态，并添加缺失的文件
@@ -546,6 +579,22 @@ export default {
         this.startProgress(); // 启动进度条更新
       }
     },
+    //获取文件状态
+    async queryFileStatus(name) {
+      try {
+        const response = await axios.post('http://localhost:8999/es/queryFiles', {
+          fileName: name,
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(response.data); // { fileNmae: filename, status: status }
+        return response.data.status;
+      } catch (error) {
+        console.error('Error upload file:', error);
+      }
+    },
 
 
 
@@ -558,6 +607,11 @@ export default {
         console.log(response.data.file_path);
 
         this.deleteFileFromDataBase(this.dataset.label, response.data.file_path);
+
+        const filePath = response.data.file_path;
+        const fileName = filePath.split('/').pop(); // 获取文件名
+        this.deleteFileStatus(fileName);
+
         ElMessage.success('删除文件成功');
         this.fetchFiles(); // 刷新文件列表
       } catch (error) {
@@ -565,7 +619,7 @@ export default {
         ElMessage.error('删除文件失败');
       }
     },
-    //向数据库发出新增索引要求
+    //向数据库发出删除索引要求
     async deleteFileFromDataBase(name, path) {
       try {
         const response = await axios.post('http://localhost:8999/es/deletefile', {
@@ -577,6 +631,21 @@ export default {
           }
         });
         console.log(response.data); // { code: 1 }
+      } catch (error) {
+        console.error('Error upload file:', error);
+      }
+    },
+    //向数据库发出删除状态索引要求
+    async deleteFileStatus(name) {
+      try {
+        const response = await axios.post('http://localhost:8999/es/deleteFiles', {
+          fileName: name,
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(response.data); // { message: Successfully deleted 1 document(s) with fileName ... }
       } catch (error) {
         console.error('Error upload file:', error);
       }
@@ -707,15 +776,18 @@ export default {
     handleSelectionChange(selected) {
       this.selectedRows = selected;
     },
-    handleEnable() {
+
+    async handleEnable() {
       console.log("启用操作");
-      this.selectedRows.forEach(row => {
+      this.selectedRows.forEach(async row => {
+        await this.uploadFileStatusToDataBase(row.name,true);
         row.enabled = true;
       });
     },
-    handleCancelEnable() {
+    async handleCancelEnable() {
       console.log("取消操作");
-      this.selectedRows.forEach(row => {
+      this.selectedRows.forEach(async row => {
+        await this.uploadFileStatusToDataBase(row.name,false);
         row.enabled = false;
       });
     },
@@ -731,7 +803,8 @@ export default {
       console.log('Options sent:', this.options);
     },
 
-    handleEnabledChange(row) {
+    async handleEnabledChange(row) {
+      await this.uploadFileStatusToDataBase(row.name,true);
       if (row.enabled) {
         row.progress = 0;
         row.parseStatus = '准备解析';
@@ -744,6 +817,7 @@ export default {
           }
         }, 500);
       } else {
+        await this.uploadFileStatusToDataBase(row.name,false);
         row.parseStatus = '未解析';
         row.progress = 0;
       }

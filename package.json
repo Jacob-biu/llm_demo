@@ -49,7 +49,8 @@
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
     "vue-cli-plugin-element-ui": "^1.1.4",
-    "vue-particles": "^1.0.9"
+    "vue-particles": "^1.0.9",
+    "webpack-dev-server": "^5.1.0"
   },
   "eslintConfig": {
     "root": true,
